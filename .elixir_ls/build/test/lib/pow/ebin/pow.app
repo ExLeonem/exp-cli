@@ -1,0 +1,10 @@
+{application,pow,
+             [{applications,[kernel,stdlib,elixir]},
+              {description,"pow"},
+              {modules,['Elixir.Pow.Acion.Record','Elixir.Pow.Action.State',
+                        'Elixir.Pow.Args.Main','Elixir.Pow.Args.Record',
+                        'Elixir.Pow.Args.State',
+                        'Elixir.Pow.Args.State.Pow.Args.State.Show',
+                        'Elixir.Pow.CLI']},
+              {registered,[]},
+              {vsn,"0.1.0"}]}.

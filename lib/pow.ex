@@ -1,18 +1,24 @@
-defmodule Pow do
+defmodule Pow.CLI do
+  alias Pow.Args.Main, as: ArgParser
   @moduledoc """
-  Documentation for Pow.
+    Work watch collecting time doing things.
   """
 
-  @doc """
-  Hello world.
 
-  ## Examples
 
-      iex> Pow.hello()
-      :world
-
+   @doc """
+    Main entry point for the cli
   """
-  def hello do
-    :world
+  def main(args \\ []) do
+    {status, msg, data} = args |> ArgParser.parse
+
   end
+
+
+  def process_message(status, msg) do
+
+  end
+
+
+
 end
