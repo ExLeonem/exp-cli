@@ -22,12 +22,12 @@ defmodule Pow.Action.Record do
   @doc """
 
   """
-  def start(argv) do
+  def start({argv, _, _}) do
     # Print either help or start recording
+    # Logger.debug(argv[:help])
     if argv[:help] do
-      {:help, @start_help, []}
+      {:help, @start_help}
     else
-
       remind = if argv[:remind], do: parse_remind(argv[:remind]), else: nil
       Start.start(argv[:timer], remind)
     end
@@ -82,19 +82,19 @@ defmodule Pow.Action.Record do
   """
   def request_user_argument(prompt, checker \\ nil, io \\ IO) when is_function(checker) or nil do
     if checker != nil do
-      Logger.debug("Check with checker.")
+      # Logger.debug("Check with checker.")
       value = io.gets(prompt)
 
       # Loop till user input is truthy
       if !apply(checker, [value]) do
-        Logger.debug("Loop")
+        # Logger.debug("Loop")
         request_user_argument(prompt, checker, io)
       else
-        Logger.debug("Return value")
+        # Logger.debug("Return value")
         value
       end
     else
-      Logger.debug("Check without checker. Just return.")
+      # Logger.debug("Check without checker. Just return.")
       io.gets(prompt)
     end
   end

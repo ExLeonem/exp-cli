@@ -9,22 +9,15 @@ defmodule TestPowActionRecord do
 
 
   test "start/valid/no_timer/no_remind" do
-    assert  {:ok, _} = Record.start([]) 
+    assert  {:ok, _} = Record.start({[],[],[]}) 
   end
+  
 
-  # test "start/valid/no_timer/remind" do
-    
-  # end
-
-  # test "create_entry/valid" do
-    
-  # end
-
+  @tag timeout: 200
   test "user_request_param" do
-    checker = fn value -> is_integer(value) end
-    assert Record.request_user_argument("output", checker, FakeIO) == true
+    checker = fn value -> is_binary(value) end
+    assert Record.request_user_argument("2", checker, FakeIO) == "2"
   end
-
 
   test "request_user_argument/invalid" do
     assert_raise ArgumentError, fn ->

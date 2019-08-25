@@ -20,7 +20,6 @@ defmodule Pow.Args.Record do
   ]
 
   def parse(:start, argv) do
-    Logger.debug(argv)
     argv
     |> OptionParser.parse(@start_options)
     |> Record.start

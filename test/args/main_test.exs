@@ -4,10 +4,10 @@ defmodule TestPowMainParser do
   doctest Pow.CLI
 
 
-  # # valid start no recording process currently running
-  # test "dispatch/start/valid" do
-  #   assert {:ok, _msg, _params} = Main.parse(["start"])
-  # end
+  # valid start no recording process currently running
+  test "dispatch/start/valid/default" do
+    assert {:ok, _} = Main.parse(["start"])
+  end
 
   # # invalid recording process already running
   # test "dispatch/start/invalid" do

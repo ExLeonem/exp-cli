@@ -1,6 +1,7 @@
 defmodule Pow.Action.Record.Start do
     alias Pow.Action.State
     alias Pow.Persist.Timer
+    require Logger
     
     
     # {:ok, remind_time} = Time.new(remind["hours"], remind["minutes"], 0)  
@@ -10,12 +11,12 @@ defmodule Pow.Action.Record.Start do
 
     # Timer and reminder
     def start(true, {:ok, remind}) do
-        
+
     end
 
     # No timer, just remind
     def start(_, {:ok, remind}) do
-        
+
     end
 
     # No reminder, no timer, just set time and wait for user to stop
@@ -24,7 +25,7 @@ defmodule Pow.Action.Record.Start do
             Timer.start_link
         end
         
-        # Currently process not recording, start new one and set parameters
+        # Currently process not recording, start new one and set parameters        
         if !Timer.recording? do
             now = Time.utc_now()
             state_updated? = State.put_config(:start_time, now)

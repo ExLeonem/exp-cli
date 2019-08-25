@@ -1,7 +1,8 @@
 defmodule Pow.Args.Main do
   # alias Pow.Action.Main, as: Action
   alias Pow.Args.Record
-  alias Pow.Args.State #
+  alias Pow.Args.State
+  require Logger
 
   @moduledoc """
     Dispatch parserd arguments to needed modules
@@ -53,26 +54,34 @@ defmodule Pow.Args.Main do
 
   def parse(argv) do
     argv
-    |> OptionParser.parse([aliases: @aliases, strict: @strict])
+    |> cast_key
     |> process
   end
 
+  # prepend switches to first argument if needed
+  def cast_key([key| rest]) do
+    {String.to_atom(key), rest}
+  end
+
   # Process the acquired options
-  def process({parsed, argv, _invalid}) do
-    dispatch(parsed, argv)
+  def process({key, argv}) do
+    dispatch(key, argv)
+    |> process_result
   end
 
 
+
+  
   @doc """
     Process the parsed parameters first match triggers specialized processing
   """
   def dispatch([], _), do: get_help() # either no parameters passed or any valid found
-  def dispatch([{:start, true}| _], argv), do: Record.parse(:start, argv)
-  def dispatch([{:stop, true}| _], argv), do: Record.parse(:stop, argv)
-  def dispatch([{:set, true}| _], argv), do: State.parse(:set, argv)
-  def dispatch([{:show, true}, _], argv), do: State.parse(:show, argv)
-  def dispatch([{:tag, true}, _], argv), do: State.parse(:tag, argv)
-  def dispatch([{:help, true}| _], _), do: get_help()
+  def dispatch(:start, argv), do: Record.parse(:start, argv)
+  def dispatch(:stop, argv), do: Record.parse(:stop, argv)
+  def dispatch(:set, argv), do: State.parse(:set, argv)
+  def dispatch(:show, argv), do: State.parse(:show, argv)
+  def dispatch(:tag, argv), do: State.parse(:tag, argv)
+  def dispatch(:help, _), do: get_help()
 
   # Iterate parsed parameters
   def dispatch([_| t], argv) do
@@ -81,8 +90,13 @@ defmodule Pow.Args.Main do
 
 
   # Return help information
-  defp get_help() do
-    {:help, @help, []}
+  defp get_help(help \\ @help) do
+    {:help, help}
+  end
+
+  defp process_result(result = {_, msg}) do
+    IO.puts(msg)
+    result
   end
 
 end
