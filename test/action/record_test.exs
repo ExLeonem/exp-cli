@@ -3,5 +3,9 @@ defmodule TestPowActionRecord do
   doctest Pow.Action.Record
 
 
+  test "create today file" do
+    assert start([]) = 
+  end
+
 
 end

@@ -8,15 +8,30 @@ defmodule Pow.Args.Main do
     Main Parser, parses top level options and passes left options to more specific parser.
   """
 
-  @keys [
-    "start", # start recording time optionally pass title
-    "stop", # stop recording time optionally pass title
-    "set", # set option to configure cli (timer, save-space, )
-    "cancel", # cancel set timer
-    "show", # print current time or timer processing (time left)
-    "tag", # tag the recorded time with a list of values
-    "help" # print usage information
-  ]
+  @help """
+
+    ++++++++++++ Pomodoro Watcher +++++++++++++++++++
+
+    For information for a specific task use [option] [--help | -h].
+
+
+    Usage:
+
+      ./pow [option] [value|s]
+
+
+    Option:
+
+      start - start recording
+      stop - stop recording
+      abort - abort a timer or current recording
+      set - cli configuration
+      show - show current state information
+      tag - tag the current tracking with keywords
+      help - print usage information
+      create - creates directory and sets variables to read configuration from
+
+    """
 
   @aliases [
     cancel: :c,
@@ -29,6 +44,7 @@ defmodule Pow.Args.Main do
   @strict [
     start: :boolean,
     stop: :boolean,
+    abort: :boolean,
     set: :boolean,
     show: :boolean,
     tag: :boolean,
@@ -37,13 +53,12 @@ defmodule Pow.Args.Main do
 
   def parse(argv) do
     argv
-    |> OptionParser.parse(@params, aliases: @aliases, strict: @strict)
+    |> OptionParser.parse([aliases: @aliases, strict: @strict])
     |> process
   end
 
   # Process the acquired options
-  def process(to_process) do
-    {parsed, argv, invalid} = to_process
+  def process({parsed, argv, _invalid}) do
     dispatch(parsed, argv)
   end
 
@@ -67,7 +82,7 @@ defmodule Pow.Args.Main do
 
   # Return help information
   defp get_help() do
-    {:help, @usage, []}
+    {:help, @help, []}
   end
 
 end
