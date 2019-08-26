@@ -1,5 +1,6 @@
 defmodule Pow.CLI do
   alias Pow.Args.Main, as: ArgParser
+  alias Pow.Action.State
   @moduledoc """
     Work watch collecting time doing things.
   """
@@ -10,15 +11,8 @@ defmodule Pow.CLI do
     Main entry point for the cli
   """
   def main(args \\ []) do
-    {status, msg, data} = args |> ArgParser.parse
-
+    {:ok, pid} = State.start_link()
+    args |> ArgParser.parse
   end
-
-
-  def process_message(status, msg) do
-
-  end
-
-
 
 end

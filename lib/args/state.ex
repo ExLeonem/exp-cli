@@ -6,9 +6,11 @@ defmodule Pow.Args.State do
 
 
   # OptionParser options
-  @params []
   @aliases []
-  @strict []
+  @strict [
+    env_path: :string,
+    chunk_size: :string
+  ]
 
 
   @doc """
