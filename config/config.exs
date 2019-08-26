@@ -28,11 +28,3 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env()}.exs"
-
-config :pow,
-    format: :csv,
-    chunk_size: "1:30",
-    env_path: Path.join([System.user_home(), "Desktop", "PowTime"]),
-    timer: "",
-    record: false, 
-    start_time: nil # Set everytime new when recording

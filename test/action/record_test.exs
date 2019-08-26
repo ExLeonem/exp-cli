@@ -8,9 +8,9 @@ defmodule TestPowActionRecord do
   end
 
 
-  test "start/valid/no_timer/no_remind" do
-    assert  {:ok, _} = Record.start({[],[],[]}) 
-  end
+  # test "start/valid/no_timer/no_remind" do
+  #   assert  {:ok, _} = Record.start({[],[],[]}) 
+  # end
   
 
   @tag timeout: 200

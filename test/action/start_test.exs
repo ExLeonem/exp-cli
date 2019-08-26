@@ -1,7 +1,6 @@
 defmodule TestPowActionRecordStart do
     use ExUnit.Case
     alias Pow.Action.Record.Start
-    alias Pow.Persist.Timer
     doctest Start
 
     # test "test process active" do

@@ -1,6 +1,5 @@
 defmodule Pow.Action.Record.Start do
     alias Pow.Action.State
-    alias Pow.Persist.Timer
     require Logger
     
     
@@ -22,6 +21,10 @@ defmodule Pow.Action.Record.Start do
     # No reminder, no timer, just set time and wait for user to stop
     def start(_, _) do
              
+        {:ok, table} = :dets.open_file(:disk_storage, [type: :set])
+
+        
+
         # currently not recording        
         if !State.get_config(:record) do
             now = Time.utc_now()
