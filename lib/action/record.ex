@@ -24,7 +24,6 @@ defmodule Pow.Action.Record do
   """
   def start({argv, _, _}) do
     # Print either help or start recording
-    # Logger.debug(argv[:help])
     if argv[:help] do
       {:help, @start_help}
     else
@@ -52,31 +51,21 @@ defmodule Pow.Action.Record do
 
 
   # Stop recording, shutdown process & write to file if circumstances right
-  def stop() do
+  def stop(io \\ IO) do
 
-    if State.get_config(:record) do
+    config = State.get_config(:is_recording)
+    if config[:is_recording] do
       now = Time.utc_now()
-      start_time = State.get_config(:start_time)
+      config_time = State.get_config(:time_started)
       
 
       # Check if today already file created & create one if needed
-      {date, file_name} = get_file_name()
-      env_path = State.get_config(:env_path)
-      full_path = Path.join([env_path, file_name])
+      title = request_user_argument("Enter a title or description for the entry... \n", &is_binary/1, io)
+      time_flag = calculate_time(config_time[:time_started], now) |> format_time
 
-
-      if !file_exists?(file_name) do
-        File.open(full_path, [:read, :write])
-      end      
-
-      title = request_user_argument("Enter a title or description for the entry... \n", &is_binary/1)
-      time_flag = calculate_time(start_time, now) |> format_time
-      output_format = State.get_config(:format)
-
-      content = [time_flag, title] |> format_content(output_format)
-      File.write(full_path, content,[:append])
-
-      {:ok, "Content writen to File XY."}
+      State.write_entry({DateTime.utc_now(), time_flag, title})
+      State.put_config(:is_recording, false)
+      {:ok, "+++++\nEntry written.\n+++++"}
     else
       {:error, "It seems like you aren't recording anything. Start recording first to stop something."}
     end
@@ -114,19 +103,15 @@ defmodule Pow.Action.Record do
   """
   def request_user_argument(prompt, checker \\ nil, io \\ IO) when is_function(checker) or nil do
     if checker != nil do
-      # Logger.debug("Check with checker.")
       value = io.gets(prompt)
 
       # Loop till user input is truthy
       if !apply(checker, [value]) do
-        # Logger.debug("Loop")
         request_user_argument(prompt, checker, io)
       else
-        # Logger.debug("Return value")
         value
       end
     else
-      # Logger.debug("Check without checker. Just return.")
       io.gets(prompt)
     end
   end

@@ -19,13 +19,15 @@ defmodule Pow.Action.Record.Start do
     end
 
     # No reminder, no timer, just set time and wait for user to stop
+    @doc """
+        Depending on passed parameters sets configuration that gets persisted.
+    """
     def start(_, _) do
-
-        # currently not recording        
-        if !State.get_config(:record) do
+        config = State.get_config(:is_recording)
+        if !config[:is_recording] do
             now = Time.utc_now()
-            state_updated? = State.put_config(:start_time, now)
-            state_updated? = State.put_config(:record, true)
+            state_updated? = State.put_config(:time_started, now)
+            state_updated? = State.put_config(:is_recording, true)
 
             if state_updated? == :ok do
                 {:ok, "Started recording, waiting for you to stop ..."}               
