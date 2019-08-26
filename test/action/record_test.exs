@@ -1,17 +1,38 @@
 defmodule TestPowActionRecord do
   use ExUnit.Case
   alias Pow.Action.Record
+  alias Pow.Action.State
   doctest Pow.Action.Record
 
   defmodule FakeIO do
       def gets(param), do: param
   end
 
+  def teardown() do
+    State.flush(:config_store)
+    State.flush(:entry_store)
+    State.shutdown()
+  end
 
-  # test "start/valid/no_timer/no_remind" do
-  #   assert  {:ok, _} = Record.start({[],[],[]}) 
-  # end
-  
+
+  test "start/valid/no_timer/no_remind" do
+    State.start_link()
+    assert  {:ok, _} = Record.start({[],[],[]})
+    teardown
+  end
+
+  test "stop/invalid/not-recording" do
+    State.start_link()
+    assert {:error, _} = Record.stop(FakeIO)
+    teardown()
+  end
+
+  test "stop/valid/default" do
+    State.start_link()
+    Record.start({[],[],[]})
+    assert {:ok, _} = Record.stop(FakeIO)
+    teardown()
+  end
 
   @tag timeout: 200
   test "user_request_param" do

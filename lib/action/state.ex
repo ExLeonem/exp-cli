@@ -28,9 +28,8 @@ defmodule Pow.Action.State do
       {:ok, config_table} = open_table(@config_table)
       {:ok, entry_table} = open_table(@entry_table)
 
-      # Parameterlist either not set or corrupted, reset
+      # Parameterlist either not set or corrupted, reset, TODO: Compare keys, length prone for manipulation
       if length(get_config(:all_keys, config_table)) != length(@default_config) do
-        Logger.debug("Init config")
         init_config(config_table)
       end
 
@@ -64,8 +63,10 @@ defmodule Pow.Action.State do
     end
   end
 
-  def write_config(key, value) do
+  def put_config(key, value) do
     # check if config is in @default config key list then write
+    table = get_table(@config_table)
+    :dets.insert(table, {key, value})
   end
 
   def get_config(key \\ :all_keys, table \\ nil)

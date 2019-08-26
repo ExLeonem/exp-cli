@@ -71,9 +71,6 @@ defmodule Pow.Args.Main do
     |> process_result
   end
 
-
-
-  
   @doc """
     Process the parsed parameters first match triggers specialized processing
   """

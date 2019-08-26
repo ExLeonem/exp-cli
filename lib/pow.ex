@@ -11,8 +11,9 @@ defmodule Pow.CLI do
     Main entry point for the cli
   """
   def main(args \\ []) do
-    {:ok, pid} = State.start_link()
+    State.start_link()
     args |> ArgParser.parse
+    State.shutdown()
   end
 
 end
