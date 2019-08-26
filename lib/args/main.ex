@@ -40,8 +40,8 @@ defmodule Pow.Args.Main do
     tag: :t,
     help: :h
   ]
-
-
+  
+  # To implement
   @strict [
     start: :boolean,
     stop: :boolean,
@@ -49,7 +49,9 @@ defmodule Pow.Args.Main do
     set: :boolean,
     show: :boolean,
     tag: :boolean,
-    help: :boolean
+    help: :boolean,
+    flush: :boolean, # clear dets store
+    save: :boolean # write data to db or file system
   ]
 
   def parse(argv) do

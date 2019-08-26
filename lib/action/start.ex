@@ -20,10 +20,6 @@ defmodule Pow.Action.Record.Start do
 
     # No reminder, no timer, just set time and wait for user to stop
     def start(_, _) do
-             
-        {:ok, table} = :dets.open_file(:disk_storage, [type: :set])
-
-        
 
         # currently not recording        
         if !State.get_config(:record) do

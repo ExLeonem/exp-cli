@@ -5,14 +5,14 @@ defmodule TestPowMainParser do
 
 
   # valid start no recording process currently running
-  test "dispatch/start/valid/default" do
-    assert {:error, _} = Main.parse(["start"])
-  end
+  # test "dispatch/start/valid/default" do
+  #   assert {:error, _} = Main.parse(["start"])
+  # end
 
 
-  test "dispatch/stop/valid/default" do
-    assert {:ok, _} = Main.parse(["stop"])
-  end
+  # test "dispatch/stop/valid/default" do
+  #   assert {:ok, _} = Main.parse(["stop"])
+  # end
 
   # # invalid recording process already running
   # test "dispatch/start/invalid" do
