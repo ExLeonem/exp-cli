@@ -21,17 +21,14 @@ defmodule Pow.Action.Record.Start do
 
     # No reminder, no timer, just set time and wait for user to stop
     def start(_, _) do
-        if !Timer.alive? do
-            Timer.start_link
-        end
-        
-        # Currently process not recording, start new one and set parameters        
-        if !Timer.recording? do
+             
+        # currently not recording        
+        if !State.get_config(:record) do
             now = Time.utc_now()
             state_updated? = State.put_config(:start_time, now)
+            state_updated? = State.put_config(:record, true)
 
             if state_updated? == :ok do
-                Timer.start # starting timer to record
                 {:ok, "Started recording, waiting for you to stop ..."}               
             else
                 {:error, "Couldn't update :start_time in config.exs"}
@@ -41,9 +38,4 @@ defmodule Pow.Action.Record.Start do
         end
     end
 
-
-    def loop(false), do: nil
-    def loop(true) do
-        
-    end
 end

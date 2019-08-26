@@ -54,7 +54,7 @@ defmodule Pow.Action.Record do
   # Stop recording, shutdown process & write to file if circumstances right
   def stop() do
 
-    if Timer.alive? && Timer.recording? do
+    if State.get_config(:record) do
       now = Time.utc_now()
       start_time = State.get_config(:start_time)
       
@@ -66,15 +66,47 @@ defmodule Pow.Action.Record do
 
 
       if !file_exists?(file_name) do
-        result = File.open(full_path, [:read, :write])
+        File.open(full_path, [:read, :write])
       end      
 
+      title = request_user_argument("Enter a title or description for the entry... \n", &is_binary/1)
+      time_flag = calculate_time(start_time, now) |> format_time
+      output_format = State.get_config(:format)
+
+      content = [time_flag, title] |> format_content(output_format)
+      File.write(full_path, content,[:append])
+
+      {:ok, "Content writen to File XY."}
     else
       {:error, "It seems like you aren't recording anything. Start recording first to stop something."}
     end
   end
 
   
+  def calculate_time(start_time, end_time) do
+    seconds = Time.diff(end_time, start_time)
+    minutes = div(seconds, 60)
+    hours = div(minutes, 60)
+
+    # Return tuple of calculated time units
+    {hours, rem(minutes, 60), rem(seconds, 60)}
+  end
+
+  def format_time({hours, minutes, seconds}) do
+    "#{hours}:#{minutes}:#{seconds}"
+  end
+
+  def format_content(content_array, format, agg \\ "")
+
+  def format_content([], :csv, agg), do: agg
+  def format_content([h| []], :csv, agg), do: agg <> h
+  def format_content([h| t], :csv, agg) do
+    tmp_result = agg <> h <> ","
+    format_content(t, :csv, tmp_result)
+  end
+
+
+
 
 
   @doc """
