@@ -25,13 +25,11 @@ defmodule Pow.Args.Main do
 
       start - start recording
       stop - stop recording
-      abort - abort a timer or current recording
       set - cli configuration
-      show - show current state information
-      tag - tag the current tracking with keywords
+      get - get current cli config information
+      show - query inserted information
+      write - write currently persisted data from dets to file system
       help - print usage information
-      create - creates directory and sets variables to read configuration from
-
     """
 
   @aliases [
@@ -78,8 +76,9 @@ defmodule Pow.Args.Main do
   def dispatch(:start, argv), do: Record.parse(:start, argv)
   def dispatch(:stop, argv), do: Record.parse(:stop, argv)
   def dispatch(:set, argv), do: State.parse(:set, argv)
-  def dispatch(:show, argv), do: State.parse(:show, argv)
-  def dispatch(:tag, argv), do: State.parse(:tag, argv)
+  def dispatch(:get, argv), do: Display.parse(:get, argv)
+  def dispatch(:show, argv), do: Display.parse(:show, argv)
+  def dispatch(:write, argv), do: Persist.parse(:write, argv)
   def dispatch(:help, _), do: get_help()
 
   # Iterate parsed parameters

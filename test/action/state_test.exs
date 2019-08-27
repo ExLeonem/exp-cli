@@ -72,6 +72,13 @@ defmodule TestPowActionState do
     assert State.write_entry({"hey", "some"}, :replace) == :ok
   end
 
+  test "entries read" do
+    State.write_entry({Time.utc_now(), "hey"})
+    State.write_entry({Time.utc_now(), "bonjour"})
+    assert State.get_entries() != []
+    teardown()
+  end
+
 
   describe "test/config/read-write" do
     # Config 
@@ -104,7 +111,17 @@ defmodule TestPowActionState do
       State.shutdown()
     end
 
+    test "set-config/persist" do
+      State.init_config()
+      update_keys = [block_length: "2:00", remind: true]
+      State.set_config(update_keys)
+      assert State.get_config(:block_length) == [block_length: "2:00"]
+      assert State.get_config(:remind) == [remind: true]
+      State.flush(:config_store)
+      State.flush(:entry_store)
+      State.shutdown()
+    end
+
   end
   
-
 end

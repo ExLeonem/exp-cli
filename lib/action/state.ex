@@ -2,11 +2,15 @@ defmodule Pow.Action.State do
   use Agent
   require Logger
   @moduledoc """
-    Handles application state read/writes of config/entries
+    Handles application state read/writes of config and entries.
+    In general all interaction with used DETS tables.
   """
 
+  # DETS table names
   @config_table :config_store
   @entry_table :entry_store
+
+  @config_keys Keyword.keys(Application.get_env(:pow, :params, []))
 
   @entry_keys [
     :datetime, # timestamp when entry was written
@@ -55,12 +59,21 @@ defmodule Pow.Action.State do
   end
 
   def write_entry(entry, type \\ :new) do
-    {_, table} = Agent.get(__MODULE__, & &1)
+    table = get_table(@entry_table)
     case type do
       :new -> :dets.insert_new(table, entry)
       :replace -> :dets.insert(table, entry)
       _ -> raise ArgumentError, message: "Unknown action: #{type}"
     end
+  end
+  
+  def get_entries(filter \\ [])
+  def get_entries([]) do
+    table = get_table(@entry_table)
+    :dets.match_object(table, {:"$1", :"$2"})
+  end
+  def get_entries(filter) do
+    
   end
 
   def put_config(key, value) do
@@ -75,11 +88,21 @@ defmodule Pow.Action.State do
     key_list = Keyword.keys(@default_config)
     :dets.match_object(table, {:"$1", :"$2"})
   end 
+
   def get_config(key, table) do
     table = if is_nil(table), do: get_table(@config_table), else: table
     # :dets.match_object(table, {key, :"$2"}) # REVIEW: Which one to choose
     :dets.lookup(table, key)
   end
+
+  def set_config([]), do: :ok
+  def set_config([{key, value} | t]) do
+    if key in @config_keys do
+      put_config(key, value)
+    end
+    set_config(t)
+  end
+
 
   def flush(table_name) do
     get_table(table_name)
@@ -122,9 +145,6 @@ defmodule Pow.Action.State do
   end
 
 
-  """
-    
-  """
   @doc """
     Initialize default arguments if not existent in dets table
   """
