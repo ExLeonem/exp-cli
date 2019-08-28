@@ -16,6 +16,7 @@ defmodule TestPowActionState do
     is_recording: false, # timer is currently recording
     timer: nil,
     remind: nil,
+    last_entry: nil,
     time_started: nil,
     default_format: :csv # write out format
   ]
@@ -58,30 +59,38 @@ defmodule TestPowActionState do
     assert :dets.is_dets_file(State.get_table(:entry_store))
   end
 
-  test "write-new-entry/entry-table/valid" do
-    State.flush(@entry_table)
-    assert State.write_entry({"hey", "some"}) == true 
-  end
 
-  test "write-new-entry/entry-table/invalid" do
-    State.write_entry({"hey", "some"})
-    assert State.write_entry({"hey", "some"}) == false 
-  end
+  describe "test/entry/read-write" do
+    
+    test "write-new-entry/entry-table/valid" do
+      State.flush(@entry_table)
+      assert State.write_entry({"hey", "some"}) == true 
+      teardown()
+    end
 
-  test "replace-existing-entry/entry-table/valid" do
-    assert State.write_entry({"hey", "some"}, :replace) == :ok
-  end
+    test "write-new-entry/entry-table/invalid" do
+      State.write_entry({"hey", "some"})
+      assert State.write_entry({"hey", "some"}) == false 
+      teardown()
+    end
 
-  test "entries read" do
-    State.write_entry({Time.utc_now(), "hey"})
-    State.write_entry({Time.utc_now(), "bonjour"})
-    assert State.get_entries() != []
-    teardown()
+    test "replace-existing-entry/entry-table/valid" do
+      assert State.write_entry({"hey", "some"}, :replace) == :ok
+      teardown()
+    end
+
+    test "entries read" do
+      State.write_entry({Time.utc_now(), "hey"})
+      State.write_entry({Time.utc_now(), "bonjour"})
+      assert State.get_entries() != []
+      teardown()
+    end
+    
   end
 
 
   describe "test/config/read-write" do
-    # Config 
+
     test "read-first/valid" do
       assert State.get_config(:block_length) == [block_length: "1:30"]
     end
@@ -98,6 +107,7 @@ defmodule TestPowActionState do
       State.init_config() # reset configuration
       State.put_config(:is_recording, true)
       assert State.get_config(:is_recording) == [is_recording: true]
+      teardown()
     end
 
     test "update-value/persisten" do
@@ -106,9 +116,16 @@ defmodule TestPowActionState do
       State.shutdown()
       State.start_link()
       assert State.get_config(:is_recording) == [is_recording: true]
-      State.flush(:config_store)
-      State.flush(:entry_store)
-      State.shutdown()
+      teardown()
+    end
+
+    test "update-value/las_entry" do
+      State.init_config()
+      now = Time.utc_now()
+      State.put_config(:last_entry, now)
+      last_entry = State.get_config(:last_entry)
+      assert last_entry[:last_entry] == now
+      teardown()
     end
 
     test "set-config/persist" do
@@ -117,9 +134,7 @@ defmodule TestPowActionState do
       State.set_config(update_keys)
       assert State.get_config(:block_length) == [block_length: "2:00"]
       assert State.get_config(:remind) == [remind: true]
-      State.flush(:config_store)
-      State.flush(:entry_store)
-      State.shutdown()
+      teardown()
     end
 
   end

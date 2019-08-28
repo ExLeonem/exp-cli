@@ -30,6 +30,10 @@ use Mix.Config
 #     import_config "#{Mix.env()}.exs"
 
 # Configuration keys and type
+
+
+# TODO: restructure config to [param_name: [:type, :default_value]]
+# and write function that generates module attribute
 config :pow,
     params: [
         block_length: :string,
@@ -37,7 +41,8 @@ config :pow,
         timer: :string,
         remind: :string,
         time_started: :string,
-        default_format: :string
+        default_format: :string,
+        last_entry: :string
     ],
     fields: [
         title: :string,

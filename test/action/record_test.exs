@@ -18,7 +18,7 @@ defmodule TestPowActionRecord do
   test "start/valid/no_timer/no_remind" do
     State.start_link()
     assert  {:ok, _} = Record.start({[],[],[]})
-    teardown
+    teardown()
   end
 
   test "stop/invalid/not-recording" do

@@ -18,7 +18,6 @@ defmodule Pow.Args.State do
   end
 
 
-
   def parse(_, argv), do: {:error, "invalid directive", []}
 
 end

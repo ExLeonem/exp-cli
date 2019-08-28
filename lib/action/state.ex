@@ -19,12 +19,14 @@ defmodule Pow.Action.State do
     :duration 
   ]
 
+
   @default_config [
     block_length: "1:30", # learning block length
     is_recording: false, # timer is currently recording
     timer: nil,
     remind: nil,
     time_started: nil,
+    last_entry: nil,
     default_format: :csv # write out format
   ]
 
@@ -70,11 +72,34 @@ defmodule Pow.Action.State do
   def get_entries(filter \\ [])
   def get_entries([]) do
     table = get_table(@entry_table)
-    :dets.match_object(table, {:"$1", :"$2"})
+    # :dets.match_object(table, {:"$1", :"$2"})
+    :dets.match(table, :"$1") # returns all entries
   end
   def get_entries(filter) do
     
   end
+
+  def get_entry(query) do
+    :dets.select(@entry_store, query)
+  end
+
+  def get_last_entry() do
+    table = get_table(@entry_table)
+    last_entry = get_config(:last_entry)
+    if !is_nil(last_entry) do
+      # query = [{{:"$1", :"$2"}, [{:==, :"$1", {:const, last_entry[:last_entry]}}], {{:"$1", :"$2"}}}]
+      # query = [{{:"$1", :"$2"}, [{:==, :"$1", {:const, last_entry[:last_entry]}}], [{{:"$1", :"$2"}}]}]
+      # :dets.match(table, query)
+
+      # REVIEW: Not a solution for big datasets (maybe Streams?)
+      get_entries()
+      |> Enum.reverse
+      |> hd
+    else
+      []
+    end
+  end
+
 
   def put_config(key, value) do
     # check if config is in @default config key list then write

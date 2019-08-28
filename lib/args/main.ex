@@ -2,6 +2,7 @@ defmodule Pow.Args.Main do
   # alias Pow.Action.Main, as: Action
   alias Pow.Args.Record
   alias Pow.Args.State
+  alias Pow.Args.Display
   require Logger
 
   @moduledoc """
@@ -93,7 +94,6 @@ defmodule Pow.Args.Main do
   end
 
   defp process_result(result = {_, msg}) do
-    IO.puts(msg)
     result
   end
 

@@ -11,7 +11,6 @@ defmodule Pow.Action.Formatter do
 
 
     def format_entries(entries) do
-        # IO.inspect(entries)
         entries
     end
 
