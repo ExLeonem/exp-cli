@@ -94,6 +94,7 @@ defmodule Pow.Args.Main do
   end
 
   defp process_result(result = {_, msg}) do
+    IO.puts(msg) # Don't remove this !!!!
     result
   end
 
