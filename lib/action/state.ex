@@ -30,6 +30,9 @@ defmodule Pow.Action.State do
     default_format: :csv # write out format
   ]
 
+  @doc """
+    Starts the StateAgent.
+  """
   def start_link() do
       {:ok, config_table} = open_table(@config_table)
       {:ok, entry_table} = open_table(@entry_table)
@@ -83,6 +86,10 @@ defmodule Pow.Action.State do
     :dets.select(@entry_store, query)
   end
 
+  @doc """
+    Returns the last entry of the entry dets store.
+
+  """
   def get_last_entry() do
     table = get_table(@entry_table)
     last_entry = get_config(:last_entry)
@@ -97,13 +104,20 @@ defmodule Pow.Action.State do
     end
   end
 
-
+  @doc """
+    Updated the configuration parameter on key with given value.
+  """
   def put_config(key, value) do
     # check if config is in @default config key list then write
     table = get_table(@config_table)
     :dets.insert(table, {key, value})
   end
 
+  @doc """
+      Gets the current configuration parameter under given key.
+      
+      Returns [key: value]
+  """
   def get_config(key \\ :all_keys, table \\ nil)
   def get_config(:all_keys, table) do
     table = if is_nil(table), do: get_table(@config_table), else: table
@@ -117,6 +131,10 @@ defmodule Pow.Action.State do
     :dets.lookup(table, key)
   end
 
+  @doc """
+    Update multiple configuration parameters.
+    Input has to be a Keyword list of the form: [config_param_key: value]
+  """
   def set_config([]), do: :ok
   def set_config([{key, value} | t]) do
     if key in @config_keys do
@@ -125,7 +143,9 @@ defmodule Pow.Action.State do
     set_config(t)
   end
 
-
+  @doc """
+    Flush table contents. (Deleting Table contents)
+  """
   def flush(table_name) do
     get_table(table_name)
     |> :dets.delete_all_objects
@@ -139,6 +159,8 @@ defmodule Pow.Action.State do
     close_table(@entry_table)
     Agent.stop(__MODULE__)
   end
+
+
 
   # -----------------------------
   # Additional Functions

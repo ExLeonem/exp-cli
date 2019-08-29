@@ -7,7 +7,7 @@ The main purpose of this tool is to offer a posibility for programmers to track 
 - [Installation](#Installation)
 - [Roadmap](#Roadmap)
 - [Commands](#Commands)
-- [Contributing](#Contributiing)
+- [Contributing](#Contributing)
 
 
 ## Installation
@@ -22,7 +22,7 @@ To use the CLI Erlang/Elixir needs to be installed loally. Other than that
 4. Adding the place where the binary is to the Path
 
 
-(*Note* The directory where the binary is needs to be writeable, because the CLI will be persisting entries into a DETS File.)
+**Note:** The directory where the binary is needs to be writeable, because the CLI will be persisting entries into a DETS File.
 
 <!-- If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 by adding `pow` to your list of dependencies in `mix.exs`:
