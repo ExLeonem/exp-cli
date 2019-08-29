@@ -13,13 +13,21 @@ defmodule TestPowActionRecordStart do
         :ok
     end
 
+    def teardown do
+        State.flush(:config_store)
+        State.flush(:entry_store)
+        State.shutdown()
+    end
+
     test "start-recording/valid" do
         assert {:ok, _} = Start.start([], [])
+        teardown()
     end
 
     test "start-recording/invalid" do
         Start.start([],[])
         assert {:error, _} = Start.start([], [])
+        teardown()
     end
 
 

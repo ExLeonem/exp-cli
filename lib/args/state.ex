@@ -4,33 +4,20 @@ defmodule Pow.Args.State do
 
   """
 
-
   # OptionParser options
-  @aliases []
-  @strict [
-    env_path: :string,
-    chunk_size: :string
-  ]
+  @strict Application.get_env(:pow, :params, [])
 
 
   @doc """
 
-
   """
   def parse(:set, argv) do
-
+    argv
+    |> OptionParser.parse(strict: @strict)
+    |> State.set_config()
   end
 
-  def parse(:show, argv) do
-    # argv
-    # |> OptionParser.parse([])
-  end
 
   def parse(_, argv), do: {:error, "invalid directive", []}
-
-
-  defmodule Pow.Args.State.Show do
-
-  end
 
 end

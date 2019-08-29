@@ -2,6 +2,7 @@ defmodule Pow.Args.Main do
   # alias Pow.Action.Main, as: Action
   alias Pow.Args.Record
   alias Pow.Args.State
+  alias Pow.Args.Display
   require Logger
 
   @moduledoc """
@@ -25,13 +26,11 @@ defmodule Pow.Args.Main do
 
       start - start recording
       stop - stop recording
-      abort - abort a timer or current recording
       set - cli configuration
-      show - show current state information
-      tag - tag the current tracking with keywords
+      get - get current cli config information
+      show - query inserted information
+      write - write currently persisted data from dets to file system
       help - print usage information
-      create - creates directory and sets variables to read configuration from
-
     """
 
   @aliases [
@@ -78,9 +77,10 @@ defmodule Pow.Args.Main do
   def dispatch(:start, argv), do: Record.parse(:start, argv)
   def dispatch(:stop, argv), do: Record.parse(:stop, argv)
   def dispatch(:set, argv), do: State.parse(:set, argv)
-  def dispatch(:show, argv), do: State.parse(:show, argv)
-  def dispatch(:tag, argv), do: State.parse(:tag, argv)
-  def dispatch(:help, _), do: get_help()
+  def dispatch(:get, argv), do: Display.parse(:get, argv)
+  def dispatch(:show, argv), do: Display.parse(:show, argv)
+  def dispatch(:write, argv), do: Persist.parse(:write, argv)
+  def dispatch(_, _), do: get_help() # :help as well as invalid flags
 
   # Iterate parsed parameters
   def dispatch([_| t], argv) do
@@ -94,7 +94,7 @@ defmodule Pow.Args.Main do
   end
 
   defp process_result(result = {_, msg}) do
-    IO.puts(msg)
+    IO.puts(msg) # Don't remove this !!!!
     result
   end
 

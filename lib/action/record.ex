@@ -38,7 +38,7 @@ defmodule Pow.Action.Record do
   """
   def parse_remind(string_value) do
     try do
-      [hours, minutes| t] = string_value 
+      [hours, minutes| r] = string_value 
         |> String.split(":") 
         |> Enum.map(&String.to_integer/1)
 
@@ -56,6 +56,7 @@ defmodule Pow.Action.Record do
     config = State.get_config(:is_recording)
     if config[:is_recording] do
       now = Time.utc_now()
+      date_time_write = DateTime.utc_now()
       config_time = State.get_config(:time_started)
       
 
@@ -63,9 +64,11 @@ defmodule Pow.Action.Record do
       title = request_user_argument("Enter a title or description for the entry... \n", &is_binary/1, io)
       time_flag = calculate_time(config_time[:time_started], now) |> format_time
 
-      State.write_entry({DateTime.utc_now(), time_flag, title})
-      State.put_config(:is_recording, false)
-      {:ok, "+++++\nEntry written.\n+++++"}
+      # Write to dets tables
+      State.write_entry({date_time_write, time_flag, title})
+      State.set_config([is_recording: false, last_entry: now])
+      last_entry = State.get_config(:last_entry)
+      {:ok, "\nEntry successfully written."}
     else
       {:error, "It seems like you aren't recording anything. Start recording first to stop something."}
     end

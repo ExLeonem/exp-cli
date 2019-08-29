@@ -28,3 +28,25 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env()}.exs"
+
+# Configuration keys and type
+
+
+# TODO: restructure config to [param_name: [:type, :default_value]]
+# and write function that generates module attribute
+config :pow,
+    params: [
+        block_length: :string,
+        is_recording: :boolean,
+        timer: :string,
+        remind: :string,
+        time_started: :string,
+        default_format: :string,
+        last_entry: :string
+    ],
+    fields: [
+        title: :string,
+        tag: :string
+    ]
+
+    
