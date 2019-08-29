@@ -72,7 +72,7 @@ defmodule Pow.Action.State do
   def get_entries(filter \\ [])
   def get_entries([]) do
     table = get_table(@entry_table)
-    # :dets.match_object(table, {:"$1", :"$2"})
+    # :dets.match_object(table, [{:"$1", :"$2", :"$3"}])
     :dets.match(table, :"$1") # returns all entries
   end
   def get_entries(filter) do
@@ -87,9 +87,6 @@ defmodule Pow.Action.State do
     table = get_table(@entry_table)
     last_entry = get_config(:last_entry)
     if !is_nil(last_entry) do
-      # query = [{{:"$1", :"$2"}, [{:==, :"$1", {:const, last_entry[:last_entry]}}], {{:"$1", :"$2"}}}]
-      # query = [{{:"$1", :"$2"}, [{:==, :"$1", {:const, last_entry[:last_entry]}}], [{{:"$1", :"$2"}}]}]
-      # :dets.match(table, query)
 
       # REVIEW: Not a solution for big datasets (maybe Streams?)
       get_entries()

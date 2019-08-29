@@ -80,7 +80,7 @@ defmodule Pow.Args.Main do
   def dispatch(:get, argv), do: Display.parse(:get, argv)
   def dispatch(:show, argv), do: Display.parse(:show, argv)
   def dispatch(:write, argv), do: Persist.parse(:write, argv)
-  def dispatch(:help, _), do: get_help()
+  def dispatch(_, _), do: get_help() # :help as well as invalid flags
 
   # Iterate parsed parameters
   def dispatch([_| t], argv) do

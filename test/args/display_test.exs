@@ -16,13 +16,13 @@ defmodule TestPowArgsDisplay do
     end
 
     def load_mock_data() do
-        State.write_entry({Time.utc_now(), "Hello World"})
-        State.write_entry({Time.utc_now(), "What in the world"})
-        State.write_entry({Time.utc_now(), "k"})
-        State.write_entry({Time.utc_now(), "nkn"})
-        State.write_entry({Time.utc_now(), "tt"})
-        now = Time.utc_now()
-        State.write_entry({now, "cc"})
+        State.write_entry({DateTime.utc_now(), "00:00", "Hello World"})
+        State.write_entry({DateTime.utc_now(), "00:00", "What in the world"})
+        State.write_entry({DateTime.utc_now(), "00:00", "k"})
+        State.write_entry({DateTime.utc_now(), "00:00", "nkn"})
+        State.write_entry({DateTime.utc_now(), "00:00", "tt"})
+        now = DateTime.utc_now()
+        State.write_entry({now, "00:00", "cc"})
         State.put_config(:last_entry, now)
     end
 
@@ -36,7 +36,7 @@ defmodule TestPowArgsDisplay do
         end
 
         test "no-param/invalid" do
-            assert Display.parse(:show, []) == []
+            assert {:ok, _} = Display.parse(:show, [])
             teardown()
         end
 
@@ -47,7 +47,7 @@ defmodule TestPowArgsDisplay do
         end
 
         test "param[:all]/invalid" do
-            assert Display.parse(:show, ["-a"]) == []
+            assert {:ok, _} =  Display.parse(:show, ["-a"])
             teardown()
         end
 
@@ -55,7 +55,7 @@ defmodule TestPowArgsDisplay do
             teardown()
             State.start_link()
             load_mock_data()
-            assert [{_, "cc"}] = Display.parse(:show, ["-l"])
+            assert {:ok, _} = Display.parse(:show, ["-l"])
             teardown()
         end
 

@@ -53,11 +53,10 @@ defmodule Pow.Args.Display do
             !is_nil(time_frame) && time_frame != "" -> _get_entries(:timeframe, time_frame)
             true -> _get_entries(:all) 
         end
-        IO.inspect(result)
         format_result(result)
     end 
 
-    def format_result(resutl, aggregate \\ "")
+    def format_result(result, aggregate \\ "")
     def format_result([], ""), do: {:ok , "There's no recorded data yet."}
     def format_result([], aggregate), do: {:ok, aggregate}
     def format_result(result, aggregate) do
@@ -67,9 +66,15 @@ defmodule Pow.Args.Display do
 
     def _format_result([], aggregate), do: {:ok, aggregate}
     def _format_result([h| t], aggregate) do
-        [{_date, duration, title}] = h
+        {date_time, duration, title} = if is_tuple(h) do
+            h 
+        else
+            [ele] = h
+            ele
+        end
         title = title |> String.replace("\n", "")
-        add_to_output = "\nDuration: #{duration}, Title: #{title}"
+        date = Date.to_string(date_time)
+        add_to_output = "\n[#{date}] Duration: #{duration}, Title: #{title}"
         aggregate = aggregate <> add_to_output
         format_result(t, aggregate)
     end

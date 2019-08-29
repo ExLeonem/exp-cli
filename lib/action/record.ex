@@ -56,6 +56,7 @@ defmodule Pow.Action.Record do
     config = State.get_config(:is_recording)
     if config[:is_recording] do
       now = Time.utc_now()
+      date_time_write = DateTime.utc_now()
       config_time = State.get_config(:time_started)
       
 
@@ -64,10 +65,10 @@ defmodule Pow.Action.Record do
       time_flag = calculate_time(config_time[:time_started], now) |> format_time
 
       # Write to dets tables
-      State.write_entry({now, time_flag, title})
+      State.write_entry({date_time_write, time_flag, title})
       State.set_config([is_recording: false, last_entry: now])
       last_entry = State.get_config(:last_entry)
-      {:ok, "+++++\nEntry written.\n+++++"}
+      {:ok, "\nEntry successfully written."}
     else
       {:error, "It seems like you aren't recording anything. Start recording first to stop something."}
     end
