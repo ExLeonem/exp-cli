@@ -77,10 +77,10 @@ defmodule Exp.Args.Main do
   def dispatch(:start, argv), do: Record.parse(:start, argv)
   def dispatch(:stop, argv), do: Record.parse(:stop, argv)
   def dispatch(:set, argv), do: State.parse(:set, argv)
-  def dispatch(:get, argv), do: Display.parse(:get, argv)
+  def dispatch(:get, argv), do: State.parse(:get, argv)
   def dispatch(:show, argv), do: Display.parse(:show, argv)
   def dispatch(:write, argv), do: Persist.parse(:write, argv)
-  def dispatch(_, _), do: get_help() # :help as well as invalid flags
+  def dispatch(_, _), do: get_help() # defaulting to on :help as well as invalid flags
 
   # Iterate parsed parameters
   def dispatch([_| t], argv) do

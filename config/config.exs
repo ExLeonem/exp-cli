@@ -36,13 +36,14 @@ use Mix.Config
 # and write function that generates module attribute
 config :exp,
     params: [
-        block_length: :string,
-        is_recording: :boolean,
-        timer: :string,
-        remind: :string,
-        time_started: :string,
-        default_format: :string,
-        last_entry: :string
+        block_length: [:string, "1:30"],
+        is_recording: [:boolean, false],
+        timer: [:string, nil],
+        remind: [:string, nil],
+        time_started: [:string, nil],
+        default_format: [:string, :csv],
+        last_entry: [:string, nil],
+        version: [:string, Mix.Project.config[:version]]
     ],
     fields: [
         title: :string,

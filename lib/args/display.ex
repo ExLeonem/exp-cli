@@ -4,15 +4,9 @@ defmodule Exp.Args.Display do
     alias Exp.Action.State
     alias Exp.Action.Formatter
 
-
-    @get_strict [
-
-    ]
-
-    def parse(:get, argv) do
-        {:ok, ""}
-    end
-
+    @moduledoc """
+        Module handles CLI calls to query/display data from entry store.
+    """
 
     @options [
         aliases: [

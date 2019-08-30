@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.com/ExLeonem/exp.svg?branch=master)](https://travis-ci.com/ExLeonem/exp)
+![](https://img.shields.io/badge/elixir-1.9.1-blue)
+
 
 #  EXP CLI - Track you'r time
 The EXP CLI a tool for tracking the time you spend working on a project or learning. 
@@ -7,8 +9,13 @@ The EXP CLI a tool for tracking the time you spend working on a project or learn
 ## Table of Contents
 - [Installation](#Installation)
 - [Roadmap](#Roadmap)
+- [Configuration Parameters](#Configuration_Parameters)
 - [Commands](#Commands)
-- [Contributing](#Contributing)
+  - [Add](#Add)
+  - [Show](#Show)
+  - [Get](#Get)
+  - [Set](#Set)
+- [Contribution](#Contribution)
 
 
 ## Installation
@@ -39,8 +46,11 @@ Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_do
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/exp](https://hexdocs.pm/exp). -->
 
-## Roadmap
+## Roadmap/Ideas
 
+- [ ] Native Application 
+- [ ] Collect additional Data
+  - [ ] Github Commits (time and message)
 - [ ] Custom Entry fields
 - [ ] Statistics 
 - [ ] Configuration
@@ -52,13 +62,25 @@ be found at [https://hexdocs.pm/exp](https://hexdocs.pm/exp). -->
   - [ ] By filter
 - [ ] Saving entries through CLI
   - [x] start/stop mechanic
-  - [ ] save entry
+  - [ ] save instantly complete entry
 - [ ] Reminder/Timer functionality 
 - [ ] DETS Flush
 - [ ] Write out DETS Data
   - [ ] CSV
   - [ ] JSON
   - [ ] XML
+
+
+## Configuration Parameters
+
+Name          | writeable?  |  Description
+---           | ---         | ---
+is-recording  | false       | Indicates if application currently is recording the time. Switches by calling the [stop](#Commands) command.
+block-length  | true        | Indicates the length of 
+timer         | false       | 
+remind        | false       |
+output-format | true        |
+last-entry    | false       |
 
 
 
@@ -68,20 +90,20 @@ To start recording a new entry just type:`exp start`.
 To stop the recording call `exp stop`.
 
 ### General Commands
-Name         | Description                                                      | Implemented 
----          | ---                                                              | ---
-start        | Starts recording an entry (Sets time when recording started)     | [x]
-stop         | Stops the recording and writes entry to DETS                     | [x]
-add          | Writing an an entry directly into DETS                           | [ ]
-show         | Prints recorded entries.                                         | [x]
-get          | Get information on current configuration                         | [ ]
-set          | Setting configuration attributes                                 | [ ]
-write        | Writes out currently saved entries from DETS into a given format | [ ] 
-stat         | Show statistics                                                  | [ ]
+Name            | Description                                                      | Implemented 
+---             | ---                                                              | ---
+start           | Starts recording an entry (Sets time when recording started)     | <ul><li>[x]</li></ul>
+stop            | Stops the recording and writes entry to DETS                     | <ul><li>[x]</li></ul>
+[add](#Add)     | Writing an an entry directly into DETS                           | <ul><li>[ ]</li></ul>
+[show](#Show)   | Prints recorded entries.                                         | <ul><li>[x]</li></ul>
+[get](#Get)     | Get information on current configuration                         | <ul><li>[ ]</li></ul>
+[set](#Set)     | Setting configuration attributes                                 | <ul><li>[ ]</li></ul>
+[write](#Write) | Writes out currently saved entries from DETS into a given format | <ul><li>[ ]</li></ul> 
+[stat](#Stat])  | Show statistics                                                  | <ul><li>[ ]</li></ul>
 
 
 
-### Show-Command
+###Show
 Passing no flag at all will default to -a, --all
 
 Flag          | Description
@@ -91,7 +113,26 @@ Flag          | Description
 -f, --filter  | Filter output with passed query
 
 
-### Contributing
-For the moment just hook me up.
+###Get
+Request the current set values of configuration parameters. All parameters usable as flags are listed in the [configuration parameter list](#Configuration_Parameters) section.
+
+Example: `exp get --block-length`
+
+
+###Set
+Setting default/configuration parameters.
+
+Example: `exp set --block-length 1:30 --output-format csv`
+
+Flag              | Type      |   Description
+---               | ---       | ---
+--block-length    | string    | Default time for block when using CLI as a pomodoro watch in Format `HH:mm`
+--output-format   | string    | Setting the default output format for entry export, supported formats: `csv` and `json`
+
+
+
+
+### Contribution
+If you are interested to contribute just write me a PM.
 
 
