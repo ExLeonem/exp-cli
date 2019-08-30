@@ -7,7 +7,7 @@ defmodule Pow.Args.State do
   """
 
   # OptionParser options
-  @strict Application.get_env(:pow, :params, [])
+  @strict Application.get_env(:exp, :params, [])
 
 
   @doc """

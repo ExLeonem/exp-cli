@@ -15,7 +15,7 @@ There are no existing dependencies to other libraries.
 To use the CLI Erlang/Elixir needs to be installed loally. Other than that
 
 1. Clone the Repo
-`git clone https://github.com/ExLeonem/pow.git`
+`git clone https://github.com/ExLeonem/exp.git`
 
 2. CD into the Repo
 3. Execute `mix escript.build` (Building the binary)
@@ -25,18 +25,18 @@ To use the CLI Erlang/Elixir needs to be installed loally. Other than that
 **Note:** The directory where the binary is needs to be writeable, because the CLI will be persisting entries into a DETS File.
 
 <!-- If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `pow` to your list of dependencies in `mix.exs`:
+by adding `exp` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:pow, "~> 0.1.0"}
+    {:exp, "~> 0.1.0"}
   ]
 end
 ```
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/pow](https://hexdocs.pm/pow). -->
+be found at [https://hexdocs.pm/exp](https://hexdocs.pm/exp). -->
 
 ## Roadmap
 
@@ -63,8 +63,8 @@ be found at [https://hexdocs.pm/pow](https://hexdocs.pm/pow). -->
 
 ## Commands
 
-To start recording a new entry just type:`pow start`.
-To stop the recording call `pow stop`.
+To start recording a new entry just type:`exp start`.
+To stop the recording call `exp stop`.
 
 ### General Commands
 Name         | Description                                                      | Implemented 

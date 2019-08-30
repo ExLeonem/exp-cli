@@ -12,7 +12,7 @@ defmodule Pow.Action.Record do
 
     Starting to record as follows ...
 
-      pow start [options]
+      exp start [options]
 
     Options:
       -t, --timer - start a timer with specified, pass time in format hh:mm

@@ -19,7 +19,7 @@ defmodule Pow.Args.Main do
 
     Usage:
 
-      ./pow [option] [value|s]
+      ./exp [option] [value|s]
 
 
     Option:

@@ -10,7 +10,7 @@ defmodule Pow.Action.State do
   @config_table :config_store
   @entry_table :entry_store
 
-  @config_keys Keyword.keys(Application.get_env(:pow, :params, []))
+  @config_keys Keyword.keys(Application.get_env(:exp, :params, []))
 
   @entry_keys [
     :datetime, # timestamp when entry was written
@@ -172,7 +172,7 @@ defmodule Pow.Action.State do
     @param path: directory where to store data
   """
   def create_dir() do
-    path = Application.get_env(:pow, :env_path)
+    path = Application.get_env(:exp, :env_path)
 
     # Create Directory write Config else try writing only config
     if(!File.exists?(path)) do
