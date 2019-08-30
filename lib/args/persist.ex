@@ -1,4 +1,4 @@
-defmodule Pow.Args.Persist do
+defmodule Exp.Args.Persist do
     require Logger
 
     @options [

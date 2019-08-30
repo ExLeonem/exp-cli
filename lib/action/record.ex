@@ -1,6 +1,6 @@
-defmodule Pow.Action.Record do
-  alias Pow.Action.State
-  alias Pow.Action.Record.Start
+defmodule Exp.Action.Record do
+  alias Exp.Action.State
+  alias Exp.Action.Record.Start
   require Logger
 
   @moduledoc """

@@ -1,5 +1,5 @@
-defmodule Pow.Args.Record do
-  alias Pow.Action.Record
+defmodule Exp.Args.Record do
+  alias Exp.Action.Record
   require Logger
 
   @moduledoc """

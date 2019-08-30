@@ -1,4 +1,4 @@
-defmodule Pow.Util do
+defmodule Exp.Util do
     require Logger
 
     def string_to_time(string) do

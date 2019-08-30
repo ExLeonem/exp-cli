@@ -1,7 +1,7 @@
-defmodule TestPowArgsRecord do
+defmodule TestExpArgsRecord do
   use ExUnit.Case
-  alias Pow.Args.Record
-  doctest Pow.Args.Record
+  alias Exp.Args.Record
+  doctest Exp.Args.Record
 
 
   # test "start/default" do

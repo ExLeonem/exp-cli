@@ -1,4 +1,4 @@
-defmodule Pow.Action.State do
+defmodule Exp.Action.State do
   use Agent
   require Logger
   @moduledoc """
@@ -181,7 +181,7 @@ defmodule Pow.Action.State do
 
       # Only write config if directory already exists
       if(!File.dir?(path)) do
-        {:error, "Theres already a directory named PowTime in #{path}. Try using the --create option"}
+        {:error, "Theres already a directory named ExpTime in #{path}. Try using the --create option"}
       else 
         :ok
       end

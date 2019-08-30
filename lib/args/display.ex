@@ -1,8 +1,8 @@
-defmodule Pow.Args.Display do
+defmodule Exp.Args.Display do
     require Logger
-    alias Pow.Action.Display
-    alias Pow.Action.State
-    alias Pow.Action.Formatter
+    alias Exp.Action.Display
+    alias Exp.Action.State
+    alias Exp.Action.Formatter
 
 
     @get_strict [

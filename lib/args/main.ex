@@ -1,8 +1,8 @@
-defmodule Pow.Args.Main do
+defmodule Exp.Args.Main do
   # alias Pow.Action.Main, as: Action
-  alias Pow.Args.Record
-  alias Pow.Args.State
-  alias Pow.Args.Display
+  alias Exp.Args.Record
+  alias Exp.Args.State
+  alias Exp.Args.Display
   require Logger
 
   @moduledoc """

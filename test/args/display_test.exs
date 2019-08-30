@@ -1,7 +1,7 @@
-defmodule TestPowArgsDisplay do
+defmodule TestExpArgsDisplay do
     use ExUnit.Case
-    alias Pow.Action.State
-    alias Pow.Args.Display
+    alias Exp.Action.State
+    alias Exp.Args.Display
     doctest Display
 
     setup do

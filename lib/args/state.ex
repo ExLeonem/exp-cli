@@ -1,6 +1,6 @@
-defmodule Pow.Args.State do
+defmodule Exp.Args.State do
 
-  alias Pow.Action.State
+  alias Exp.Action.State
 
   @moduledoc """
 

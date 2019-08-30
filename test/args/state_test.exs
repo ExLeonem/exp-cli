@@ -1,8 +1,8 @@
-defmodule TestPowArgsState do
+defmodule TestExpArgsState do
   use ExUnit.Case
-  alias Pow.Action.State, as: StateAgent
-  alias Pow.Args.State, as: ArgsState
-  doctest Pow.Args.State
+  alias Exp.Action.State, as: StateAgent
+  alias Exp.Args.State, as: ArgsState
+  doctest Exp.Args.State
 
 
   setup do

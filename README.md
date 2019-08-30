@@ -1,6 +1,7 @@
-#  POW CLI - Track you'r time
-POW CLI is a pomodoro watch and tool for tracking the time you spend working on a project. 
-The main purpose of this tool is to offer a posibility for programmers to track their time.
+[![Build Status](https://travis-ci.com/ExLeonem/exp.svg?branch=master)](https://travis-ci.com/ExLeonem/exp)
+
+#  EXP CLI - Track you'r time
+The EXP CLI a tool for tracking the time you spend working on a project or learning. 
 
 
 ## Table of Contents

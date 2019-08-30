@@ -1,8 +1,8 @@
-defmodule TestPowActionState do
+defmodule TestExpActionState do
   use ExUnit.Case
   require Logger
-  alias Pow.Action.State
-  doctest Pow.Action.State
+  alias Exp.Action.State
+  doctest Exp.Action.State
 
   # test "create default directory/valid" do
   #   assert :ok = State.create_default_config()
