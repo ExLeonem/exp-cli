@@ -1,8 +1,8 @@
-defmodule TestPowActionRecord do
+defmodule TestExpActionRecord do
   use ExUnit.Case
-  alias Pow.Action.Record
-  alias Pow.Action.State
-  doctest Pow.Action.Record
+  alias Exp.Action.Record
+  alias Exp.Action.State
+  doctest Exp.Action.Record
 
   defmodule FakeIO do
       def gets(param), do: param

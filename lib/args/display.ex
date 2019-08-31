@@ -1,18 +1,12 @@
-defmodule Pow.Args.Display do
+defmodule Exp.Args.Display do
     require Logger
-    alias Pow.Action.Display
-    alias Pow.Action.State
-    alias Pow.Action.Formatter
+    alias Exp.Action.Display
+    alias Exp.Action.State
+    alias Exp.Action.Formatter
 
-
-    @get_strict [
-
-    ]
-
-    def parse(:get, argv) do
-        {:ok, ""}
-    end
-
+    @moduledoc """
+        Module handles CLI calls to query/display data from entry store.
+    """
 
     @options [
         aliases: [

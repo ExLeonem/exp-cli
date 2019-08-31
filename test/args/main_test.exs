@@ -1,7 +1,7 @@
-defmodule TestPowMainParser do
+defmodule TestExpMainParser do
   use ExUnit.Case
-  alias Pow.Args.Main
-  doctest Pow.CLI
+  alias Exp.Args.Main
+  doctest Exp.CLI
 
 
   # valid start no recording process currently running

@@ -1,6 +1,6 @@
-defmodule PowCLITest do
+defmodule TestExpCli do
   use ExUnit.Case
-  doctest Pow.CLI
+  doctest Exp.CLI
 
   # Top level test only test if valid or invalid
 

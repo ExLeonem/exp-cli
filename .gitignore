@@ -24,3 +24,5 @@ pow-*.tar
 
 # Don't track hidden files
 /.*
+
+/exp

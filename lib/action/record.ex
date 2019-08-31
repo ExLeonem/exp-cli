@@ -1,6 +1,6 @@
-defmodule Pow.Action.Record do
-  alias Pow.Action.State
-  alias Pow.Action.Record.Start
+defmodule Exp.Action.Record do
+  alias Exp.Action.State
+  alias Exp.Action.Record.Start
   require Logger
 
   @moduledoc """
@@ -12,7 +12,7 @@ defmodule Pow.Action.Record do
 
     Starting to record as follows ...
 
-      pow start [options]
+      exp start [options]
 
     Options:
       -t, --timer - start a timer with specified, pass time in format hh:mm

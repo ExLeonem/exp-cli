@@ -1,7 +1,7 @@
-defmodule TestPowActionRecordStart do
+defmodule TestExpActionRecordStart do
     use ExUnit.Case
-    alias Pow.Action.State
-    alias Pow.Action.Record.Start
+    alias Exp.Action.State
+    alias Exp.Action.Record.Start
     doctest Start
 
     # Start Agent and reset everything

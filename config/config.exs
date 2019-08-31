@@ -10,11 +10,11 @@ use Mix.Config
 
 # You can configure your application as:
 #
-#     config :pow, key: :value
+#     config :exp, key: :value
 #
 # and access this configuration in your application as:
 #
-#     Application.get_env(:pow, :key)
+#     Application.get_env(:exp, :key)
 #
 # You can also configure a third-party app:
 #
@@ -32,17 +32,16 @@ use Mix.Config
 # Configuration keys and type
 
 
-# TODO: restructure config to [param_name: [:type, :default_value]]
-# and write function that generates module attribute
-config :pow,
+# Params structure param_name: [:type, :default_value, :modifyable?]
+config :exp,
     params: [
-        block_length: :string,
-        is_recording: :boolean,
-        timer: :string,
-        remind: :string,
-        time_started: :string,
-        default_format: :string,
-        last_entry: :string
+        block_length: [:string, "1:30", true],
+        is_recording: [:boolean, false, false],
+        remind: [:string, nil, true], # can be set but flag must be passed on start
+        time_started: [:string, nil, false],
+        output_format: [:string, :csv, true],
+        last_entry: [:string, nil, false],
+        version: [:string, Mix.Project.config[:version], false]
     ],
     fields: [
         title: :string,

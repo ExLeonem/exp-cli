@@ -1,4 +1,4 @@
-defmodule Pow.Action.State do
+defmodule Exp.Action.State do
   use Agent
   require Logger
   @moduledoc """
@@ -10,7 +10,7 @@ defmodule Pow.Action.State do
   @config_table :config_store
   @entry_table :entry_store
 
-  @config_keys Keyword.keys(Application.get_env(:pow, :params, []))
+  @config_keys Keyword.keys(Application.get_env(:exp, :params, []))
 
   @entry_keys [
     :datetime, # timestamp when entry was written
@@ -30,6 +30,11 @@ defmodule Pow.Action.State do
     default_format: :csv # write out format
   ]
 
+
+
+  @doc """
+    Starts the StateAgent.
+  """
   def start_link() do
       {:ok, config_table} = open_table(@config_table)
       {:ok, entry_table} = open_table(@entry_table)
@@ -83,6 +88,10 @@ defmodule Pow.Action.State do
     :dets.select(@entry_store, query)
   end
 
+  @doc """
+    Returns the last entry of the entry dets store.
+
+  """
   def get_last_entry() do
     table = get_table(@entry_table)
     last_entry = get_config(:last_entry)
@@ -97,26 +106,49 @@ defmodule Pow.Action.State do
     end
   end
 
-
+  @doc """
+    Updated the configuration parameter on key with given value.
+  """
   def put_config(key, value) do
     # check if config is in @default config key list then write
     table = get_table(@config_table)
     :dets.insert(table, {key, value})
   end
 
-  def get_config(key \\ :all_keys, table \\ nil)
-  def get_config(:all_keys, table) do
+  @doc """
+      Gets the current configuration parameter under given key.
+      
+      Returns [key: value]
+  """
+  def get_config(key \\ :all_keys, table \\ nil, aggr \\ [])
+  def get_config(:all_keys, table, aggr) do
     table = if is_nil(table), do: get_table(@config_table), else: table
     key_list = Keyword.keys(@default_config)
     :dets.match_object(table, {:"$1", :"$2"})
   end 
 
-  def get_config(key, table) do
+  # Getting list of config param names as atoms [:default_config, :remind]
+  def get_config([], _, aggr), do: {:ok, aggr}
+  def get_config([config_key| rest], table, aggr) do
+  
+    result = get_config(config_key)
+    case result do
+      {:error, _} -> result
+      [{key, value}] -> get_config(rest, table, [value| aggr])
+    end
+  end
+
+  def get_config(key, table, _) when is_atom(key) do
     table = if is_nil(table), do: get_table(@config_table), else: table
     # :dets.match_object(table, {key, :"$2"}) # REVIEW: Which one to choose
     :dets.lookup(table, key)
   end
 
+
+  @doc """
+    Update multiple configuration parameters.
+    Input has to be a Keyword list of the form: [config_param_key: value]
+  """
   def set_config([]), do: :ok
   def set_config([{key, value} | t]) do
     if key in @config_keys do
@@ -125,7 +157,9 @@ defmodule Pow.Action.State do
     set_config(t)
   end
 
-
+  @doc """
+    Flush table contents. (Deleting Table contents)
+  """
   def flush(table_name) do
     get_table(table_name)
     |> :dets.delete_all_objects
@@ -140,6 +174,8 @@ defmodule Pow.Action.State do
     Agent.stop(__MODULE__)
   end
 
+
+
   # -----------------------------
   # Additional Functions
   # -----------------------------
@@ -150,7 +186,7 @@ defmodule Pow.Action.State do
     @param path: directory where to store data
   """
   def create_dir() do
-    path = Application.get_env(:pow, :env_path)
+    path = Application.get_env(:exp, :env_path)
 
     # Create Directory write Config else try writing only config
     if(!File.exists?(path)) do
@@ -159,7 +195,7 @@ defmodule Pow.Action.State do
 
       # Only write config if directory already exists
       if(!File.dir?(path)) do
-        {:error, "Theres already a directory named PowTime in #{path}. Try using the --create option"}
+        {:error, "Theres already a directory named ExpTime in #{path}. Try using the --create option"}
       else 
         :ok
       end

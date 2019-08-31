@@ -1,4 +1,4 @@
-defmodule Pow.Action.Formatter do
+defmodule Exp.Action.Formatter do
     require Logger
     
     @moduledoc """
