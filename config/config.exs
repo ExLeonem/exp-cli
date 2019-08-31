@@ -32,18 +32,16 @@ use Mix.Config
 # Configuration keys and type
 
 
-# TODO: restructure config to [param_name: [:type, :default_value]]
-# and write function that generates module attribute
+# Params structure param_name: [:type, :default_value, :modifyable?]
 config :exp,
     params: [
-        block_length: [:string, "1:30"],
-        is_recording: [:boolean, false],
-        timer: [:string, nil],
-        remind: [:string, nil],
-        time_started: [:string, nil],
-        default_format: [:string, :csv],
-        last_entry: [:string, nil],
-        version: [:string, Mix.Project.config[:version]]
+        block_length: [:string, "1:30", true],
+        is_recording: [:boolean, false, false],
+        remind: [:string, nil, true], # can be set but flag must be passed on start
+        time_started: [:string, nil, false],
+        output_format: [:string, :csv, true],
+        last_entry: [:string, nil, false],
+        version: [:string, Mix.Project.config[:version], false]
     ],
     fields: [
         title: :string,

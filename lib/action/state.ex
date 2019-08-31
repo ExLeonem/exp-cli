@@ -120,18 +120,30 @@ defmodule Exp.Action.State do
       
       Returns [key: value]
   """
-  def get_config(key \\ :all_keys, table \\ nil)
-  def get_config(:all_keys, table) do
+  def get_config(key \\ :all_keys, table \\ nil, aggr \\ [])
+  def get_config(:all_keys, table, aggr) do
     table = if is_nil(table), do: get_table(@config_table), else: table
     key_list = Keyword.keys(@default_config)
     :dets.match_object(table, {:"$1", :"$2"})
   end 
 
-  def get_config(key, table) do
+  # Getting list of config param names as atoms [:default_config, :remind]
+  def get_config([], _, aggr), do: {:ok, aggr}
+  def get_config([config_key| rest], table, aggr) do
+  
+    result = get_config(config_key)
+    case result do
+      {:error, _} -> result
+      [{key, value}] -> get_config(rest, table, [value| aggr])
+    end
+  end
+
+  def get_config(key, table, _) when is_atom(key) do
     table = if is_nil(table), do: get_table(@config_table), else: table
     # :dets.match_object(table, {key, :"$2"}) # REVIEW: Which one to choose
     :dets.lookup(table, key)
   end
+
 
   @doc """
     Update multiple configuration parameters.

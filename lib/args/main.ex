@@ -12,7 +12,7 @@ defmodule Exp.Args.Main do
 
   @help """
 
-    ++++++++++++ Pomodoro Watcher +++++++++++++++++++
+    ++++++++++++ EXP CLI +++++++++++++++++++
 
     For information for a specific task use [option] [--help | -h].
 

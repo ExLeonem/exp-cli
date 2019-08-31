@@ -77,10 +77,9 @@ Name          | writeable?  |  Description
 ---           | ---         | ---
 is-recording  | false       | Indicates if application currently is recording the time. Switches by calling the [stop](#Commands) command.
 block-length  | true        | Indicates the length of 
-timer         | false       | 
-remind        | false       |
-output-format | true        |
-last-entry    | false       |
+remind        | true        | Set timout to prompt user current state
+output-format | true        | Default output format to use on `write` command
+last-entry    | false       | DateTime of last entry written to the entry store
 
 
 
@@ -92,18 +91,18 @@ To stop the recording call `exp stop`.
 ### General Commands
 Name            | Description                                                      | Implemented 
 ---             | ---                                                              | ---
-start           | Starts recording an entry (Sets time when recording started)     | <ul><li>[x]</li></ul>
-stop            | Stops the recording and writes entry to DETS                     | <ul><li>[x]</li></ul>
-[add](#Add)     | Writing an an entry directly into DETS                           | <ul><li>[ ]</li></ul>
-[show](#Show)   | Prints recorded entries.                                         | <ul><li>[x]</li></ul>
-[get](#Get)     | Get information on current configuration                         | <ul><li>[ ]</li></ul>
-[set](#Set)     | Setting configuration attributes                                 | <ul><li>[ ]</li></ul>
-[write](#Write) | Writes out currently saved entries from DETS into a given format | <ul><li>[ ]</li></ul> 
-[stat](#Stat])  | Show statistics                                                  | <ul><li>[ ]</li></ul>
+start           | Starts recording an entry (Sets time when recording started)     | &#9745;
+stop            | Stops the recording and writes entry to DETS                     | &#9745;
+[add](#Add)     | Writing an an entry directly into DETS                           | &#9744; <!--Unchecked-->
+[show](#Show)   | Prints recorded entries.                                         | &#9745; <!--Checked-->
+[get](#Get)     | Get information on current configuration                         | &#9744;
+[set](#Set)     | Setting configuration attributes                                 | &#9744;
+[write](#Write) | Writes out currently saved entries from DETS into a given format | &#9744;
+[stat](#Stat])  | Show statistics                                                  | &#9744;
 
 
 
-###Show
+### Show
 Passing no flag at all will default to -a, --all
 
 Flag          | Description
@@ -113,13 +112,13 @@ Flag          | Description
 -f, --filter  | Filter output with passed query
 
 
-###Get
+### Get
 Request the current set values of configuration parameters. All parameters usable as flags are listed in the [configuration parameter list](#Configuration_Parameters) section.
 
 Example: `exp get --block-length`
 
 
-###Set
+### Set
 Setting default/configuration parameters.
 
 Example: `exp set --block-length 1:30 --output-format csv`
