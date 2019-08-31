@@ -1,5 +1,6 @@
 defmodule Exp.Action.State do
   use Agent
+  alias Exp.Format.Types
   require Logger
   @moduledoc """
     Handles application state read/writes of config and entries.
@@ -10,27 +11,9 @@ defmodule Exp.Action.State do
   @config_table :config_store
   @entry_table :entry_store
 
-  @config_keys Keyword.keys(Application.get_env(:exp, :params, []))
-
-  @entry_keys [
-    :datetime, # timestamp when entry was written
-    :title,
-    :tags,
-    :duration 
-  ]
-
-
-  @default_config [
-    block_length: "1:30", # learning block length
-    is_recording: false, # timer is currently recording
-    timer: nil,
-    remind: nil,
-    time_started: nil,
-    last_entry: nil,
-    default_format: :csv # write out format
-  ]
-
-
+  # Load default values for configuration into keyword list (config.exs)
+  @default_config Types.extract(:defaults)
+  @config_keys Keyword.keys(@default_config)
 
   @doc """
     Starts the StateAgent.

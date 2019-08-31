@@ -5,40 +5,34 @@ defmodule Exp.Format.Types do
     """
 
 
-
-
-
-
-
     @doc """
-        Modifies the type of a list of keys/flags to be equal.
+        Sets the switch types of a switch definition to the same value.
     """
     def set_type(flags, type \\ :boolean)
-    def set_type(flags, type) do
+    def set_type(flags, type) when type in [:boolean, :count, :integer, :float, :string] do
         flags
         |> Enum.map(fn {key, _} -> {key, type} end)
     end
     def set_type(_, _), do: raise ArgumentError, message: "Only list allowed for flags in set_list_types()."
+
+
 
     # Actions on config.exs
 
     @doc """
         Returns either a schema for the options parser, or a keyword list of config parameter and default value.
     """
-    def extract(:schema) do
-        Application.get_env(:exp, :params, nil)
-        |> Enum.map(fn {key, [type, _, _]} -> {key, type} end)
-    end
+    def extract(action) do
 
-    def extract(:defaults) do
-        Application.get_env(:exp, :params, nil)
-        |> Enum.map(fn {key, [_, default, _]} -> {key, default} end)
-    end
+        transform = case action do
+            :schema -> fn {key, [type, _, _]} -> {key, type} end
+            :defaults -> fn {key, [_, default, _]} -> {key, default} end
+            :write -> fn {key, [_, _, write?]} -> {key, write?} end
+            :keys -> fn {key, _} -> key end 
+            _ -> fn params -> params end
+        end
 
-    def extract(:write) do
-        Application.get_env(:exp, :params, nil)
-        |> Enum.map(fn {key, [_, _, write?]} -> {key, write?} end)
+        Application.get_env(:exp, :params, nil)|> Enum.map(transform)
     end
-
 
 end

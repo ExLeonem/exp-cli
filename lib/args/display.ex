@@ -32,7 +32,9 @@ defmodule Exp.Args.Display do
         argv
         |> OptionParser.parse(@options)
         |> get_entries
-        |> Formatter.format_entries
+
+        #TODO: output needs to be formatted
+        # |> Formatter.format_entries
     end
 
 
