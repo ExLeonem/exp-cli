@@ -2,6 +2,7 @@ defmodule TestExpActionState do
   use ExUnit.Case
   require Logger
   alias Exp.Action.State
+  alias Exp.Format.Types
   doctest Exp.Action.State
 
   # test "create default directory/valid" do
@@ -11,15 +12,7 @@ defmodule TestExpActionState do
   @config_table :config_store
   @entry_table :entry_store
 
-  @default_config [
-    block_length: "1:30", # learning block length
-    is_recording: false, # timer is currently recording
-    timer: nil,
-    remind: nil,
-    last_entry: nil,
-    time_started: nil,
-    default_format: :csv # write out format
-  ]
+  @default_config Types.extract(:defaults)
 
   setup do
     State.start_link()
@@ -96,7 +89,7 @@ defmodule TestExpActionState do
     end
 
     test "read-last/valid" do
-      assert State.get_config(:default_format) == [default_format: :csv]
+      assert State.get_config(:output_format) == [output_format: :csv]
     end
 
     test "negative/mid/invalid" do

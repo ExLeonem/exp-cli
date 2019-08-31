@@ -3,8 +3,15 @@
 ![](https://img.shields.io/badge/elixir-1.9.1-blue)
 
 
-#  EXP CLI - Track you'r time
-The EXP CLI a tool for tracking the time you spend working on a project or learning. 
+<div style="text-align:center">
+  <img src="./.favicon.png">
+</div>
+
+<!-- ![exp-icon](./.favicon.png) -->
+
+
+#  Track you'r time
+The EXP CLI is a tool for tracking the time you spend working on a project or learning. 
 
 
 ## Table of Contents
@@ -54,9 +61,9 @@ be found at [https://hexdocs.pm/exp](https://hexdocs.pm/exp). -->
   - [ ] Github Commits (time and message)
 - [ ] Custom Entry fields
 - [ ] Statistics 
-- [ ] Configuration
-  - [ ] Setting Parameters
-  - [ ] Getting Parameters
+- [x] Configuration
+  - [x] Setting Parameters
+  - [x] Getting Parameters
 - [ ] Query entries
   - [x] Complete List
   - [x] Last Entry
@@ -103,6 +110,16 @@ stop            | Stops the recording and writes entry to DETS                  
 
 
 
+### Add
+
+
+Flag            | Description
+---             | ---
+-s, --start     | Start of the entry `HH:mm` 
+-t, --title     | Title of the entry
+-tg, --tag      | Add tags to the entry `exp add - "something" -tg tag1,tag2,tag3`     
+
+
 ### Show
 Passing no flag at all will default to -a, --all
 
@@ -130,9 +147,8 @@ Flag              | Type      |   Description
 --output-format   | string    | Setting the default output format for entry export, supported formats: `csv` and `json`
 
 
-
-
 ### Contribution
-If you are interested to contribute just write me a PM.
+Contribution is appreciated. If you are interested to contribute just write me a PM.
 
 
+#### Donation
