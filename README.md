@@ -7,11 +7,9 @@
   <img src="./.favicon.png">
 </div>
 
-<!-- ![exp-icon](./.favicon.png) -->
 
-
-#  Track you'r time
-The EXP CLI is a tool for tracking the time you spend working on a project or learning. 
+#  EXP CLI -Track you'r time
+A tool to track the time you spend working on a project or anythin else.
 
 
 ## Table of Contents
@@ -148,7 +146,11 @@ Flag              | Type      |   Description
 
 
 ### Contribution
-Contribution is appreciated. If you are interested to contribute just write me a PM.
+Contribution is very much appreciated. If you are interested to contribute just write me a Mail.
+If you have any ideas how to extend this thing. Just open an issue.
+
+#### Project Structure
 
 
-#### Donation
+
+<!-- #### Donation -->
