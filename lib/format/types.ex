@@ -1,4 +1,5 @@
 defmodule Exp.Format.Types do
+    require Logger
     alias Exp.Format.Config    
     @moduledoc """
         Utilities to format and generate types
@@ -17,7 +18,7 @@ defmodule Exp.Format.Types do
     """
     def build_entry({_, rest, invalid}) when rest != [] or invalid != [], do: {:error, "Invalid parameters passed."}
     def build_entry({values, _, _}) do
-        IO.inspect(values)
+        IO.puts("\n")
         iterate_fields(@field_keys, values)
     end
 
@@ -28,45 +29,117 @@ defmodule Exp.Format.Types do
         - fields: List of field keys as atoms `[:date, :title, :start, ...]` is getting read from config.exs
         - values: The passed values via CLI, as keyword list `[date: "22.10.2019", ...]`
         - acc: Accumulator adding up the values
-        - next: Follow up function to use on next entry `&fun/3` must take same parameters as `&iterate_fields/3`
+        - prev: Previously set values to act upon.
 
-        Returns list of all values that can be further processed `["22.10.2019", "Some title", ...]` for example joined to :csv format etc.
+
+        Returns {:ok, values as list} | {:error, reason} 
     """
     
-    def iterate_fields(fields, values, acc \\ [], opts \\ [])
-    def iterate_fields([], _, acc, _), do: acc # Return the build entry value list
-    def iterate_fields([:date = key| rest], values, acc, opts) do
-        # field_value = values[key]
-        
-        result = process_field(values[key], :date)
+    def iterate_fields(fields, values, acc \\ [], prev \\ [])
+    def iterate_fields([], _, acc, []), do: {:ok, acc} # Return the build entry value list
+    def iterate_fields([], _, acc, prev) do
+        # Prev still contains unused keys, merge values into acc
+        acc = acc |> update_entry(prev)
+        {:ok, acc}
+    end
+    def iterate_fields([key| rest], values, acc, prev) do
 
-        case result do
-            {:ok, value} -> iterate_fields(rest, values, [value| values], opts)
-            {:error, _} -> result
+        t_result = process_field(key, values[key], prev)
+
+        case t_result do
+            {:ok, result} when is_list(result) -> 
+                # t_result returned multiple values (Keyword list)
+                {value, new_prev} = Keyword.pop(result, key)
+                iterate_fields(rest, values, [value| acc], new_prev)
+            {:ok, value} -> 
+                Logger.debug("iterate")
+                iterate_fields(rest, values, [value | acc], prev)
+            {:error, _} -> 
+                Logger.debug("Got an error")
+                t_result
         end
 
-        # next(rest, values, acc, next)    
     end
 
-    # Catch end on next iteration and add another field
-    def iterate_fields([:start = key| rest], values, acc, _opt) do
-        
-    end
-
-    # def iterate_fields([:end = key| rest], values, acc, next)
-
-    # No specific processing for given key, but key is required. Therefore return error if empty
-    def iterate_fields([key| rest], values, acc, opt) do
-        field_value = values[key]
-
-        
-
-        if !empty?(field_value) && @field_required?[key] == true do
-            iterate_fields(rest, values, [field_value| acc], opt)
+    
+    def update_entry(acc, []), do: acc
+    def update_entry(acc, [{key, value}| rest]) do
+        # Append new entry if key not already added to acc
+        if key not in @field_keys do
+            update_entry([value| acc], rest)    
         else
-            # Field is required, but no value was passed
-            {:error, "There was no value passed for field: #{key}"}    
+            update_entry(acc, rest)
         end
+    end
+
+
+    @doc """
+        Processes a single field.
+
+        May return multiple values, which get append to prev and filled in at the end if not used.
+    """
+    def process_field(:date = key, value, _) do
+        {year, month, day} = Date.utc_today |> Date.to_erl
+        
+        value
+        |> filled?(key, default: "#{day}-#{month}-#{year}")
+        |> cast(key)
+    end
+
+    def process_field(:start = key, value, prev) do
+
+        t_result = value
+        |> filled?(key)
+        |> cast(:time)
+
+        IO.inspect(t_result)
+
+        # Calculate duration if end-time given, else append to prev
+        has_end? = not is_nil(prev[:end])
+        case t_result do
+            {:ok, value} when has_end? -> 
+                # End time already set, calculate the time
+                {end_time, prev_rest} = Keyword.pop(prev, :end)
+                duration = Time.diff(end_time, value) |> format_time_diff
+                new_prev = prev_rest |> Keyword.put(:duration, duration) |> Keyword.put(:start, value)
+                {:ok, new_prev}
+            {:ok, value} ->
+                # End time not set, add :start to prev. Maybe :end will apear later
+                new_prev = prev |> Keyword.put(:start, value)
+                {:ok, new_prev}
+            {:error, _} -> 
+                t_result
+        end   
+    end
+
+    def process_field(:end = key, value, prev) do
+        # TODO: duration calculation needs to be fixed. Duration over a day will result in error if end_time < start_time !!
+        {hour, minute, _sec} = Time.utc_now |> Time.to_erl 
+        
+        t_result = value
+        |> filled?(key, default: "#{hour}:#{minute}")
+        |> cast(:time)
+
+        # Calculate duration if start-time given, else append end-time to prev
+        has_start? = not is_nil(prev[:start])
+        case t_result do
+            {:ok, value} when has_start? ->
+                {start_time, prev_rest} = Keyword.pop(prev, :start)
+                duration = Time.diff(value, start_time) |> format_time_diff
+                new_prev = prev_rest |> Keyword.put(:duration, duration) |> Keyword.put(:end, value)
+                {:ok, new_prev}
+            {:ok, value} ->
+                new_prev = prev |> Keyword.put(:end, value)
+                {:ok, new_prev}
+            {:error, _} -> t_result
+        end
+    
+    end
+
+    def process_field(key, value, _) do
+        Logger.debug("Process field")
+        value
+        |> filled?(key)
     end
 
 
@@ -80,57 +153,182 @@ defmodule Exp.Format.Types do
 
 
     @doc """
-        Processes a field value. Check required, generate default if empty or return error.
+       Checks if field is required and filled.
 
-        Returns tuple {:ok, value} | {:error, status}
+       Parameters:
+       - value: the field value
+       - key: the field name
+       - opts: further options to set
+         [
+             default: value to set if field not required and no value was given (defaults to `nil`)
+         ]    
+
+       returns {:ok, value} | {:error, msg}
     """
-    def process_value(value, key, type \\ :string, opts \\ [])
-    
-    def process_value(value, key, :string, opts) do
-
+    def filled?(value, key, opts \\ [default: nil]) do
         if @field_required?[key] do
-
-            if !empty?(value) do
-                # Field required and not empty
-
+            if empty?(value) do
+                {:error, "There was no value passed for required field: \"#{key}\"."} 
             else
-                {:error, "Required field #{key} is empty."}
-            end
-
-        else
-            # Default value for fields
-            default = if empty?(opts[:default]), do: opts[:default], else: ""
-
-            # Function to change format of field
-            transform = if !is_nil(opts[:format]) && is_function(opts[:format]), do: opts[:format], else: &(&1)
-        
-            case !empty?(value) do
                 {:ok, value}
+            end
+        else 
+            if empty?(value) do
+                {:ok, opts[:default]}
             else
-                {:ok, default}
-            end 
-
+                {:ok, value}
+            end
         end
-
     end
- 
-
 
 
     @doc """
-        Check if the supplied value has the right format as specified
+        Cast a value to a specific type. Typecheck in the process.
+
+        return {:ok, casted_value} | {:error, msg}
     """
-    def check(value, type \\ :string)
-    def check(value, :integer) do
-        
-    end
-    
-    def check(value, :date) do
-        
+    def cast({:error, msg} = result, _), do: result
+    def cast({:ok, value}, type) do
+
+        if valid?(value, type) do
+            case type do
+                :boolean -> String.to_atom(value)
+                :float -> String.to_float(value)
+                :integer -> String.to_integer(value)
+                :date -> string_to_date(value)
+                :time -> string_to_time(value)
+                _ -> {:error, "Unknown type \"#{type}\" passed to function &cast/2. Valid values are :boolean, :float, :integer, :date, :time."}
+            end
+        else
+            {:error, "Value can't be casted to #{type}"}
+        end
     end
 
-    def check(value, :string) do
-        
+
+    @doc """
+        Checks if the give value is valid depending the given type.
+
+        return true | false
+    """
+    def valid?(value, type \\ :string)
+    def valid?(value, :string), do: is_binary(value)
+    def valid?(value, :boolean) when is_binary(value), do: try_cast(fn -> value |> String.to_atom |> is_boolean end)
+    def valid?(value, :boolean), do: is_boolean(value)
+    def valid?(value, :float) when is_binary(value), do: try_cast(fn -> value |> String.to_float |> is_float end)
+    def valid?(value, :float), do: is_float(value)
+    def valid?(value, :integer) when is_binary(value), do: try_cast(fn -> value |> String.to_integer |> is_integer end)
+    def valid?(value, :integer), do: is_integer(value)
+    def valid?(value, :date) when is_binary(value) do
+        matches_format = value |> String.match?(~r/[0-9]{1,2}\-[0-9]{1,2}\-[0-9]{4}/)
+        if matches_format do
+            # Check if values match
+            {day, month, year} = value |> String.split("-") |> Enum.map(&String.to_integer/1) |> List.to_tuple
+
+            cond do
+                day == 0 || month == 0 || year == 0 -> false
+                month == 2 && ((rem(year, 100) == 0 && rem(year, 400) != 0 && day <= 29) || day <= 28)  -> true
+                month <= 7 && ((rem(month, 2) == 0 && day <= 30) ||  (rem(month, 2) != 0 && day <= 31)) -> true 
+                month > 7 && ((rem(month, 2) == 0 && day <= 31) || (rem(month, 2) != 0 && day <= 30)) -> true
+                true -> false # Alle above checks passed but nothing matched
+            end
+        else
+            false
+        end
     end
+    def valid?(_, :date), do: false
+    def valid?(value, :time) when is_binary(value) do
+        matches_format = value |> String.match?(~r/[0-9]{1,2}\:[0-9]{1,2}/)
+        if matches_format do
+            {hours, minutes} = value |> String.split(":") |> Enum.map(&String.to_integer/1) |> List.to_tuple
+
+            cond do
+                hours > 24 || minutes > 59 -> false 
+                true -> true
+            end
+        else
+            false
+        end
+    end
+    def valid?(_, :time), do: false
+    
+    def valid?(_, _), do: raise ArgumentError, message: "Unknown parameter value type: [:string | :boolean | :float | :integer | :date | :time ]"
+
+    
+
+
+
+    # Tries to executed the parsed pipe (which represents a cast from string to a specific type. See in &valid?/2)
+    defp try_cast(cast_pipe) do
+        try do
+            cast_pipe.()
+        rescue
+            ArgumentError -> false
+        end
+    end
+
+
+
+
+    # ################################
+    #       FORMAT Functions
+    # ################################
+
+
+    @doc """
+        Takes the a time difference in seconds and returns a string of form `hh:mm:ss` representing a duration
+
+        Parameters:
+        - secs: seconds as integer
+    """
+    def format_time_diff(secs) do
+        # REVIEW: Better way to encode/decode duration? maybe a sigil?
+        sec = rem(secs, 60)
+        minutes = if secs >= 60, do: div(secs, 60), else: 0
+        hours = if minutes > 60, do: div(minutes, 60), else: 0
+        real_minutes = minutes - (hours*60)
+        "#{hours}:#{real_minutes}:#{sec}"
+    end
+
+    @doc """
+        Parses a String of form \"dd-MM-YYYY\" into a date
+
+        return {:ok, date} | {:error, msg}
+    """
+    def string_to_date(date_string) do
+        try do
+            {day, month, year} = date_string |> String.split("-") |> Enum.map(&String.to_integer/1) |> List.to_tuple
+            Date.new(year, month, day)
+        rescue
+            MatchError -> {:error, "Failed to parse string into date format."}
+        end
+    end
+
+    def date_to_string(date) do
+        {year, month, day} = Date.to_erl(date)
+        "#{day}-#{month}-#{year}"
+    end
+
+    @doc """
+        Parses a string of format \"hh:mm\" into a time.
+
+        return {:ok, time} | {:error, msg}
+    """
+    def string_to_time(time_string) do
+        try do
+            {hour, minute} = time_string |> String.split(":") |> Enum.map(&String.to_integer/1) |> List.to_tuple()
+            Time.new(hour, minute, 0)
+        rescue  
+            MatchError -> {:error, "Failed to parse string into time format."}
+        end
+    end
+
+    @doc """
+        Parses given time into a string.
+    """
+    def time_to_string(time) do
+        {hour, minute, sec} = Time.to_erl(time)
+        "#{hour}:#{minute}"        
+    end
+
 
 end

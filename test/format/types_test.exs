@@ -6,9 +6,20 @@ defmodule TestExpFormatTypes do
     
     describe "test/build-entries" do
 
-         test "valid" do
+        setup do
+            
+            [
+                valid: 
+            ]
+        end
+
+        test "valid" do
+            assert Types.build_entry({[title: "Value", start: "12:12"], [] ,[]}) == false
+        end
+
+        test "invalid/missing-required-fields" do
             # Should throw error because not all required fields are filled
-            assert Types.build_entry({[title: "Value"], [], []}) == ["01.09.2019", "Value", ]
+            assert {:error, _} = Types.build_entry({[title: "Value"], [], []})
         end
 
         test "rest/invalid-params" do
@@ -20,7 +31,6 @@ defmodule TestExpFormatTypes do
         end
 
     end
-
 
     describe "test/utilities/empty?" do
         
@@ -62,7 +72,89 @@ defmodule TestExpFormatTypes do
 
     end
 
+    describe "test/utilities/valid?" do
+        
+        test "true/float" do
+            assert Types.valid?(2.2, :float) == true
+        end 
+
+        test "false/float/try-cast-break" do
+            assert Types.valid?("break?", :float) == false
+        end
+
+        test "true/float-string" do
+            assert Types.valid?("2.2", :float) == true
+        end
+        
+        test "false/float" do
+            assert Types.valid?(1, :float) == false
+        end
+
+        test "true/string" do
+            assert Types.valid?("he") == true
+        end 
+
+        test "false/string" do
+            assert Types.valid?('15') == false
+        end
+
+        test "true/integer" do
+            assert Types.valid?(12, :integer) == true
+        end
+
+        test "false/integer/try-cast-break" do
+            assert Types.valid?("break?", :integer) == false
+        end
+
+        test "false/integer" do
+            assert Types.valid?(12.5, :integer) == false
+        end
+
+        test "true/date" do
+            assert Types.valid?("12-12-2019", :date) == true
+        end
+
+        test "false/date/wrong-dividers" do
+            assert Types.valid?("12.12.2019", :date) == false
+        end
+
+        test "false/date/invalid-format/12.2019" do
+            assert Types.valid?("12.2019", :date) == false
+        end
+
+        test "false/date/invalid-format/2019" do
+            assert Types.valid?("2019", :date) == false
+        end
+
+        test "false/date/invalid-format/empty" do
+            assert Types.valid?("", :date) == false
+        end
+
+        test "false/date/is_time" do
+            assert Types.valid?("h", :date) == false
+        end
+
+        test "false/date/invalid_type" do
+            assert Types.valid?(true, :date) == false
+        end
+
+        test "true/time/valid" do
+            assert Types.valid?("12:15", :time) == true
+        end
+
+        test "false/time/invalid" do
+            assert Types.valid?("12", :time) == false
+        end
+
+        test "false/time/hey" do
+            assert Types.valid?("hey", :time) == false
+        end
+
+        test "false/time/invalid-type" do
+            assert Types.valid?(true, :time) == false
+        end
+
+    end
 
 
-
-end
+end 
