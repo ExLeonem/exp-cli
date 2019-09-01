@@ -1,6 +1,6 @@
 defmodule Exp.Action.State do
   use Agent
-  alias Exp.Format.Types
+  alias Exp.Format.Config
   require Logger
   @moduledoc """
     Handles application state read/writes of config and entries.
@@ -12,7 +12,7 @@ defmodule Exp.Action.State do
   @entry_table :entry_store
 
   # Load default values for configuration into keyword list (config.exs)
-  @default_config Types.extract(:defaults)
+  @default_config Config.extract(:defaults)
   @config_keys Keyword.keys(@default_config)
 
   @doc """

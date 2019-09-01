@@ -1,6 +1,6 @@
 defmodule Exp.Args.Record do
   alias Exp.Action.Record
-  alias Exp.Format.Types
+  alias Exp.Format.Config
   require Logger
 
   @moduledoc """
@@ -9,18 +9,19 @@ defmodule Exp.Args.Record do
 
   """
 
-  @add_types [strict: Types.extract(:schema, :fields), aliases: Types.extract(:alias, :fields)]
+  @add_types [strict: Config.extract(:schema, :field), aliases: Config.extract(:alias, :field)]
   @doc """
 
   """
   def parse(:add, argv) do
     argv
     |> OptionParser.parse(@add_types)
-    |> Record.add()
+    |> Config.build_entry
+    |> Record.add
   end
 
 
-  @start_types Types.extract(:start, :command)
+  @start_types Config.extract(:start, :command)
   @doc """
 
   """

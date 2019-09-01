@@ -75,13 +75,11 @@ defmodule Exp.Action.Record do
   end
 
 
-
-  
-
-  def add({_, rest, invalid}) when rest != [] && invalid != [], do: {:error, "Invalid arguments"}
-  def add({valid, _, _}) do
-      
+  def add({:ok, entry}) do
+      State.write_entry(entry)
+      {:ok, "\Entry successfully written"}
   end
+  def add(entry), do: entry
 
 
 

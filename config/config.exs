@@ -32,9 +32,11 @@ use Mix.Config
 # Configuration keys and type
 
 
+
+
 # Params: default application configuration, structure of single parameter [type, default_value, is_modifyable?]
 # Commands: Each represents an top-level option and the flags that may be set for it
-# Fields:  used on saving an entry the inner defnition: [type_of_field, is_required?, alias]
+# Fields:  used on saving an entry the inner defnition: [type_of_field, is_required?, alias]. The :none atom specifies a field without alias.
 config :exp,
     params: [
         block_length: [:string, "1:30", true],
@@ -53,10 +55,10 @@ config :exp,
     ],
     fields: [
         date: [:string, false, :d],
-        end: [:string, false, :e],
-        start: [:string, true, :s],
+        start: [:string, true, :s], # ATTENTION: Start field must be followed by end field. 
+        end: [:string, false, :e], 
         title: [:string, true, :t],
-        tag: [:string, false, :none],
+        tag: [:string, false, :none]
     ]
 
     

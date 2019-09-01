@@ -1,7 +1,7 @@
 defmodule Exp.Args.State do
 
   alias Exp.Action.State
-  alias Exp.Format.Types
+  alias Exp.Format.Config
 
   @moduledoc """
 
@@ -78,7 +78,7 @@ defmodule Exp.Args.State do
     Getting configuration parameters through the cli.
   """
   def parse(:get, argv) do
-     strict = Types.extract(:schema) |> Types.set_type(:boolean)
+     strict = Config.extract(:schema) |> Config.set_type(:boolean)
 
       result = argv
       |> OptionParser.parse(strict: strict)

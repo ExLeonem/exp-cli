@@ -1,106 +1,136 @@
 defmodule Exp.Format.Types do
-    require Logger
+    alias Exp.Format.Config    
     @moduledoc """
-        Formatting different datatypes like time etc.
+        Utilities to format and generate types
     """
+
+    # All keys are in field_required, because same base and no exclusion of keys
+    @field_type Config.extract(:schema, :field)
+    @field_required? Config.extract(:required, :field)
+    @field_keys Config.extract(:keys, :field)
 
 
     @doc """
-        Sets the switch types of a switch definition to the same value.
+        Build entries dynamically.
+
+        Returns tuple representing the entry to be written into the store.
     """
-    def set_type(flags, type \\ :boolean)
-    def set_type(flags, type) when type in [:boolean, :count, :integer, :float, :string] do
-        flags
-        |> Enum.map(fn {key, _} -> {key, type} end)
+    def build_entry({_, rest, invalid}) when rest != [] or invalid != [], do: {:error, "Invalid parameters passed."}
+    def build_entry({values, _, _}) do
+        IO.inspect(values)
+        iterate_fields(@field_keys, values)
     end
-    def set_type(_, _), do: raise ArgumentError, message: "Only list allowed for flags in set_list_types()."
-
-
-
-    # @doc """
-    #     Generates add options from field defintions
-
-    #     ## Parameters
-    #     - exclude: List of atoms, representing fieldnames to exclude
-       
-    # """
-    # def gen_field_schema(exclude \\ []) do
-    #     fields = Application.get_env(:exp, :fields)
-        
-    # end
-
-    # Actions on config.exs
 
     @doc """
-        Uses the config.exs to extract specific sections out of it.
-        
-        ## Parameter
-        - action: The type of action to execute, as an atom
-        - config_type: [:params, :command, :fields] 
-        - options: Keywordlist of options, depending on config_type
+        Iterate over all field keys and build an entry as well as setting default values.
 
+        Parameter:
+        - fields: List of field keys as atoms `[:date, :title, :start, ...]` is getting read from config.exs
+        - values: The passed values via CLI, as keyword list `[date: "22.10.2019", ...]`
+        - acc: Accumulator adding up the values
+        - next: Follow up function to use on next entry `&fun/3` must take same parameters as `&iterate_fields/3`
 
-        Returns the prepared config defintions
+        Returns list of all values that can be further processed `["22.10.2019", "Some title", ...]` for example joined to :csv format etc.
     """
-    def extract(action, config_type \\ :param, options \\ [])
-    # Extracts default application configuration parameter
-    def extract(action, :param, _) do
+    
+    def iterate_fields(fields, values, acc \\ [], opts \\ [])
+    def iterate_fields([], _, acc, _), do: acc # Return the build entry value list
+    def iterate_fields([:date = key| rest], values, acc, opts) do
+        # field_value = values[key]
+        
+        result = process_field(values[key], :date)
 
-        transform = case action do
-            :schema -> fn {key, [type, _, _]} -> {key, type} end
-            :defaults -> fn {key, [_, default, _]} -> {key, default} end
-            :write -> fn {key, [_, _, write?]} -> {key, write?} end
-            :keys -> fn {key, _} -> key end 
-            _ -> fn params -> params end
+        case result do
+            {:ok, value} -> iterate_fields(rest, values, [value| values], opts)
+            {:error, _} -> result
         end
 
-        Application.get_env(:exp, :params, nil) |> Enum.map(transform)
+        # next(rest, values, acc, next)    
     end
 
-    def extract(action, :command, _) do
-        command_params = Application.get_env(:exp, :commands, nil)
-        if !is_nil(command_params) && Keyword.has_key?(command_params, action) do
-            command_params[action]
+    # Catch end on next iteration and add another field
+    def iterate_fields([:start = key| rest], values, acc, _opt) do
+        
+    end
+
+    # def iterate_fields([:end = key| rest], values, acc, next)
+
+    # No specific processing for given key, but key is required. Therefore return error if empty
+    def iterate_fields([key| rest], values, acc, opt) do
+        field_value = values[key]
+
+        
+
+        if !empty?(field_value) && @field_required?[key] == true do
+            iterate_fields(rest, values, [field_value| acc], opt)
         else
-            []
+            # Field is required, but no value was passed
+            {:error, "There was no value passed for field: #{key}"}    
         end
     end
 
-    def extract(action, :fields, options) do
 
-        if !is_list(options) do
-            raise ArgumentError, message: "Parameter options must be a Keyword list."
-        end
+    @doc """
+        Checks if given field value is empty.
 
-        tmp_exclude = if options[:exclude] != nil, do: options[:exclude], else: [] # fields to exclude
-        to_exclude = tmp_exclude ++ [:none]
+        return true | false depending if field value is empty
+    """
+    def empty?(value) when value == "" or is_nil(value) or (is_list(value) and value == []) or (is_map(value) and value == %{}) , do: true
+    def empty?(_), do: false
 
-        # Transform field definitions from config.exs
-        transform = case action do
-            :schema -> fn {name, [type, _, _]} -> {name, type} end
-            :required -> fn {name, [_, required?, _]} -> {name, required?} end
-            :alias -> fn {name, [_, _, alias]} -> {alias, name} end
-            _ -> raise ArgumentError, message: "Unknown action passed."
-        end
+
+    @doc """
+        Processes a field value. Check required, generate default if empty or return error.
+
+        Returns tuple {:ok, value} | {:error, status}
+    """
+    def process_value(value, key, type \\ :string, opts \\ [])
+    
+    def process_value(value, key, :string, opts) do
+
+        if @field_required?[key] do
+
+            if !empty?(value) do
+                # Field required and not empty
+
+            else
+                {:error, "Required field #{key} is empty."}
+            end
+
+        else
+            # Default value for fields
+            default = if empty?(opts[:default]), do: opts[:default], else: ""
+
+            # Function to change format of field
+            transform = if !is_nil(opts[:format]) && is_function(opts[:format]), do: opts[:format], else: &(&1)
         
-        if !is_list(to_exclude) do
-            raise ArgumentError, message: "Exclude option is not a list of atoms."
+            case !empty?(value) do
+                {:ok, value}
+            else
+                {:ok, default}
+            end 
+
         end
 
-        # Function to filter fields
-        exclude =  if !Enum.empty?(to_exclude), do: fn {name, _} -> name not in to_exclude end, else: &(&1) 
+    end
+ 
 
-        filtered = Application.get_env(:exp, :fields)
-        |> Enum.map(transform)
-        |> Enum.filter(exclude)
 
+
+    @doc """
+        Check if the supplied value has the right format as specified
+    """
+    def check(value, type \\ :string)
+    def check(value, :integer) do
+        
+    end
+    
+    def check(value, :date) do
+        
     end
 
-
-    # -----------------------------
-    # Generators
-    # -----------------------------
-
-
+    def check(value, :string) do
+        
+    end
 
 end
