@@ -3,23 +3,47 @@ defmodule TestExpFormatTypes do
     alias Exp.Format.Types
     doctest Types
 
+    def parser_mock(parsed, rest \\ [], errors \\ []) do
+        {parsed, rest, errors}
+    end
+
     
     describe "test/build-entries" do
 
         setup do
-            
-            [
-                valid: 
-            ]
+            [ valid: [title: "Value", start: "12:12"] ]
         end
 
-        test "valid" do
-            assert Types.build_entry({[title: "Value", start: "12:12"], [] ,[]}) == false
+
+        test "valid/default", context do
+            assert {:ok, _} = Types.build_entry(parser_mock(context[:valid]))
+        end
+
+        test "valid/set-date", context do
+            params = context[:valid] |> Keyword.put(:date, "22-10-2019") |> parser_mock
+            assert {:ok, _} = Types.build_entry(params)
+        end
+
+        test "invalid/set-date", context do
+            params = context[:valid] |> Keyword.put(:date, "22.10.2019") |> parser_mock
+            assert {:error, _} = Types.build_entry(params)
+        end
+
+        test "invalid/unknown-parameters", context do
+            assert {:error, _} = Types.build_entry({context[:valid], [some: "other"], []})
+        end
+
+        test "invalid/parse-errors", context do
+            assert {:error, _} = Types.build_entry({context[:valid], [], [some: "value"]})
         end
 
         test "invalid/missing-required-fields" do
             # Should throw error because not all required fields are filled
             assert {:error, _} = Types.build_entry({[title: "Value"], [], []})
+        end
+
+        test "invalid/all-empty" do
+            assert {:error, _} = Types.build_entry({[],[],[]})
         end
 
         test "rest/invalid-params" do

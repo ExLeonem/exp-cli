@@ -49,6 +49,7 @@ defmodule TestExpActionState do
   end
 
   test "open-dets-tables/entry_store/valid" do
+    # Error here
     assert :dets.is_dets_file(State.get_table(:entry_store))
   end
 

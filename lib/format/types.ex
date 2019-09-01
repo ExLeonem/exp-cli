@@ -18,7 +18,6 @@ defmodule Exp.Format.Types do
     """
     def build_entry({_, rest, invalid}) when rest != [] or invalid != [], do: {:error, "Invalid parameters passed."}
     def build_entry({values, _, _}) do
-        IO.puts("\n")
         iterate_fields(@field_keys, values)
     end
 
@@ -52,10 +51,8 @@ defmodule Exp.Format.Types do
                 {value, new_prev} = Keyword.pop(result, key)
                 iterate_fields(rest, values, [value| acc], new_prev)
             {:ok, value} -> 
-                Logger.debug("iterate")
                 iterate_fields(rest, values, [value | acc], prev)
             {:error, _} -> 
-                Logger.debug("Got an error")
                 t_result
         end
 
@@ -91,8 +88,6 @@ defmodule Exp.Format.Types do
         t_result = value
         |> filled?(key)
         |> cast(:time)
-
-        IO.inspect(t_result)
 
         # Calculate duration if end-time given, else append to prev
         has_end? = not is_nil(prev[:end])
@@ -136,8 +131,11 @@ defmodule Exp.Format.Types do
     
     end
 
+    # def process_field(:tag, value, _) do
+        
+    # end
+
     def process_field(key, value, _) do
-        Logger.debug("Process field")
         value
         |> filled?(key)
     end

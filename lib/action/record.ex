@@ -76,7 +76,11 @@ defmodule Exp.Action.Record do
 
 
   def add({:ok, entry}) do
-      State.write_entry(entry)
+
+      entry
+      |> List.to_tuple
+      |> State.write_entry
+
       {:ok, "\Entry successfully written"}
   end
   def add(entry), do: entry
