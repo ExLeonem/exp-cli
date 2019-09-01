@@ -17,12 +17,14 @@ defmodule TestExpActionRecord do
 
   test "start/valid/no_timer/no_remind" do
     State.start_link()
+    State.init_config()
     assert  {:ok, _} = Record.start({[],[],[]})
     teardown()
   end
 
   test "stop/invalid/not-recording" do
     State.start_link()
+    State.init_config()
     assert {:error, _} = Record.stop(FakeIO)
     teardown()
   end

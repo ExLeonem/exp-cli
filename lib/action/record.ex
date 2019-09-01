@@ -74,6 +74,21 @@ defmodule Exp.Action.Record do
     end
   end
 
+
+
+  
+
+  def add({_, rest, invalid}) when rest != [] && invalid != [], do: {:error, "Invalid arguments"}
+  def add({valid, _, _}) do
+      
+  end
+
+
+
+
+  # -----------------------------
+  # Utility functions
+  # -----------------------------
   
   def calculate_time(start_time, end_time) do
     seconds = Time.diff(end_time, start_time)

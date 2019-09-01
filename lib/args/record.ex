@@ -1,5 +1,6 @@
 defmodule Exp.Args.Record do
   alias Exp.Action.Record
+  alias Exp.Format.Types
   require Logger
 
   @moduledoc """
@@ -8,23 +9,30 @@ defmodule Exp.Args.Record do
 
   """
 
-  @start_options [
-    aliases: [
-      timer: :t,
-      remind: :r
-    ],
-    strict: [
-      timer: :string,
-      remind: :string
-    ]
-  ]
+  @add_types [strict: Types.extract(:schema, :fields), aliases: Types.extract(:alias, :fields)]
+  @doc """
 
+  """
+  def parse(:add, argv) do
+    argv
+    |> OptionParser.parse(@add_types)
+    |> Record.add()
+  end
+
+
+  @start_types Types.extract(:start, :command)
+  @doc """
+
+  """
   def parse(:start, argv) do
     argv
-    |> OptionParser.parse(@start_options)
+    |> OptionParser.parse(@start_types)
     |> Record.start
   end
 
+  @doc """
+
+  """
   def parse(:stop, _), do: Record.stop
   def parse(_, _), do: {:error, "", []}
 

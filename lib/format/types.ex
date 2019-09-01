@@ -17,12 +17,34 @@ defmodule Exp.Format.Types do
 
 
 
+    # @doc """
+    #     Generates add options from field defintions
+
+    #     ## Parameters
+    #     - exclude: List of atoms, representing fieldnames to exclude
+       
+    # """
+    # def gen_field_schema(exclude \\ []) do
+    #     fields = Application.get_env(:exp, :fields)
+        
+    # end
+
     # Actions on config.exs
 
     @doc """
-        Returns either a schema for the options parser, or a keyword list of config parameter and default value.
+        Uses the config.exs to extract specific sections out of it.
+        
+        ## Parameter
+        - action: The type of action to execute, as an atom
+        - config_type: [:params, :command, :fields] 
+        - options: Keywordlist of options, depending on config_type
+
+
+        Returns the prepared config defintions
     """
-    def extract(action) do
+    def extract(action, config_type \\ :param, options \\ [])
+    # Extracts default application configuration parameter
+    def extract(action, :param, _) do
 
         transform = case action do
             :schema -> fn {key, [type, _, _]} -> {key, type} end
@@ -32,7 +54,53 @@ defmodule Exp.Format.Types do
             _ -> fn params -> params end
         end
 
-        Application.get_env(:exp, :params, nil)|> Enum.map(transform)
+        Application.get_env(:exp, :params, nil) |> Enum.map(transform)
     end
+
+    def extract(action, :command, _) do
+        command_params = Application.get_env(:exp, :commands, nil)
+        if !is_nil(command_params) && Keyword.has_key?(command_params, action) do
+            command_params[action]
+        else
+            []
+        end
+    end
+
+    def extract(action, :fields, options) do
+
+        if !is_list(options) do
+            raise ArgumentError, message: "Parameter options must be a Keyword list."
+        end
+
+        tmp_exclude = if options[:exclude] != nil, do: options[:exclude], else: [] # fields to exclude
+        to_exclude = tmp_exclude ++ [:none]
+
+        # Transform field definitions from config.exs
+        transform = case action do
+            :schema -> fn {name, [type, _, _]} -> {name, type} end
+            :required -> fn {name, [_, required?, _]} -> {name, required?} end
+            :alias -> fn {name, [_, _, alias]} -> {alias, name} end
+            _ -> raise ArgumentError, message: "Unknown action passed."
+        end
+        
+        if !is_list(to_exclude) do
+            raise ArgumentError, message: "Exclude option is not a list of atoms."
+        end
+
+        # Function to filter fields
+        exclude =  if !Enum.empty?(to_exclude), do: fn {name, _} -> name not in to_exclude end, else: &(&1) 
+
+        filtered = Application.get_env(:exp, :fields)
+        |> Enum.map(transform)
+        |> Enum.filter(exclude)
+
+    end
+
+
+    # -----------------------------
+    # Generators
+    # -----------------------------
+
+
 
 end
