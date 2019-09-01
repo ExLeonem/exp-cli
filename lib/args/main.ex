@@ -23,35 +23,16 @@ defmodule Exp.Args.Main do
 
 
     Option:
-
-      start - start recording
-      stop - stop recording
-      set - cli configuration
-      get - get current cli config information
-      show - query inserted information
-      write - write currently persisted data from dets to file system
-      help - print usage information
+      
+      add     - adding a new entry
+      start   - start recording
+      stop    - stop recording
+      set     - cli configuration
+      get     - get current cli config information
+      show    - query inserted information
+      write   - write currently persisted data from dets to file system
+      help    - print usage information
     """
-
-  @aliases [
-    cancel: :c,
-    show: :s,
-    tag: :t,
-    help: :h
-  ]
-  
-  # To implement
-  @strict [
-    start: :boolean,
-    stop: :boolean,
-    abort: :boolean,
-    set: :boolean,
-    show: :boolean,
-    tag: :boolean,
-    help: :boolean,
-    flush: :boolean, # clear dets store
-    save: :boolean # write data to db or file system
-  ]
 
   def parse(argv) do
     argv
@@ -74,6 +55,7 @@ defmodule Exp.Args.Main do
     Process the parsed parameters first match triggers specialized processing
   """
   def dispatch([], _), do: get_help() # either no parameters passed or any valid found
+  def dispatch(:add, argv), do: Record.parse(:add, argv)
   def dispatch(:start, argv), do: Record.parse(:start, argv)
   def dispatch(:stop, argv), do: Record.parse(:stop, argv)
   def dispatch(:set, argv), do: State.parse(:set, argv)

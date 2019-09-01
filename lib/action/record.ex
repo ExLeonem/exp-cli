@@ -74,6 +74,23 @@ defmodule Exp.Action.Record do
     end
   end
 
+
+  def add({:ok, entry}) do
+
+      entry
+      |> List.to_tuple
+      |> State.write_entry
+
+      {:ok, "\Entry successfully written"}
+  end
+  def add(entry), do: entry
+
+
+
+
+  # -----------------------------
+  # Utility functions
+  # -----------------------------
   
   def calculate_time(start_time, end_time) do
     seconds = Time.diff(end_time, start_time)

@@ -1,74 +1,184 @@
-defmodule ExpTestFormatTypes do
+defmodule TestExpFormatTypes do
     use ExUnit.Case
     alias Exp.Format.Types
-    doctest Exp.Format.Types
+    doctest Types
 
-    
-
-    describe "test/config-operations" do
-        
-        test "get-default-values" do
-            assert Types.extract(:defaults) |> Keyword.get(:output_format) == :csv  
-        end
-
-        test "extract-writes?" do
-            assert Types.extract(:write) |> Keyword.get(:block_length) == true
-        end
-
-        test "extract-keys" do
-            assert :time_started in Types.extract(:keys)
-        end
-
-        test "extract-schema" do
-            assert Types.extract(:schema) |> Keyword.get(:last_entry) == :string
-        end
-
-        test "extract-invalid-action" do
-            assert Types.extract(:do_something) == Application.get_env(:exp, :params, nil)
-        end
-
+    def parser_mock(parsed, rest \\ [], errors \\ []) do
+        {parsed, rest, errors}
     end
 
-
-
-    describe "test/set-types" do
     
+    describe "test/build-entries" do
+
         setup do
-            schema = Types.extract(:schema)
-            [schema: schema]
+            [ valid: [title: "Value", start: "12:12"] ]
+        end
+
+
+        test "valid/default", context do
+            assert {:ok, _} = Types.build_entry(parser_mock(context[:valid]))
+        end
+
+        test "valid/set-date", context do
+            params = context[:valid] |> Keyword.put(:date, "22-10-2019") |> parser_mock
+            assert {:ok, _} = Types.build_entry(params)
+        end
+
+        test "invalid/set-date", context do
+            params = context[:valid] |> Keyword.put(:date, "22.10.2019") |> parser_mock
+            assert {:error, _} = Types.build_entry(params)
+        end
+
+        test "invalid/unknown-parameters", context do
+            assert {:error, _} = Types.build_entry({context[:valid], [some: "other"], []})
+        end
+
+        test "invalid/parse-errors", context do
+            assert {:error, _} = Types.build_entry({context[:valid], [], [some: "value"]})
+        end
+
+        test "invalid/missing-required-fields" do
+            # Should throw error because not all required fields are filled
+            assert {:error, _} = Types.build_entry({[title: "Value"], [], []})
+        end
+
+        test "invalid/all-empty" do
+            assert {:error, _} = Types.build_entry({[],[],[]})
+        end
+
+        test "rest/invalid-params" do
+            assert {:error, _} = Types.build_entry({[], [some: "value"], []})
+        end
+
+        test "invalid/params" do
+            assert {:error, _} = Types.build_entry({[], [], [error: "wtf"]})
+        end
+
+    end
+
+    describe "test/utilities/empty?" do
+        
+        test "true/empty_string" do
+            assert Types.empty?("") == true
+        end 
+
+        test "true/nil" do
+            assert Types.empty?(nil) == true
+        end
+
+        test "false/numeric" do
+            assert Types.empty?(234) == false
+        end
+
+        test "false/string" do
+            assert Types.empty?("something") == false
+        end
+
+        test "false/boolean" do
+            assert Types.empty?(false) == false
+        end
+
+        test "true/list" do
+            assert Types.empty?([]) == true
+        end
+
+        test "false/list" do
+            assert Types.empty?([1, 2]) == false
+        end
+
+        test "true/map" do
+            assert Types.empty?(%{}) == true
+        end
+
+        test "false/map" do
+            assert Types.empty?(%{"val" => 10}) == false
+        end
+
+    end
+
+    describe "test/utilities/valid?" do
+        
+        test "true/float" do
+            assert Types.valid?(2.2, :float) == true
+        end 
+
+        test "false/float/try-cast-break" do
+            assert Types.valid?("break?", :float) == false
+        end
+
+        test "true/float-string" do
+            assert Types.valid?("2.2", :float) == true
         end
         
-        test "set/default-boolean", context do
-            new_schema = Types.set_type(context[:schema])
-            assert new_schema |> Keyword.get(:output_format) == :boolean
+        test "false/float" do
+            assert Types.valid?(1, :float) == false
         end
 
-        test "set/string", context do
-            new_schema = Types.set_type(context[:schema], :string)
-            assert new_schema |> Keyword.get(:is_recording) == :string
+        test "true/string" do
+            assert Types.valid?("he") == true
+        end 
+
+        test "false/string" do
+            assert Types.valid?('15') == false
         end
 
-        test "set/integer", context do
-            new_schema = Types.set_type(context[:schema], :integer)
-            assert new_schema |> Keyword.get(:last_entry)  == :integer
+        test "true/integer" do
+            assert Types.valid?(12, :integer) == true
         end
 
-        test "set/type", context do
-            new_schema = Types.set_type(context[:schema], :float)
-            assert new_schema |> Keyword.get(:version) == :float
+        test "false/integer/try-cast-break" do
+            assert Types.valid?("break?", :integer) == false
         end
 
-        test "set/unknown-type", context do
-            assert_raise ArgumentError, fn ->
-                new_schema = Types.set_type(context[:schema], :wtf)
-            end
+        test "false/integer" do
+            assert Types.valid?(12.5, :integer) == false
         end
 
+        test "true/date" do
+            assert Types.valid?("12-12-2019", :date) == true
+        end
 
+        test "false/date/wrong-dividers" do
+            assert Types.valid?("12.12.2019", :date) == false
+        end
 
+        test "false/date/invalid-format/12.2019" do
+            assert Types.valid?("12.2019", :date) == false
+        end
 
+        test "false/date/invalid-format/2019" do
+            assert Types.valid?("2019", :date) == false
+        end
+
+        test "false/date/invalid-format/empty" do
+            assert Types.valid?("", :date) == false
+        end
+
+        test "false/date/is_time" do
+            assert Types.valid?("h", :date) == false
+        end
+
+        test "false/date/invalid_type" do
+            assert Types.valid?(true, :date) == false
+        end
+
+        test "true/time/valid" do
+            assert Types.valid?("12:15", :time) == true
+        end
+
+        test "false/time/invalid" do
+            assert Types.valid?("12", :time) == false
+        end
+
+        test "false/time/hey" do
+            assert Types.valid?("hey", :time) == false
+        end
+
+        test "false/time/invalid-type" do
+            assert Types.valid?(true, :time) == false
+        end
 
     end
 
 
-end
+end 

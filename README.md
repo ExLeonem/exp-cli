@@ -9,7 +9,7 @@
 
 
 #  EXP CLI -Track you'r time
-A tool to track the time you spend working on a project or anythin else.
+A tool to track the time you spend working on a project or anything else.
 
 
 ## Table of Contents
@@ -54,9 +54,10 @@ be found at [https://hexdocs.pm/exp](https://hexdocs.pm/exp). -->
 
 ## Roadmap/Ideas
 
-- [ ] Native Application 
-- [ ] Collect additional Data
+- [ ] Native Application
+- [ ] Connect to 3rd party applications to collect additional data
   - [ ] Github Commits (time and message)
+  - [ ] Quire/Google Task etc.
 - [ ] Custom Entry fields
 - [ ] Statistics 
 - [x] Configuration
@@ -149,7 +150,7 @@ Flag              | Type      |   Description
 Contribution is very much appreciated. If you are interested to contribute just write me a Mail.
 If you have any ideas how to extend this thing. Just open an issue.
 
-#### Project Structure
+<!-- #### Project Structure -->
 
 
 

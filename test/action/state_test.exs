@@ -2,7 +2,7 @@ defmodule TestExpActionState do
   use ExUnit.Case
   require Logger
   alias Exp.Action.State
-  alias Exp.Format.Types
+  alias Exp.Format.Config
   doctest Exp.Action.State
 
   # test "create default directory/valid" do
@@ -12,7 +12,7 @@ defmodule TestExpActionState do
   @config_table :config_store
   @entry_table :entry_store
 
-  @default_config Types.extract(:defaults)
+  @default_config Config.extract(:defaults)
 
   setup do
     State.start_link()
@@ -49,6 +49,7 @@ defmodule TestExpActionState do
   end
 
   test "open-dets-tables/entry_store/valid" do
+    # Error here
     assert :dets.is_dets_file(State.get_table(:entry_store))
   end
 
