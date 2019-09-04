@@ -67,9 +67,9 @@ be found at [https://hexdocs.pm/exp](https://hexdocs.pm/exp). -->
   - [x] Complete List
   - [x] Last Entry
   - [ ] By filter
-- [ ] Saving entries through CLI
+- [x] Saving entries through CLI
   - [x] start/stop mechanic
-  - [ ] save instantly complete entry
+  - [x] save instantly complete entry
 - [ ] Reminder/Timer functionality 
 - [ ] DETS Flush
 - [ ] Write out DETS Data
@@ -100,12 +100,12 @@ Name            | Description                                                   
 ---             | ---                                                              | ---
 start           | Starts recording an entry (Sets time when recording started)     | &#9745;
 stop            | Stops the recording and writes entry to DETS                     | &#9745;
-[add](#Add)     | Writing an an entry directly into DETS                           | &#9744; <!--Unchecked-->
+[add](#Add)     | Writing an an entry directly into DETS                           | &#9745; 
 [show](#Show)   | Prints recorded entries.                                         | &#9745; <!--Checked-->
-[get](#Get)     | Get information on current configuration                         | &#9744;
-[set](#Set)     | Setting configuration attributes                                 | &#9744;
+[get](#Get)     | Get information on current configuration                         | &#9745;
+[set](#Set)     | Setting configuration attributes                                 | &#9745;
 [write](#Write) | Writes out currently saved entries from DETS into a given format | &#9744;
-[stat](#Stat])  | Show statistics                                                  | &#9744;
+[stat](#Stat])  | Show statistics                                                  | &#9744; <!--Unchecked-->
 
 
 

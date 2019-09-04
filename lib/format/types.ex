@@ -48,7 +48,7 @@ defmodule Exp.Format.Types do
         case t_result do
             {:ok, result} when is_list(result) -> 
                 # t_result returned multiple values (Keyword list)
-                {value, new_prev} = Keyword.pop(result, key)
+                {value, new_prev} = Keyword.pop_first(result, key)
                 iterate_fields(rest, values, [value| acc], new_prev)
             {:ok, value} -> 
                 iterate_fields(rest, values, [value | acc], prev)
@@ -58,7 +58,6 @@ defmodule Exp.Format.Types do
 
     end
 
-    
     def update_entry(acc, []), do: acc
     def update_entry(acc, [{key, value}| rest]) do
         # Append new entry if key not already added to acc
@@ -100,7 +99,8 @@ defmodule Exp.Format.Types do
                 {:ok, new_prev}
             {:ok, value} ->
                 # End time not set, add :start to prev. Maybe :end will apear later
-                new_prev = prev |> Keyword.put(:start, value)
+                template = {:start, value}
+                new_prev = [template, template | prev]
                 {:ok, new_prev}
             {:error, _} -> 
                 t_result
@@ -148,11 +148,11 @@ defmodule Exp.Format.Types do
                 new_prev = prev_rest |> Keyword.put(:duration, duration) |> Keyword.put(:end, value)
                 {:ok, new_prev}
             {:ok, value} ->
-                new_prev = prev |> Keyword.put(:end, value)
+                template = {:end, value}
+                new_prev = [template, template | prev]
                 {:ok, new_prev}
             {:error, _} -> t_result
         end
-    
     end
 
     # def process_field(:tag, value, _) do
@@ -164,7 +164,6 @@ defmodule Exp.Format.Types do
         |> filled?(key)
     end
 
-
     @doc """
         Checks if given field value is empty.
 
@@ -172,7 +171,6 @@ defmodule Exp.Format.Types do
     """
     def empty?(value) when value == "" or is_nil(value) or (is_list(value) and value == []) or (is_map(value) and value == %{}) , do: true
     def empty?(_), do: false
-
 
     @doc """
        Checks if field is required and filled.
@@ -203,7 +201,6 @@ defmodule Exp.Format.Types do
         end
     end
 
-
     @doc """
         Cast a value to a specific type. Typecheck in the process.
 
@@ -225,7 +222,6 @@ defmodule Exp.Format.Types do
             {:error, "Value can't be casted to #{type}"}
         end
     end
-
 
     @doc """
         Checks if the give value is valid depending the given type.
@@ -275,10 +271,6 @@ defmodule Exp.Format.Types do
     
     def valid?(_, _), do: raise ArgumentError, message: "Unknown parameter value type: [:string | :boolean | :float | :integer | :date | :time ]"
 
-    
-
-
-
     # Tries to executed the parsed pipe (which represents a cast from string to a specific type. See in &valid?/2)
     defp try_cast(cast_pipe) do
         try do
@@ -287,9 +279,6 @@ defmodule Exp.Format.Types do
             ArgumentError -> false
         end
     end
-
-
-
 
     # ################################
     #       FORMAT Functions
@@ -316,18 +305,24 @@ defmodule Exp.Format.Types do
 
         return {:ok, date} | {:error, msg}
     """
-    def string_to_date(date_string) do
+    def string_to_date(date_string) when is_binary(date_string) do
         try do
             {day, month, year} = date_string |> String.split("-") |> Enum.map(&String.to_integer/1) |> List.to_tuple
             Date.new(year, month, day)
         rescue
+            ArgumentError -> {:error, "Error in function &string_to_date/1. Value #{date_string} is in the wrong format. Function expects value to be in dd-MM-YYYY"}
             MatchError -> {:error, "Failed to parse string into date format."}
         end
     end
+    def string_to_date(_), do: {:error, "Error in function &string_to_date/1. Wrong parameter type passed. Functions expects value of type string."}
 
     def date_to_string(date) do
-        {year, month, day} = Date.to_erl(date)
-        "#{day}-#{month}-#{year}"
+        try do
+            {year, month, day} = Date.to_erl(date)
+            {:ok, "#{day}-#{month}-#{year}"}
+        rescue
+            FunctionClauseError -> {:error, "Error in function &date_to_string/1. Expected parameter of type ~D."}
+        end
     end
 
     @doc """
@@ -335,21 +330,38 @@ defmodule Exp.Format.Types do
 
         return {:ok, time} | {:error, msg}
     """
-    def string_to_time(time_string) do
+    def string_to_time(time_string) when is_binary(time_string) do
         try do
-            {hour, minute} = time_string |> String.split(":") |> Enum.map(&String.to_integer/1) |> List.to_tuple()
-            Time.new(hour, minute, 0)
+            result = time_string |> String.split(":") |> Enum.map(&String.to_integer/1) |> List.to_tuple()
+            num_values = tuple_size(result)
+
+            case num_values do
+                2 -> 
+                    {hour, minute} = result
+                    Time.new(hour, minute, 0) 
+                3 ->
+                    # Logger.debug(time_string)
+                    {hour, minute, sec} = result
+                    Time.new(hour, minute, sec)
+                _ -> raise ArgumentError
+            end
         rescue  
-            MatchError -> {:error, "Failed to parse string into time format."}
+            ArgumentError -> {:error, "Error in function &string_to_time/1. Passes parameter has the wrong format. String in format hh:mm:ss or hh:mm expected."}
+            MatchError -> {:error, "Error in function &string_to_time/1. Failed to parse string into time format."}
         end
     end
+    def string_to_time(_), do: {:error, "Error in function &string_to_time/1. Passed parameter is not of type string."}
 
     @doc """
         Parses given time into a string.
     """
     def time_to_string(time) do
-        {hour, minute, sec} = Time.to_erl(time)
-        "#{hour}:#{minute}"        
+        try do
+            {hour, minute, sec} = Time.to_erl(time)
+            {:ok, "#{hour}:#{minute}:#{sec}"}
+        rescue
+            FunctionClauseError -> {:error, "Error in function &time_to_string/1. Passed parameter is expected to be of type ~T."}
+        end
     end
 
 
