@@ -19,6 +19,10 @@ defmodule TestExpFormatTypes do
             assert {:ok, _} = Types.build_entry(parser_mock(context[:valid]))
         end
 
+        test "valid/all-filled", context do
+            
+        end
+
         test "valid/set-date", context do
             params = context[:valid] |> Keyword.put(:date, "22-10-2019") |> parser_mock
             assert {:ok, _} = Types.build_entry(params)
@@ -179,6 +183,36 @@ defmodule TestExpFormatTypes do
         end
 
     end
+
+    describe "test/utilities/string-time|date-conversion" do
+        
+        test "to_date/valid" do
+            assert {:ok, _} = Types.string_to_date("22-10-2019")
+        end
+
+        test "to_date/invalid-date" do
+            assert Types.string_to_date("33.10.2019") == false
+        end
+
+        test "to_date/invalid-wrong-format" do
+            assert Types.string_to_date("40.22.2020") == false
+        end
+
+        test "to_date/invalid-type/integer" do
+            assert {:error, _} = Types.string_to_date(22)
+        end
+
+        test "to_date/invalid-type/boolean" do
+            assert {:error, _} = Types.string_to_date(true)
+        end
+
+        test "to_time/valid" do
+            assert Types.string_to_time("22:10") == 
+        end
+
+
+    end
+
 
 
 end 

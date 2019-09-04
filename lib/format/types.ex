@@ -58,7 +58,6 @@ defmodule Exp.Format.Types do
 
     end
 
-    
     def update_entry(acc, []), do: acc
     def update_entry(acc, [{key, value}| rest]) do
         # Append new entry if key not already added to acc
@@ -100,7 +99,8 @@ defmodule Exp.Format.Types do
                 {:ok, new_prev}
             {:ok, value} ->
                 # End time not set, add :start to prev. Maybe :end will apear later
-                new_prev = prev |> Keyword.put(:start, value)
+                template = {:start, value}
+                new_prev = [template, template | prev]
                 {:ok, new_prev}
             {:error, _} -> 
                 t_result
@@ -124,11 +124,11 @@ defmodule Exp.Format.Types do
                 new_prev = prev_rest |> Keyword.put(:duration, duration) |> Keyword.put(:end, value)
                 {:ok, new_prev}
             {:ok, value} ->
-                new_prev = prev |> Keyword.put(:end, value)
+                template = {:end, value}
+                new_prev = [template, template | prev]
                 {:ok, new_prev}
             {:error, _} -> t_result
         end
-    
     end
 
     # def process_field(:tag, value, _) do
@@ -140,7 +140,6 @@ defmodule Exp.Format.Types do
         |> filled?(key)
     end
 
-
     @doc """
         Checks if given field value is empty.
 
@@ -148,7 +147,6 @@ defmodule Exp.Format.Types do
     """
     def empty?(value) when value == "" or is_nil(value) or (is_list(value) and value == []) or (is_map(value) and value == %{}) , do: true
     def empty?(_), do: false
-
 
     @doc """
        Checks if field is required and filled.
@@ -179,7 +177,6 @@ defmodule Exp.Format.Types do
         end
     end
 
-
     @doc """
         Cast a value to a specific type. Typecheck in the process.
 
@@ -201,7 +198,6 @@ defmodule Exp.Format.Types do
             {:error, "Value can't be casted to #{type}"}
         end
     end
-
 
     @doc """
         Checks if the give value is valid depending the given type.
@@ -251,10 +247,6 @@ defmodule Exp.Format.Types do
     
     def valid?(_, _), do: raise ArgumentError, message: "Unknown parameter value type: [:string | :boolean | :float | :integer | :date | :time ]"
 
-    
-
-
-
     # Tries to executed the parsed pipe (which represents a cast from string to a specific type. See in &valid?/2)
     defp try_cast(cast_pipe) do
         try do
@@ -263,9 +255,6 @@ defmodule Exp.Format.Types do
             ArgumentError -> false
         end
     end
-
-
-
 
     # ################################
     #       FORMAT Functions
@@ -292,7 +281,7 @@ defmodule Exp.Format.Types do
 
         return {:ok, date} | {:error, msg}
     """
-    def string_to_date(date_string) do
+    def string_to_date(date_string) when is_binary(date_string) do
         try do
             {day, month, year} = date_string |> String.split("-") |> Enum.map(&String.to_integer/1) |> List.to_tuple
             Date.new(year, month, day)
@@ -300,6 +289,7 @@ defmodule Exp.Format.Types do
             MatchError -> {:error, "Failed to parse string into date format."}
         end
     end
+    def string_to_date(_), do: {:error, "Error in function &string_to_date/1. Wrong parameter type passed. Functions expects value of type string."}
 
     def date_to_string(date) do
         {year, month, day} = Date.to_erl(date)
@@ -323,10 +313,11 @@ defmodule Exp.Format.Types do
     @doc """
         Parses given time into a string.
     """
-    def time_to_string(time) do
+    def time_to_string(time) when is_binary(time) do
         {hour, minute, sec} = Time.to_erl(time)
-        "#{hour}:#{minute}"        
+        "#{hour}:#{minute}"
     end
+    def time_to_string(_), do: {:error, "Error in function &time_to_string/1. Wrong type passed. Function takes only string in format hh:mm:ss."}
 
 
 end
