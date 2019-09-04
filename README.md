@@ -58,7 +58,6 @@ be found at [https://hexdocs.pm/exp](https://hexdocs.pm/exp). -->
 - [ ] Connect to 3rd party applications to collect additional data
   - [ ] Github Commits (time and message)
   - [ ] Quire/Google Task etc.
-- [ ] Custom Entry fields
 - [ ] Statistics 
 - [x] Configuration
   - [x] Setting Parameters
