@@ -48,7 +48,7 @@ defmodule Exp.Format.Types do
         case t_result do
             {:ok, result} when is_list(result) -> 
                 # t_result returned multiple values (Keyword list)
-                {value, new_prev} = Keyword.pop(result, key)
+                {value, new_prev} = Keyword.pop_first(result, key)
                 iterate_fields(rest, values, [value| acc], new_prev)
             {:ok, value} -> 
                 iterate_fields(rest, values, [value | acc], prev)
@@ -286,14 +286,19 @@ defmodule Exp.Format.Types do
             {day, month, year} = date_string |> String.split("-") |> Enum.map(&String.to_integer/1) |> List.to_tuple
             Date.new(year, month, day)
         rescue
+            ArgumentError -> {:error, "Error in function &string_to_date/1. Value #{date_string} is in the wrong format. Function expects value to be in dd-MM-YYYY"}
             MatchError -> {:error, "Failed to parse string into date format."}
         end
     end
     def string_to_date(_), do: {:error, "Error in function &string_to_date/1. Wrong parameter type passed. Functions expects value of type string."}
 
     def date_to_string(date) do
-        {year, month, day} = Date.to_erl(date)
-        "#{day}-#{month}-#{year}"
+        try do
+            {year, month, day} = Date.to_erl(date)
+            {:ok, "#{day}-#{month}-#{year}"}
+        rescue
+            FunctionClauseError -> {:error, "Error in function &date_to_string/1. Expected parameter of type ~D."}
+        end
     end
 
     @doc """
@@ -301,23 +306,39 @@ defmodule Exp.Format.Types do
 
         return {:ok, time} | {:error, msg}
     """
-    def string_to_time(time_string) do
+    def string_to_time(time_string) when is_binary(time_string) do
         try do
-            {hour, minute} = time_string |> String.split(":") |> Enum.map(&String.to_integer/1) |> List.to_tuple()
-            Time.new(hour, minute, 0)
+            result = time_string |> String.split(":") |> Enum.map(&String.to_integer/1) |> List.to_tuple()
+            num_values = tuple_size(result)
+
+            case num_values do
+                2 -> 
+                    {hour, minute} = result
+                    Time.new(hour, minute, 0) 
+                3 ->
+                    # Logger.debug(time_string)
+                    {hour, minute, sec} = result
+                    Time.new(hour, minute, sec)
+                _ -> raise ArgumentError
+            end
         rescue  
-            MatchError -> {:error, "Failed to parse string into time format."}
+            ArgumentError -> {:error, "Error in function &string_to_time/1. Passes parameter has the wrong format. String in format hh:mm:ss or hh:mm expected."}
+            MatchError -> {:error, "Error in function &string_to_time/1. Failed to parse string into time format."}
         end
     end
+    def string_to_time(_), do: {:error, "Error in function &string_to_time/1. Passed parameter is not of type string."}
 
     @doc """
         Parses given time into a string.
     """
-    def time_to_string(time) when is_binary(time) do
-        {hour, minute, sec} = Time.to_erl(time)
-        "#{hour}:#{minute}"
+    def time_to_string(time) do
+        try do
+            {hour, minute, sec} = Time.to_erl(time)
+            {:ok, "#{hour}:#{minute}:#{sec}"}
+        rescue
+            FunctionClauseError -> {:error, "Error in function &time_to_string/1. Passed parameter is expected to be of type ~T."}
+        end
     end
-    def time_to_string(_), do: {:error, "Error in function &time_to_string/1. Wrong type passed. Function takes only string in format hh:mm:ss."}
 
 
 end

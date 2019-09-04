@@ -16,11 +16,13 @@ defmodule TestExpFormatTypes do
 
 
         test "valid/default", context do
-            assert {:ok, _} = Types.build_entry(parser_mock(context[:valid]))
+            params = context[:valid] |> parser_mock
+            assert {:ok, _} = Types.build_entry(params)
         end
 
         test "valid/all-filled", context do
-            
+            params = context[:valid] |> Keyword.put(:tag, "tag1,tag2,tag3") |> Keyword.put(:end, "22:22") |> parser_mock
+            assert {:ok, _} = Types.build_entry(params)
         end
 
         test "valid/set-date", context do
@@ -186,16 +188,21 @@ defmodule TestExpFormatTypes do
 
     describe "test/utilities/string-time|date-conversion" do
         
+        # string_to_date
         test "to_date/valid" do
             assert {:ok, _} = Types.string_to_date("22-10-2019")
         end
 
         test "to_date/invalid-date" do
-            assert Types.string_to_date("33.10.2019") == false
+            assert {:error, _} = Types.string_to_date("33-10-2019")
+        end
+
+        test "to_date/invalid-negative" do
+            assert {:error, _} = Types.string_to_date("10-10--2020")
         end
 
         test "to_date/invalid-wrong-format" do
-            assert Types.string_to_date("40.22.2020") == false
+            assert {:error, _} = Types.string_to_date("40.22.2020")
         end
 
         test "to_date/invalid-type/integer" do
@@ -206,10 +213,49 @@ defmodule TestExpFormatTypes do
             assert {:error, _} = Types.string_to_date(true)
         end
 
+        # time_to_date
         test "to_time/valid" do
-            assert Types.string_to_time("22:10") == 
+            assert {:ok, _} = Types.string_to_time("22:10")
         end
 
+         # time_to_date
+        test "to_time/valid+sec" do
+            assert {:ok, _} = Types.string_to_time("22:10:02")
+        end
+
+        test "to_time/invalid-wrong-format" do
+            assert {:error, _} = Types.string_to_time("11.20")
+        end
+
+        test "to_time/invalid-time" do
+            assert {:error, _} = Types.string_to_time("11:2k")
+        end
+
+        test "to_time/wrong-type/integer" do
+            assert {:error, _} = Types.string_to_time(22)
+        end    
+
+        # date_to_string
+        test "date_to_string/valid" do
+            assert {:ok, "10-10-2019"} = Types.date_to_string(~D[2019-10-10])
+        end
+
+        test "date_to_string/invalid/negative-date" do
+            assert {:error, _} = Types.date_to_string(Date.new(-100, 10, 10))
+        end
+
+        test "date_to_string/invalid/wrong-type" do
+            assert {:error, _} = Types.date_to_string(22)
+        end
+
+        # time to
+        test "time_to_string/invalid/" do
+            assert {:ok, _} = Types.time_to_string(~T[10:00:00.100])
+        end
+
+        test "time_to_string/invalid/wrong-type" do
+            assert {:error, _} = Types.time_to_string(22)
+        end
 
     end
 
