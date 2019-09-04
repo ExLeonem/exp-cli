@@ -107,6 +107,30 @@ defmodule Exp.Format.Types do
         end   
     end
 
+    def process_field(:tag = key, value, prev) do
+        
+        t_result = value
+        |> filled?(key)
+
+        case t_result do
+            {:ok, tags_string} ->
+
+                # Try to split array
+                if is_binary(tags_string) do
+                    splitted_values =  tags_string |> String.split(",") |> Enum.map(&String.trim/1) |> List.to_tuple
+                    {:ok, splitted_values}
+                else
+                    if not is_nil(value) do
+                        {:error, "Error in function &process_field/3. Passed value is not of type String."}
+                    else
+                        {:ok, value}
+                    end
+                end
+
+            {:error, _} -> t_result 
+        end
+    end
+
     def process_field(:end = key, value, prev) do
         # TODO: duration calculation needs to be fixed. Duration over a day will result in error if end_time < start_time !!
         {hour, minute, _sec} = Time.utc_now |> Time.to_erl 
