@@ -1,4 +1,6 @@
 defmodule Exp.Action.File do
+    alias Exp.Format.FileOutput
+
     @moduledoc """
         Export of saved entries into a specific format.
 
@@ -18,7 +20,7 @@ defmodule Exp.Action.File do
 
     """
     def write_out(format \\ :csv, opts \\ [])
-    def write_out(:csv, _opts) do
+    def write_out(:csv = format_type, _opts) do
         
     end
 
