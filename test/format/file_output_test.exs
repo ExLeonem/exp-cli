@@ -7,11 +7,11 @@ defmodule TestExpFormatFileOutput do
     describe "test/csv-output" do
 
         test "single/integer" do
-            assert FileOutput.format(:csv, 22) == "21"
+            assert FileOutput.format(:csv, 22) == "22"
         end
 
         test "single/boolean" do
-            assert FileOutput.format(:csv, true) == "none"
+            assert FileOutput.format(:csv, true) == "true"
         end
 
         test "collection/tuple" do
@@ -41,15 +41,52 @@ defmodule TestExpFormatFileOutput do
     
     end
 
-
     describe "test/json-output" do
         
     end
 
-
     describe "yaml" do
         
     end
+
+    describe "test/utilities" do
+        
+        test "collection/valid/list" do
+            assert FileOutput.is_collection?(["a", "c"]) == true
+        end
+
+        test "collection/valid/tuple" do
+            assert FileOutput.is_collection?({1,2,3}) == true
+        end
+
+        test "collection/valid/map" do
+            assert FileOutput.is_collection?(%{"a" => 12}) == true
+        end
+
+        test "collection/invalid" do
+            assert FileOutput.is_collection?(12) == false
+        end
+
+        test "to_list/valid/tuple" do
+            assert FileOutput.to_list({1, 2, 3}) |> is_list == true
+        end
+
+        test "to_list/valid/map" do
+            assert FileOutput.to_list(%{"a" => 12}) |> is_list == true
+        end
+
+        test "to_list/valid/list" do
+            assert FileOutput.to_list([1, 2, 3]) |> is_list == true
+        end
+
+        test "to_list/invalid/atomic" do
+            assert_raise FunctionClauseError, fn ->
+                FileOutput.to_list(1)
+            end
+        end
+
+    end
+
 
 
 end
