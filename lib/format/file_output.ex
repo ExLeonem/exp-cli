@@ -1,16 +1,11 @@
 defmodule Exp.Format.FileOutput do
-    alias Exp.Format.Config
     @moduledoc """
         Formatting the export of entry tables to output files.
     """
 
-    @field_names Config.extract(:keys, :field)
-
-
-    def write_file(data, opts \\ [format: :csv, dir: "./"]) do
-
+    def header(type, keys) do
+        
     end
-
 
     @doc """
         Parses the given data to the output format.
@@ -42,29 +37,43 @@ defmodule Exp.Format.FileOutput do
     end
 
 
+
     @doc """
+
+        Function resolves and writes entry into one line. Formatting the output.
 
         Parameters:
         - output_format: type of output [:csv | :json | :xml]
+
+        Returns String
     """
     def resolve_csv(data, opts \\ [], acc \\ "")
+    def resolve_csv(value, opts, acc) when is_binary(value), do: value
     def resolve_csv([], _, acc), do: acc
     def resolve_csv([value | rest], opts, acc) do
 
         if !is_collection?(value) do
-            # Not a collection append and recurse
 
+            # If string value includes separator, encapsulate content
+            new_acc = value 
+                |> to_string 
+                |> encapsulate?
+                |> combine(acc, opts[:sep])
+
+            # to_add = if acc == "", do: string_value, else: ","<> string_value
+            # new_acc = acc <> to_add
+            resolve_csv(rest, opts, new_acc)
         else
-            
+            # Recurse, resolve only to a specific level
+            value
+            |> to_string
+            |> resolve_csv(opts, acc)
         end
     end
 
-
-
-    # XML|CSV specific
-    def create_header(type, keys) do
-        
-    end
+    # Combines left and right string parts, takes only strings
+    def combine(right, "", _), do: right
+    def combine(right, left, sep), do: left <> sep <> right
 
     # Check if passed data is collection
     def is_collection?(data) when is_list(data) or is_map(data) or is_tuple(data), do: true
@@ -74,5 +83,18 @@ defmodule Exp.Format.FileOutput do
     def to_list(data) when is_list(data), do: data
     def to_list(data) when is_map(data), do: data |> Map.to_list
     def to_list(data) when is_tuple(data), do: data |> Tuple.to_list
+
+    # Value contains comma? return value encapsulated in double commata
+    # TODO: catch double quotes in text too??
+    def encapsulate?(value) do
+        has_commata? = Regex.match?(~r/\,/, value)
+
+        if has_commata? do
+            "\"" <> value <> "\""
+        else
+            value
+        end
+    end
+
 
 end
