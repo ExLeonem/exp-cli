@@ -56,11 +56,11 @@ defmodule TestExpArgsState do
   describe "test/get-parameters" do
 
     test "get/:block-length" do
-      assert ArgsState.parse(:get, ["--block-length"]) == {:ok, ["1:30"]}
+      assert ArgsState.parse(:get, ["--block-length"]) == {:ok, "1:30"}
     end
 
     test "get/[:block-length, :remind]" do
-      assert ArgsState.parse(:get, ["--block-length", "--remind"]) == {:ok, [nil, "1:30"]}
+      assert ArgsState.parse(:get, ["--block-length", "--remind"]) == {:ok, "1:30, nil"}
     end
 
     test "get/[]/help" do

@@ -1,7 +1,8 @@
 defmodule Exp.Args.State do
-
+  require Logger
   alias Exp.Action.State
   alias Exp.Format.Config
+  alias Exp.Format.Msgs
 
   @moduledoc """
 
@@ -59,7 +60,7 @@ defmodule Exp.Args.State do
 
     Usage:
 
-      exp get [--flag | --flag --flag ...]
+      exp get [flag | flag flag ...]
 
 
     Flags:
@@ -85,9 +86,9 @@ defmodule Exp.Args.State do
       |> extract_valid
       |> get_config
 
-
       case result do
-        {:ok, _} -> result
+        {:ok, _} -> 
+          {:ok, (elem(result,1) |> Enum.map(&Msgs.to_string/1) |> Enum.join(", "))}
         {:error, _} -> result
         :help -> {:help, @help_get} 
         _ -> {:error, "Unknown error"}
@@ -101,6 +102,7 @@ defmodule Exp.Args.State do
   def get_config(argv) do
     argv
     |> Keyword.keys
+    |> Enum.reverse
     |> State.get_config
   end
 
