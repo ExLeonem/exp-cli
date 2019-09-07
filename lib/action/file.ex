@@ -1,16 +1,20 @@
 defmodule Exp.Action.File do
     alias Exp.Format.FileOutput
+    alias Exp.Format.Config
 
+    @moduledoc """
+        Export of saved entries into a specific format.
+
+    """
+
+    @field_names Config.extract(:keys, :field)
     @default_config [
         name: "time_data",
         dir: "./",
         format: :csv
     ]
 
-    @moduledoc """
-        Export of saved entries into a specific format.
 
-    """
 
     @doc """
         Write File in a specific format to the Filesystem.
@@ -80,13 +84,13 @@ defmodule Exp.Action.File do
     @doc """
         In either case returns a tuple with default configuration.
 
-
-
         Returns Tuple {:ok {filename, path}} | {:error, "passed parameter doesen't exist."}
     """
     def get_write_config(opts) do
         
     end
+
+
 
     def get_file_name(name, format) when (is_atom(format) or is_binary(format)) and is_binary(name) do
         ext = format |> to_string
