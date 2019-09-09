@@ -3,6 +3,7 @@ defmodule Exp.Args.Main do
   alias Exp.Args.Record
   alias Exp.Args.State
   alias Exp.Args.Display
+  alias Exp.Args.File
   require Logger
 
   @moduledoc """
@@ -10,11 +11,11 @@ defmodule Exp.Args.Main do
     Main Parser, parses top level options and passes left options to more specific parser.
   """
 
-  @help """
+  @usage """
 
     ++++++++++++ EXP CLI +++++++++++++++++++
 
-    For information for a specific task use [option] [--help | -h].
+    For information about a specific task use [option] [--help | -h].
 
 
     Usage:
@@ -30,7 +31,7 @@ defmodule Exp.Args.Main do
       set     - cli configuration
       get     - get current cli config information
       show    - query inserted information
-      write   - write currently persisted data from dets to file system
+      write   - write recorded data from dets to a file
       help    - print usage information
     """
 
@@ -41,11 +42,13 @@ defmodule Exp.Args.Main do
   end
 
   # prepend switches to first argument if needed
+  def cast_key([]), do: []
   def cast_key([key| rest]) do
     {String.to_atom(key), rest}
   end
 
   # Process the acquired options
+  def process(options) when not is_tuple(options), do: {:error, "I need some arguments to work. Check out exp --help to get more information."} |> process_result
   def process({key, argv}) do
     dispatch(key, argv)
     |> process_result
@@ -61,7 +64,7 @@ defmodule Exp.Args.Main do
   def dispatch(:set, argv), do: State.parse(:set, argv)
   def dispatch(:get, argv), do: State.parse(:get, argv)
   def dispatch(:show, argv), do: Display.parse(:show, argv)
-  def dispatch(:write, argv), do: Persist.parse(:write, argv)
+  def dispatch(:write, argv), do: File.parse(:write, argv)
   def dispatch(_, _), do: get_help() # defaulting to on :help as well as invalid flags
 
   # Iterate parsed parameters
@@ -71,7 +74,7 @@ defmodule Exp.Args.Main do
 
 
   # Return help information
-  defp get_help(help \\ @help) do
+  defp get_help(help \\ @usage) do
     {:help, help}
   end
 

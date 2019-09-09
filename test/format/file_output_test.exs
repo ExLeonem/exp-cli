@@ -18,8 +18,16 @@ defmodule TestExpFormatFileOutput do
             assert FileOutput.format(:csv, [{1,2,3}, {1,2,3}]) == "1,2,3\n1,2,3"
         end
 
+        test "valid/simple-with-header" do
+            assert FileOutput.format(:csv, [{1,2,3}], [sep: ",", field_names: ["a", "b", "c"]]) == "a,b,c\n1,2,3"
+        end
+
         test "valid/opt-separator" do
             assert FileOutput.format(:csv, [{1, 2, 3}], [sep: ";"]) == "1;2;3"
+        end
+
+        test "invalid/header" do
+            assert FileOutput.format(:csv, [{1,2,3}], [sep: "/", field_names: "hey"]) == "1/2/3"
         end
 
         test "collection/valid/nested-values" do

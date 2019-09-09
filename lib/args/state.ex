@@ -11,7 +11,7 @@ defmodule Exp.Args.State do
   @strict Application.get_env(:exp, :params, [])
 
 
-  @help_set """
+  @usage_set """
     Invalid use of exp set
 
     For information for a specific task use [option] [--help | -h].
@@ -40,7 +40,7 @@ defmodule Exp.Args.State do
     case result do
       :ok -> {:ok, "Configuration successfully updated."}
       {:error, _} -> result
-      :help -> {:help, @help_set}
+      :help -> {:help, @usage_set}
     end
   end
 
@@ -52,7 +52,7 @@ defmodule Exp.Args.State do
 
 
 
-  @help_get """
+  @usage_get """
     Invalid use of exp get
 
     For information for a specific task use [option] [--help | -h].
@@ -89,7 +89,7 @@ defmodule Exp.Args.State do
       case result do
         {:ok, _} -> result
         {:error, _} -> result
-        :help -> {:help, @help_get} 
+        :help -> {:help, @usage_get} 
         _ -> {:error, "Unknown error"}
       end
   end

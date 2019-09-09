@@ -8,34 +8,64 @@ defmodule Exp.Action.File do
     """
 
     @field_names Config.extract(:keys, :field)
-    @default_config [
-        name: "time_data",
-        dir: "./",
+    @default_opts [
+        name: "exp_data",
+        dir: File.cwd(),
         format: :csv
     ]
 
     @doc """
         Write File in a specific format to the Filesystem.
 
-        Parameters:
+        Argv-Parameters:
         - format: Fileformat [:csv | :json | :xml]
-        - opts: Additional options to set
-            [
-                dir: "To wich directory to write"
-                name: "Filename"
-            ]
+        - dir: Additional options to set
+        - name: The name of the file
+        - output: full path to the output directory and filename with extension
 
     """
-    def write_out(opts \\ [])
-    def write_out(opts) do
-
-        result = get_write_config(opts)
-        case result do
-            {:ok, config} -> config |> exists? |> create |> fill
-            {:error, _} -> result
-        end
+    def write({status, _} = input) when status == :error or status == :help, do: input # return {:error, _} | {:help, @usage} 
+    def write({:ok, argv}) do
+        # argv
+        # |> build_filepath
+        # |> exists?
+        # |> fill
     end
 
+
+    @doc """
+        Builds a full fetched filepath out of OptionParser argv.
+
+        Parameters:
+        - argv: OptionParser Arguments 
+            - output: full featured output path
+            - name: Filename
+            - dir: directory path
+            - 
+
+        Returns {:ok, path} | {:error, reason}
+    """
+    def build_filepath(write_opts) do
+        
+        # if Keyword.has_key?(write_opts, :output) do
+        #     output_path = write_opts[:output]
+        #     file_ext = File.ext(output_path)
+
+        # else
+
+        # end
+
+    end
+
+    def check_full_path(path) do
+        
+    end
+
+
+
+    # def exists?(config) do
+        
+    # end
 
     # ----------------------------
     # Utilities
