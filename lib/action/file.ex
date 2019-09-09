@@ -1,5 +1,6 @@
 defmodule Exp.Action.File do
     alias Exp.Format.FileOutput
+    alias Exp.Action.State
     alias Exp.Format.Config
 
     @moduledoc """
@@ -26,10 +27,24 @@ defmodule Exp.Action.File do
     """
     def write({status, _} = input) when status == :error or status == :help, do: input # return {:error, _} | {:help, @usage} 
     def write({:ok, argv}) do
-        # argv
-        # |> build_filepath
-        # |> exists?
-        # |> fill
+        result = argv |> build_filepath
+        data = State.get_entries()
+        
+        case path do
+            {:ok, path, type} -> FileOutput.format(type, data) |> write_out(path)
+            {:error, _} -> result
+        end
+
+    end
+
+    
+
+    @doc """
+        Writes data out to a file.
+
+    """
+    def write_out(content, path) do
+        
     end
 
 
@@ -47,13 +62,18 @@ defmodule Exp.Action.File do
     """
     def build_filepath(write_opts) do
         
-        # if Keyword.has_key?(write_opts, :output) do
-        #     output_path = write_opts[:output]
-        #     file_ext = File.ext(output_path)
+        if Keyword.has_key?(write_opts, :output)  do
+            output_path = write_opts[:output]
 
-        # else
+            if File.exists?(output_path) && !File.dir?(output_path) do
+                ext = Path.extname(output_path) |> String.downcase |> String.slice(1..-1) |> String.to_atom
+            else
 
-        # end
+            end 
+
+        else
+
+        end
 
     end
 
