@@ -3,10 +3,12 @@ defmodule Exp.Format.FileOutput do
         Formatting the export of entry tables to output files.
     """
 
-    def header(type, keys) do
-        
+    # What todo on nested keys?
+    def header(:csv, keys) do
+        keys |> Enum.map(&to_string/1) |> Enum.join(",")    
     end
 
+    
     @doc """
         Parses the given data to the output format.
 
@@ -17,15 +19,7 @@ defmodule Exp.Format.FileOutput do
     """
     def format(type, data, opts \\ [sep: ",", field_names: []])
     def format(:csv = type, data, opts) do
-    
-        content = ""
-        
-        cond do
-            is_list(data) -> data |> resolve_csv(opts)
-            is_tuple(data) -> data |> Tuple.to_list |> resolve_csv(opts)
-            is_map(data) -> data |> Map.to_string |> resolve_csv(opts)
-            true -> data |> to_string
-        end
+        data |> resolve_csv(opts, "")
     end
 
     def format(:json, data, opts) do
@@ -39,41 +33,61 @@ defmodule Exp.Format.FileOutput do
 
 
     @doc """
-
         Function resolves and writes entry into one line. Formatting the output.
 
         Parameters:
-        - output_format: type of output [:csv | :json | :xml]
+        - data: data to be resolved
+        - opts: additional options used while processing the data
+            - sep: separator to be used, needs to be a string
+            - field names: needs to be equally long as entity type length
+        - acc: accumulator for the string
 
-        Returns String
+        Returns resolved string ready to be written to a file.
     """
     def resolve_csv(data, opts \\ [], acc \\ "")
-    def resolve_csv(value, opts, acc) when is_binary(value), do: value
     def resolve_csv([], _, acc), do: acc
-    def resolve_csv([value | rest], opts, acc) do
+    def resolve_csv([value| rest], opts, acc) when is_tuple(value) do
 
-        if !is_collection?(value) do
+        resolve_inner = fn 
+            value when is_tuple(value) or is_list(value) -> 
+                joined_values = value |> to_list |> Enum.join(opts[:sep])
+                "[#{joined_values}]"
+            value -> value |> to_string |> encapsulate? end   
+        
+        new_acc = value
+        |> to_list
+        |> Enum.map(resolve_inner)
+        |> Enum.join(opts[:sep])
+        |> combine(acc)
 
-            # If string value includes separator, encapsulate content
-            new_acc = value 
-                |> to_string 
-                |> encapsulate?
-                |> combine(acc, opts[:sep])
-
-            # to_add = if acc == "", do: string_value, else: ","<> string_value
-            # new_acc = acc <> to_add
-            resolve_csv(rest, opts, new_acc)
-        else
-            # Recurse, resolve only to a specific level
-            value
-            |> to_string
-            |> resolve_csv(opts, acc)
-        end
+        resolve_csv(rest, opts, new_acc)
     end
+    
+    def resolve_csv(_, _, _), do: raise ArgumentError, message: "Error in function &resolve_csv/3. Invalid entry format. Only mulitple entries represented as tuple may be written to a file."
+
+    # def resolve_csv([value | rest], opts, acc) do
+
+    #     if !is_collection?(value) do
+
+    #         # If string value includes separator, encapsulate content
+    #         new_acc = value 
+    #             |> to_string 
+    #             |> encapsulate?
+    #             |> combine(acc, opts[:sep])
+
+    #         resolve_csv(rest, opts, acc)
+    #     else
+
+    #         # Recurse, resolve only to a specific level
+    #         value
+    #         |> to_string
+    #         |> resolve_csv(opts, acc)
+    #     end
+    # end
 
     # Combines left and right string parts, takes only strings
-    def combine(right, "", _), do: right
-    def combine(right, left, sep), do: left <> sep <> right
+    def combine(right, ""), do: right
+    def combine(right, left), do: left <> "\n" <> right
 
     # Check if passed data is collection
     def is_collection?(data) when is_list(data) or is_map(data) or is_tuple(data), do: true
@@ -84,9 +98,15 @@ defmodule Exp.Format.FileOutput do
     def to_list(data) when is_map(data), do: data |> Map.to_list
     def to_list(data) when is_tuple(data), do: data |> Tuple.to_list
 
-    # Value contains comma? return value encapsulated in double commata
-    # TODO: catch double quotes in text too??
-    def encapsulate?(value) do
+    @moduledoc """
+        Value contains commata. Needs to be encapsulated in ""
+
+        # Value contains comma? return value encapsulated in double commata
+        # TODO: catch double quotes in text too??
+        returns encapsulated string
+    """
+    def encapsulate?(value) when not is_binary(value), do: value
+    def encapsulate?(value) when is_binary(value) do
         has_commata? = Regex.match?(~r/\,/, value)
 
         if has_commata? do

@@ -14,8 +14,6 @@ defmodule Exp.Action.File do
         format: :csv
     ]
 
-
-
     @doc """
         Write File in a specific format to the Filesystem.
 
@@ -37,6 +35,7 @@ defmodule Exp.Action.File do
             {:error, _} -> result
         end
     end
+
 
     # ----------------------------
     # Utilities
@@ -89,7 +88,6 @@ defmodule Exp.Action.File do
     def get_write_config(opts) do
         
     end
-
 
 
     def get_file_name(name, format) when (is_atom(format) or is_binary(format)) and is_binary(name) do

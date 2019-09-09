@@ -6,36 +6,60 @@ defmodule TestExpFormatFileOutput do
 
     describe "test/csv-output" do
 
-        test "single/integer" do
-            assert FileOutput.format(:csv, 22) == "22"
+        test "valid/simple" do
+            assert FileOutput.format(:csv, [{1, 2, 3}]) == "1,2,3"
         end
 
-        test "single/boolean" do
-            assert FileOutput.format(:csv, true) == "true"
+        test "valid/mixed-values" do
+            assert FileOutput.format(:csv, [{1, :hey, 12.2, nil, true}]) == "1,hey,12.2,,true"
         end
 
-        test "collection/tuple" do
-            assert FileOutput.format(:csv, {1, 2}) == "1,2"
+        test "valid/2-entries" do
+            assert FileOutput.format(:csv, [{1,2,3}, {1,2,3}]) == "1,2,3\n1,2,3"
         end
 
-        test "nested/tuple" do
-            assert FileOutput.format(:csv, {1, {2, 3}}) == "1,[2,3]"
+        test "valid/opt-separator" do
+            assert FileOutput.format(:csv, [{1, 2, 3}], [sep: ";"]) == "1;2;3"
         end
 
-        test "collection/list" do
-            assert FileOutput.format(:csv, [1, 2]) == "1,2"
+        test "collection/valid/nested-values" do
+            assert FileOutput.format(:csv, [{1, {2, 3}}]) == "1,[2,3]"
+        end
+
+        test "single/invalid/integer" do
+            assert_raise ArgumentError, fn ->
+                FileOutput.format(:csv, 22)
+            end
+        end
+
+        test "single/invalid/boolean" do
+            assert_raise ArgumentError, fn -> 
+                FileOutput.format(:csv, true)
+            end
+        end
+
+        test "collection/invalid-format/single-tuple" do
+            assert_raise ArgumentError, fn ->
+                FileOutput.format(:csv, {1, 2})
+            end
+        end
+
+        test "collection/invalid/list" do
+            assert_raise ArgumentError, fn ->
+                FileOutput.format(:csv, [1, 2])
+            end
         end
 
         test "nested/list" do
-            assert FileOutput.format(:csv, [1, [2, 3]]) == "1,[2,3]"            
-        end
-
-        test "valid-opt-separator" do
-            assert FileOutput.format(:csv, [1, 2, 3], [sep: ";"]) == "1;2;3"
+            assert_raise ArgumentError, fn ->
+                FileOutput.format(:csv, [1, [2, 3]])
+            end            
         end
 
         test "invalid-separator" do
-            assert FileOutput.format(:csv, [1, 3, 4], [sep: true]) == false
+            assert_raise ArgumentError, fn ->
+                FileOutput.format(:csv, [1, 3, 4], [sep: true]) == false
+            end
         end
 
     
