@@ -26,7 +26,6 @@ defmodule Exp.Action.File do
             ]
 
     """
-    def write_out(opts \\ [])
     def write_out(opts) do
 
         result = get_write_config(opts)
@@ -85,7 +84,10 @@ defmodule Exp.Action.File do
 
         Returns Tuple {:ok {filename, path}} | {:error, "passed parameter doesen't exist."}
     """
-    def get_write_config(opts) do
+
+    def get_write_config()
+    def get_write_config([], acc), do: acc
+    def get_write_config([{key, value} | rest]) do
         
     end
 

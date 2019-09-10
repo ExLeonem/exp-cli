@@ -22,13 +22,9 @@ defmodule Exp.Format.FileOutput do
         data |> resolve_csv(opts, "")
     end
 
-    def format(:json, data, opts) do
-        
-    end
-
-    def format(:xml, data, opts) do
-        
-    end
+    def format(:json, data, opts), do: {:help, "This feature is currently under development."}
+    def format(:xml, data, opts), do: {:help, "This feature is currently under development."}
+    def format(:yaml, data, opts), do: {:help, "This feature is currently under development."}
 
 
 
@@ -65,26 +61,6 @@ defmodule Exp.Format.FileOutput do
     
     def resolve_csv(_, _, _), do: raise ArgumentError, message: "Error in function &resolve_csv/3. Invalid entry format. Only mulitple entries represented as tuple may be written to a file."
 
-    # def resolve_csv([value | rest], opts, acc) do
-
-    #     if !is_collection?(value) do
-
-    #         # If string value includes separator, encapsulate content
-    #         new_acc = value 
-    #             |> to_string 
-    #             |> encapsulate?
-    #             |> combine(acc, opts[:sep])
-
-    #         resolve_csv(rest, opts, acc)
-    #     else
-
-    #         # Recurse, resolve only to a specific level
-    #         value
-    #         |> to_string
-    #         |> resolve_csv(opts, acc)
-    #     end
-    # end
-
     # Combines left and right string parts, takes only strings
     def combine(right, ""), do: right
     def combine(right, left), do: left <> "\n" <> right
@@ -98,7 +74,7 @@ defmodule Exp.Format.FileOutput do
     def to_list(data) when is_map(data), do: data |> Map.to_list
     def to_list(data) when is_tuple(data), do: data |> Tuple.to_list
 
-    @moduledoc """
+    @doc """
         Value contains commata. Needs to be encapsulated in ""
 
         # Value contains comma? return value encapsulated in double commata

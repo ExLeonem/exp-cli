@@ -109,6 +109,15 @@ defmodule TestExpFormatFileOutput do
             end
         end
 
+        # &combine/2
+        test "combine/valid/empty-left" do
+            assert FileOutput.combine("hey", "") == "hey"
+        end
+
+        test "combine/valid/all-given" do
+            assert FileOutput.combine("right", "left") == "left\nright"
+        end
+
     end
 
 

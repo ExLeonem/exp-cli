@@ -3,6 +3,7 @@ defmodule Exp.Args.Main do
   alias Exp.Args.Record
   alias Exp.Args.State
   alias Exp.Args.Display
+  alias Exp.Args.File
   require Logger
 
   @moduledoc """
@@ -61,7 +62,7 @@ defmodule Exp.Args.Main do
   def dispatch(:set, argv), do: State.parse(:set, argv)
   def dispatch(:get, argv), do: State.parse(:get, argv)
   def dispatch(:show, argv), do: Display.parse(:show, argv)
-  def dispatch(:write, argv), do: Persist.parse(:write, argv)
+  def dispatch(:write, argv), do: File.parse(:write, argv)
   def dispatch(_, _), do: get_help() # defaulting to on :help as well as invalid flags
 
   # Iterate parsed parameters
