@@ -71,10 +71,11 @@ be found at [https://hexdocs.pm/exp](https://hexdocs.pm/exp). -->
   - [x] save instantly complete entry
 - [ ] Reminder/Timer functionality 
 - [ ] DETS Flush
-- [ ] Write out DETS Data
-  - [ ] CSV
+- [ ] Export DETS Data
+  - [x] CSV
   - [ ] JSON
   - [ ] XML
+- [ ] Import DETS Data
 
 
 ## Configuration Parameters

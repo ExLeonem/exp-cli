@@ -3,7 +3,11 @@ defmodule Exp.Format.FileOutput do
         Formatting the export of entry tables to output files.
     """
 
+    @default_config [sep: ",", field_names: []]
+
+
     # What todo on nested keys?
+    def header(:csv, keys) when not is_list(keys), do: raise ArgumentError, message: "Error in function &header/2. Expected an array of header keys, got something else."
     def header(:csv, keys) do
         keys |> Enum.map(&to_string/1) |> Enum.join(",")    
     end
@@ -15,18 +19,29 @@ defmodule Exp.Format.FileOutput do
         Parameters
         - output_format: atom representing the output format [:csv | :json | :xml]
         - data: given entry data
+        - opts: additional options to set
+            - sep: separator for :csv type
+            - field_names: column names for :csv
         
+
+        TODO: Merge default config into passed config
     """
     def format(type, data, opts \\ [sep: ",", field_names: []])
     def format(:csv = type, data, opts) do
-        data |> resolve_csv(opts, "")
+        csv_content = data |> resolve_csv(opts, "")
+        
+        # Append header additional header if :field_names passed
+        if is_list(opts[:field_names]) && !Enum.empty?(opts[:field_names]) do
+            csv_header = header(type, opts[:field_names])
+            csv_header <> "\n" <> csv_content
+        else
+            csv_content 
+        end
     end
 
     def format(:json, data, opts), do: {:help, "This feature is currently under development."}
     def format(:xml, data, opts), do: {:help, "This feature is currently under development."}
     def format(:yaml, data, opts), do: {:help, "This feature is currently under development."}
-
-
 
     @doc """
         Function resolves and writes entry into one line. Formatting the output.

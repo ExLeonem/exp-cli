@@ -144,6 +144,9 @@ defmodule Exp.Action.Record do
   end
 
   @doc """
+    !deprecated
+    Not in use here
+
     Returns boolean. File exists do true else false
   """
   def file_exists?(file_name) do

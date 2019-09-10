@@ -4,8 +4,16 @@ defmodule TestExpActionFile do
     doctest File
 
 
-    describe "test/write" do
-        
+    describe "test/exists?" do
+
+        test "valid/dir" do
+
+        end
+
+        test "invalid/dir" do
+            
+        end
+
     end
 
 end
