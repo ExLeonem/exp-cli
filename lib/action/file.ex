@@ -51,6 +51,9 @@ defmodule Exp.Action.File do
         Checks the given path and it's components for validity.
         Creates the needed file to write the content.
 
+        Parameters:
+            - write_opts :  
+
         Returns {:ok, path} | {:error, reason}
     """
     def path_valid?(write_opts) do
@@ -101,10 +104,23 @@ defmodule Exp.Action.File do
 
     @doc """
         Fills the file with the formatted content
+
+        Parameters:
+            - file_pid: PID of the successfully opened file.
+            - content to be written to the file
+
+        returns {:ok, msg} | {:error, msg}
     """
     def fill({:error, _} = result), do: result
-    def fill({:ok, {file_pid, content}}) do
-        {:ok, "some"}
+    def fill({:ok, {file, content}}) do
+        written? = IO.write(file, content)
+
+        File.close(file)
+
+        case written? do
+            :ok -> {:ok, "File successfully written."}
+            :error -> {:error, "Couldn't write the file."}
+        end
     end
 
 

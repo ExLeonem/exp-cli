@@ -32,7 +32,6 @@ defmodule Exp.Args.Display do
 
     """
 
-
     @options [
         aliases: [
             a: :all,
@@ -47,11 +46,7 @@ defmodule Exp.Args.Display do
             help: :boolean
         ]
     ]
-
-    # @show_strict [
-        
-    # ]
-
+    
     @doc """
 
     """
