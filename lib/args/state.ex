@@ -12,7 +12,7 @@ defmodule Exp.Args.State do
   @strict Application.get_env(:exp, :params, [])
 
 
-  @help_set """
+  @usage_set """
     Invalid use of exp set
 
     For information for a specific task use [option] [--help | -h].
@@ -41,7 +41,7 @@ defmodule Exp.Args.State do
     case result do
       :ok -> {:ok, "Configuration successfully updated."}
       {:error, _} -> result
-      :help -> {:help, @help_set}
+      :help -> {:help, @usage_set}
     end
   end
 
@@ -53,24 +53,22 @@ defmodule Exp.Args.State do
 
 
 
-  @help_get """
-    Invalid use of exp get
+  @usage_get """
 
-    For information for a specific task use [option] [--help | -h].
+    Description:
+
+      Returns default configs.
 
     Usage:
 
       exp get [flag | flag flag ...]
 
 
-    Flags:
+    Options:
 
       --block-length    - set the default length of a learning unit.
-      --output-format   - the format to write out entries.
       --is-recording    - is CLI currently recording?
       --remind          - Current time of set timer
-      --
-
 
     """
 
@@ -90,7 +88,7 @@ defmodule Exp.Args.State do
         {:ok, _} -> 
           {:ok, (elem(result,1) |> Enum.map(&Msgs.to_string/1) |> Enum.join(", "))}
         {:error, _} -> result
-        :help -> {:help, @help_get} 
+        :help -> {:help, @usage_get} 
         _ -> {:error, "Unknown error"}
       end
   end

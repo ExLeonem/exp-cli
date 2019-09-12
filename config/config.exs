@@ -45,7 +45,9 @@ config :exp,
         time_started: [:string, nil, false],
         output_format: [:string, :csv, true],
         last_entry: [:string, nil, false],
-        version: [:string, Mix.Project.config[:version], false]
+        version: [:string, Mix.Project.config[:version], false],
+        # supported_types: [:array, [:csv, :json, :xml, :yaml], false],
+        # last_write: [:string, nil, false] # Last time data was writen to fs
     ],
     commands: [
         start: [

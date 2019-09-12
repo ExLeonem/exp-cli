@@ -8,6 +8,12 @@ defmodule Exp.Args.Display do
         Module handles CLI calls to query/display data from entry store.
     """
 
+    @usage_display """
+    
+            
+    """
+
+
     @options [
         aliases: [
             a: :all,
@@ -62,6 +68,7 @@ defmodule Exp.Args.Display do
 
     def _format_result([], aggregate), do: {:ok, aggregate}
     def _format_result([h| t], aggregate) do
+        # Needs to be dynamically generated
         {date_time, duration, title} = if is_tuple(h) do
             h 
         else
