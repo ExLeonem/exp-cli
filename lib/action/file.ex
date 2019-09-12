@@ -9,144 +9,108 @@ defmodule Exp.Action.File do
     """
 
     @field_names Config.extract(:keys, :field)
-    @default_opts [
-        name: "exp_data",
-        dir: File.cwd(),
-        format: :csv
-    ]
+    @valid_extensions [:csv, :json, :yaml, :xml]
+
 
     @doc """
-        Write File in a specific format to the Filesystem.
+        Write files in a specific format to the filesystem.
+        Valid formats include csv, json, xml and yaml.
 
         Argv-Parameters:
-        - format: Fileformat [:csv | :json | :xml]
-        - dir: Additional options to set
-        - name: The name of the file
+        - flush: cleans the dets store after a successful write
         - output: full path to the output directory and filename with extension
 
+
+        returns {:error, reason} | {:help, message} | {:ok, message}
     """
-    def write({status, _} = input) when status == :error or status == :help, do: input # return {:error, _} | {:help, @usage} 
+    def write({status, _} = result) when status == :error or status == :help, do: result # return {:error, _} | {:help, @usage} 
     def write({:ok, argv}) do
-        result = argv |> build_filepath
-        data = State.get_entries()
         
-        case path do
-            {:ok, path, type} -> FileOutput.format(type, data) |> write_out(path)
-            {:error, _} -> result
+        # TODO: Check if there is content at all to write.
+        # Modify Agent to only need read once. --> save content inside state
+        {is_valid?, result} = argv |> path_valid? 
+
+        if is_valid? do
+            {full_path, type} = result
+            data = State.get_entries
+
+            type
+            |> FileOutput.format(data)
+            |> create(full_path)
+            |> fill
+
+        else
+            {:error, result}
+        end
+    end
+
+
+    @doc """
+        Checks the given path and it's components for validity.
+        Creates the needed file to write the content.
+
+        Returns {:ok, path} | {:error, reason}
+    """
+    def path_valid?(write_opts) do
+        
+        if Keyword.has_key?(write_opts, :output)  do
+            output_path = write_opts[:output]
+
+            # Get the components
+            type = output_path |> Path.extname |> String.slice(1..-1) |> String.to_atom 
+            dir_path = Path.dirname(output_path)
+
+            if File.dir?(dir_path) do
+
+                case type do
+                     ext when ext in @valid_extensions -> {true, {output_path, type}}
+                    :"" -> {false, "I couldn't write the file. Seems like you missed the file extension in \"#{output_path}\"."}
+                    _ -> {false, "Sorry the file extension \"#{type}\" is currently not supported. Supported formats are [csv, json, xml, yaml]."}
+
+                end                
+
+            else
+                {false, "Some part of the path is not existent. Are you sure that this folder structure already exists?"}
+            end
+            
+        else
+            {false, "You need at least pass me a path with a valid file name. Check exp write --help to get more info."}
         end
 
     end
 
     
-
     @doc """
-        Writes data out to a file.
-
+        Creates the file to be filled
     """
-    def write_out(content, path) do
-        
-    end
+    def create({status, _} = result, path) when status in [:error, :help], do: result
+    def create({:ok, content}, path) do
 
+        opened? = File.open(path, [:write, :append])
 
-    @doc """
-        Builds a full fetched filepath out of OptionParser argv.
-
-        Parameters:
-        - argv: OptionParser Arguments 
-            - output: full featured output path
-            - name: Filename
-            - dir: directory path
-            - 
-
-        Returns {:ok, path} | {:error, reason}
-    """
-    def build_filepath(write_opts) do
-        
-        if Keyword.has_key?(write_opts, :output)  do
-            output_path = write_opts[:output]
-
-            if File.exists?(output_path) && !File.dir?(output_path) do
-                ext = Path.extname(output_path) |> String.downcase |> String.slice(1..-1) |> String.to_atom
-            else
-
-            end 
-
-        else
-
+        case opened? do
+            {:ok, pid} -> {:ok ,{pid, content}}
+            {:error, reason} -> reason |> process_fs_error
         end
 
     end
-
-    def check_full_path(path) do
-        
-    end
-
-
-
-    # def exists?(config) do
-        
-    # end
-
-    # ----------------------------
-    # Utilities
-
-    @doc """
-        Check wether file/directory exists
-    """
-    def exists?(config) do
-        {name, dir, format} = config |> Keyword.values |> List.to_tuple
-        full_name = get_file_name(name, format)
-        full_path = Path.join([dir, full_name])
-
-        if File.exists?(dir) && File.dir?(dir) do
-            {true, full_path}
-        else
-            # Create path that does not exist 
-            result = File.mkdir(dir)
-
-            case result do
-                :ok -> {true, full_path}
-                {:error, :eacces} -> {false, "Couldn't write directory because of lacking permission."}
-                {:error, :eexist} -> {false, "Couldn't create Directory. There's already a directory named that way."}
-                {:error, :enoent} -> {false, "Couldn't create Directory. A component of the path does not exist."}
-                {:error, :enospc} -> {false, "Couldn't create Directory. There's no space left on the device."}
-                {:error, :enotdir} -> {false, "Couldn't create Directory. A component of the path is not a directory."}
-            end
-            
-        end
-
-    end
-
-    # Create the file pass result
-    def create({true, full_path}), do: full_path |> File.open([:write, :append])
-    def create({false, msg} = result), do: {:error, msg}
-        
-    @doc """
-
-    """
-    def fill({:error, msg} = result), do: result
-    def fill() do
-        
-    end
+    def create(not_successfull_format, _path), do: not_successfull_format
 
 
     @doc """
-        In either case returns a tuple with default configuration.
-
-        Returns Tuple {:ok {filename, path}} | {:error, "passed parameter doesen't exist."}
+        Fills the file with the formatted content
     """
-
-    def get_write_config()
-    def get_write_config([], acc), do: acc
-    def get_write_config([{key, value} | rest]) do
-        
+    def fill({:error, _} = result), do: result
+    def fill({:ok, {file_pid, content}}) do
+        {:ok, "some"}
     end
 
 
-    def get_file_name(name, format) when (is_atom(format) or is_binary(format)) and is_binary(name) do
-        ext = format |> to_string
-        "#{name}.#{ext}"
-    end
-    def get_file_name(name, format), do: raise ArgumentError, message: "Error in function &get_file_name/2. Expected parameters of type atom and string. Got something else."
+    # Custom error messages
+    def process_fs_error(:eacces), do: {:error, "Missing search or write permission."}
+    def process_fs_error(:eexist), do: {:error, "There's already a file named this way."}
+    def process_fs_error(:enoent), do: {:error, "A component of the path is missing."}
+    def process_fs_error(:enospc), do: {:error, "There's no space left on the device."}
+    def process_fs_error(:enotdir), do: {:error, "A component of the path is not a directory."}
 
 end

@@ -14,6 +14,10 @@ defmodule Exp.Args.Record do
   @add_help_switch [strict: [help: :boolean], aliases: [h: :help]]
   @add_help """
 
+    -------------------------------------------
+    /////////////////// add /////////////////// 
+    -------------------------------------------
+
     Description:
 
         Adds a new entry to the entry store.
@@ -22,7 +26,7 @@ defmodule Exp.Args.Record do
 
       exp add --start 20:20 --title "Sample tilte" --tags tag1,tag2,tag3
 
-    Fields:
+    Options:
       --date,  -d   - The date in which you've done the work, dd-MM-YYYY
       --start, -s   - Time you started the work, in format: hh:mm (required!)
       --end,   -e   - Time you finished the work, in format hh:mm (default to now)

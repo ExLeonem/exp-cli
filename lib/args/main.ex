@@ -12,10 +12,11 @@ defmodule Exp.Args.Main do
   """
 
   @usage """
+    -------------------------------------------------
+    /////////////////// EXP-CLI ⌚ ///////////////////
+    -------------------------------------------------
 
-    ++++++++++++ EXP CLI +++++++++++++++++++
-
-    For information about a specific task use [option] [--help | -h].
+    For information about a specific command use [option] [--help | -h].
 
 
     Usage:
@@ -23,7 +24,7 @@ defmodule Exp.Args.Main do
       ./exp [option] [value|s]
 
 
-    Option:
+    Commands:
       
       add     - adding a new entry
       start   - start recording

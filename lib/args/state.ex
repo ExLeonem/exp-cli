@@ -53,23 +53,21 @@ defmodule Exp.Args.State do
 
 
   @usage_get """
-    Invalid use of exp get
 
-    For information for a specific task use [option] [--help | -h].
+    Description:
+
+      Returns default configs.
 
     Usage:
 
       exp get [--flag | --flag --flag ...]
 
 
-    Flags:
+    Options:
 
       --block-length    - set the default length of a learning unit.
-      --output-format   - the format to write out entries.
       --is-recording    - is CLI currently recording?
       --remind          - Current time of set timer
-      --
-
 
     """
 

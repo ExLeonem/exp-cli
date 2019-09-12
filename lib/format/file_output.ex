@@ -3,7 +3,14 @@ defmodule Exp.Format.FileOutput do
         Formatting the export of entry tables to output files.
     """
 
-    @default_config [sep: ",", field_names: []]
+    # Add to config.exs and make configurable
+    @opts [
+        csv: [sep: ",", field_names: []],
+        json: [],
+        xml: [],
+        yaml: []    
+    ]
+    
 
 
     # What todo on nested keys?
@@ -26,55 +33,72 @@ defmodule Exp.Format.FileOutput do
 
         TODO: Merge default config into passed config
     """
-    def format(type, data, opts \\ [sep: ",", field_names: []])
-    def format(:csv = type, data, opts) do
-        csv_content = data |> resolve_csv(opts, "")
-        
-        # Append header additional header if :field_names passed
-        if is_list(opts[:field_names]) && !Enum.empty?(opts[:field_names]) do
-            csv_header = header(type, opts[:field_names])
-            csv_header <> "\n" <> csv_content
+    def format(type, data) do
+
+        if length(data) != 0 do
+            result = type |> resolve(data) 
+            {:ok, result}
         else
-            csv_content 
+            {:error, "Nice try. Record something before trying to write it into a file."}
         end
+        # Append header additional header if :field_names passed
+        # if is_list(opts[:field_names]) && !Enum.empty?(opts[:field_names]) do
+        #     csv_header = header(type, opts[:field_names])
+        #     csv_header <> "\n" <> csv_content
+        # else
+        #     csv_content 
+        # end
     end
 
-    def format(:json, data, opts), do: {:help, "This feature is currently under development."}
-    def format(:xml, data, opts), do: {:help, "This feature is currently under development."}
-    def format(:yaml, data, opts), do: {:help, "This feature is currently under development."}
+    @doc """
+        Dispatches on different resolve functions depending on the file extension.
+
+        Returns the resolved entries into the specific file format.
+    """
+    def resolve(type, data) do
+        case type do
+            :csv -> resolve_csv(data)
+            :json -> resolve_json(data)
+            :xml -> resolve_xml(data)
+            :yaml -> resolve_yaml(data)
+        end
+    end
 
     @doc """
         Function resolves and writes entry into one line. Formatting the output.
 
         Parameters:
         - data: data to be resolved
-        - opts: additional options used while processing the data
-            - sep: separator to be used, needs to be a string
-            - field names: needs to be equally long as entity type length
         - acc: accumulator for the string
 
         Returns resolved string ready to be written to a file.
     """
-    def resolve_csv(data, opts \\ [], acc \\ "")
-    def resolve_csv([], _, acc), do: acc
-    def resolve_csv([value| rest], opts, acc) when is_tuple(value) do
+    def resolve_csv(data, acc \\ "")
+    def resolve_csv([], acc), do: acc
+    def resolve_csv([value | rest], acc) when is_tuple(value) do
 
         resolve_inner = fn 
             value when is_tuple(value) or is_list(value) -> 
-                joined_values = value |> to_list |> Enum.join(opts[:sep])
+                joined_values = value |> to_list |> Enum.join(@opts[:csv][:sep])
                 "[#{joined_values}]"
             value -> value |> to_string |> encapsulate? end   
         
         new_acc = value
         |> to_list
         |> Enum.map(resolve_inner)
-        |> Enum.join(opts[:sep])
+        |> Enum.join(@opts[:csv][:sep])
         |> combine(acc)
 
-        resolve_csv(rest, opts, new_acc)
+        resolve_csv(rest, new_acc)
     end
-    
-    def resolve_csv(_, _, _), do: raise ArgumentError, message: "Error in function &resolve_csv/3. Invalid entry format. Only mulitple entries represented as tuple may be written to a file."
+    def resolve_csv(_, _), do: raise ArgumentError, message: "Error in function &resolve_csv/3. Invalid entry format. Only mulitple entries represented as tuple may be written to a file."
+
+
+    def resolve_xml(data), do: {:error, "Currently under development"}
+    def resolve_yaml(data), do: {:error, "Currently under development"}
+    def resolve_json(data), do: {:error, "Currently under development"}
+
+
 
     # Combines left and right string parts, takes only strings
     def combine(right, ""), do: right

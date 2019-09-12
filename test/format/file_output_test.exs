@@ -1,76 +1,78 @@
 defmodule TestExpFormatFileOutput do
     use ExUnit.Case
+    alias Exp.Action.State
     alias Exp.Format.FileOutput
     doctest FileOutput
 
 
     describe "test/csv-output" do
 
+        setup do
+            State.start_link
+            :ok
+        end
+
+        def teardown do
+            State.flush(:config_store)
+            State.flush(:entry_store)
+            State.shutdown()
+        end
+
         test "valid/simple" do
             assert FileOutput.format(:csv, [{1, 2, 3}]) == "1,2,3"
+            teardown()
         end
 
         test "valid/mixed-values" do
             assert FileOutput.format(:csv, [{1, :hey, 12.2, nil, true}]) == "1,hey,12.2,,true"
+            teardown()
         end
 
         test "valid/2-entries" do
             assert FileOutput.format(:csv, [{1,2,3}, {1,2,3}]) == "1,2,3\n1,2,3"
-        end
-
-        test "valid/simple-with-header" do
-            assert FileOutput.format(:csv, [{1,2,3}], [sep: ",", field_names: ["a", "b", "c"]]) == "a,b,c\n1,2,3"
-        end
-
-        test "valid/opt-separator" do
-            assert FileOutput.format(:csv, [{1, 2, 3}], [sep: ";"]) == "1;2;3"
-        end
-
-        test "invalid/header" do
-            assert FileOutput.format(:csv, [{1,2,3}], [sep: "/", field_names: "hey"]) == "1/2/3"
+            teardown()
         end
 
         test "collection/valid/nested-values" do
             assert FileOutput.format(:csv, [{1, {2, 3}}]) == "1,[2,3]"
+            teardown()
         end
 
         test "single/invalid/integer" do
             assert_raise ArgumentError, fn ->
                 FileOutput.format(:csv, 22)
             end
+            teardown()
         end
 
         test "single/invalid/boolean" do
             assert_raise ArgumentError, fn -> 
                 FileOutput.format(:csv, true)
             end
+            teardown()
         end
 
         test "collection/invalid-format/single-tuple" do
             assert_raise ArgumentError, fn ->
                 FileOutput.format(:csv, {1, 2})
             end
+            teardown()
         end
 
         test "collection/invalid/list" do
             assert_raise ArgumentError, fn ->
                 FileOutput.format(:csv, [1, 2])
             end
+            teardown()
         end
 
         test "nested/list" do
             assert_raise ArgumentError, fn ->
                 FileOutput.format(:csv, [1, [2, 3]])
-            end            
-        end
-
-        test "invalid-separator" do
-            assert_raise ArgumentError, fn ->
-                FileOutput.format(:csv, [1, 3, 4], [sep: true]) == false
             end
+            teardown()
         end
-
-    
+   
     end
 
     describe "test/json-output" do

@@ -8,6 +8,12 @@ defmodule Exp.Args.Display do
         Module handles CLI calls to query/display data from entry store.
     """
 
+    @usage_display """
+    
+            
+    """
+
+
     @options [
         aliases: [
             a: :all,
