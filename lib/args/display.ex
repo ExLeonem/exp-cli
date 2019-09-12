@@ -10,7 +10,26 @@ defmodule Exp.Args.Display do
 
     @usage_display """
     
-            
+        --------------------------------------------
+        /////////////////// show /////////////////// 
+        --------------------------------------------
+
+        Description:
+
+            Display the currently stored entries.
+
+        Usage:
+
+            exp show --last
+
+            exp show 
+
+        Options:
+
+            --all, -a           - Show all stored entries
+            --last, -l          - Show the last saved entry
+            --timeframe, -t     - Query entries by timeframe
+
     """
 
 

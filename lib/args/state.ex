@@ -8,14 +8,15 @@ defmodule Exp.Args.State do
 
   """
 
-  # OptionParser options
-  @strict Application.get_env(:exp, :params, [])
-
-
   @usage_set """
-    Invalid use of exp set
 
-    For information for a specific task use [option] [--help | -h].
+    --------------------------------------------
+    /////////////////// set ////////////////////
+    --------------------------------------------
+
+    Description:
+
+      Set configuration parameter for the cli.
 
     Usage:
 
@@ -33,8 +34,10 @@ defmodule Exp.Args.State do
     Setting configuration parameters through the cli.
   """
   def parse(:set, argv) do
+    strict = Config.extract(:schema) |> Keyword.put_new(:help, :boolean)
+
     result = argv
-    |> OptionParser.parse(strict: @strict)
+    |> OptionParser.parse([strict: strict, aliases: [h: :help]])
     |> extract_valid
     |> set_config
 
@@ -46,14 +49,22 @@ defmodule Exp.Args.State do
   end
 
   def set_config({:error, msg} = result), do: result
-  def set_config([]), do: :help
+  def set_config([]), do: {:error, "You passed no options at all. Type exp set -h for usage information"}
   def set_config(argv) do
-    State.set_config(argv)
+    if argv[:help] do
+      :help
+    else
+      State.set_config(argv)
+    end
   end
 
 
 
   @usage_get """
+
+    --------------------------------------------
+    /////////////////// get /////////////////// 
+    --------------------------------------------
 
     Description:
 
@@ -69,7 +80,8 @@ defmodule Exp.Args.State do
       --block-length    - set the default length of a learning unit.
       --is-recording    - is CLI currently recording?
       --remind          - Current time of set timer
-
+      -- version        - Get the current cli version
+      
     """
 
 
@@ -77,31 +89,33 @@ defmodule Exp.Args.State do
     Getting configuration parameters through the cli.
   """
   def parse(:get, argv) do
-     strict = Config.extract(:schema) |> Config.set_type(:boolean)
+     strict = Config.extract(:schema) |> Config.set_type(:boolean) |> Keyword.put_new(:help, :boolean)
 
       result = argv
-      |> OptionParser.parse(strict: strict)
+      |> OptionParser.parse([strict: strict, aliases: [h: :help]])
       |> extract_valid
       |> get_config
 
       case result do
-        {:ok, _} -> 
-          {:ok, (elem(result,1) |> Enum.map(&Msgs.to_string/1) |> Enum.join(", "))}
+        {:ok, _} -> {:ok, (elem(result,1) |> Enum.map(&Msgs.to_string/1) |> Enum.join(", "))}
         {:error, _} -> result
         :help -> {:help, @usage_get} 
-        _ -> {:error, "Unknown error"}
       end
   end
 
   def parse(_, argv), do: {:error, "invalid directive", []}
 
-  def get_config({:error, msg} = result), do: result  
-  def get_config([]), do: :help
+  def get_config({status, _} = result) when status in [:help, :error], do: result  
+  def get_config([]), do: {:error, "You passed no options at all. Type exp get -h for usage information"}
   def get_config(argv) do
-    argv
-    |> Keyword.keys
-    |> Enum.reverse
-    |> State.get_config
+    if argv[:help] do
+      :help
+    else
+      argv
+      |> Keyword.keys
+      |> Enum.reverse
+      |> State.get_config
+    end
   end
 
 
@@ -113,7 +127,7 @@ defmodule Exp.Args.State do
     if Enum.empty?(rest) && Enum.empty?(invalid) do
       valid_argv  
     else
-      {:error, :invalid_param}
+      {:error, "You passed some invalid options. Check the usage with exp get -h"}
     end
 
   end
