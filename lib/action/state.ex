@@ -60,7 +60,7 @@ defmodule Exp.Action.State do
   def get_entries(filter \\ [])
   def get_entries([]) do
     table = get_table(@entry_table)
-    # :dets.match_object(table, [{:"$1", :"$2", :"$3"}])
+    # :dets.match_object(table, {:"$1", :"$2", :"$3"})
     :dets.match(table, :"$1") # returns all entries
   end
   def get_entries(filter) do

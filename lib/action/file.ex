@@ -1,4 +1,6 @@
 defmodule Exp.Action.File do
+    require Logger
+
     alias Exp.Format.FileOutput
     alias Exp.Action.State
     alias Exp.Format.Config

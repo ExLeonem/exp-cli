@@ -75,7 +75,15 @@ defmodule Exp.Format.FileOutput do
     """
     def resolve_csv(data, acc \\ "")
     def resolve_csv([], acc), do: acc
-    def resolve_csv([value | rest], acc) when is_tuple(value) do
+    def resolve_csv([value | rest], acc) when is_tuple(value) or is_list(value) do
+        
+        # Resolve unecessary nesting
+        new_value = if is_tuple(value) do
+            value    
+        else
+            [ele] = value
+            ele
+        end
 
         resolve_inner = fn 
             value when is_tuple(value) or is_list(value) -> 
@@ -83,7 +91,7 @@ defmodule Exp.Format.FileOutput do
                 "[#{joined_values}]"
             value -> value |> to_string |> encapsulate? end   
         
-        new_acc = value
+        new_acc = new_value
         |> to_list
         |> Enum.map(resolve_inner)
         |> Enum.join(@opts[:csv][:sep])

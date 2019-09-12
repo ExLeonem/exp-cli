@@ -18,8 +18,18 @@ defmodule TestExpArgsFile do
             State.shutdown()
         end
 
+
         test "only/-o/valid" do
-            assert File.parse(:write, ["--output", "/home/maksim/Desktop/test.csv"]) == false
+            State.write_entry({"a", "b", "c"})
+            State.write_entry({"a", "b", "c"})
+            State.write_entry({"k", "t", "b"})
+            assert {:ok, _} = File.parse(:write, ["--output", "/home/maksim/Desktop/test/test.csv"])
+            teardown()
+        end
+        
+        test "only/-o/invalid/no-data" do
+            
+            assert {:error, _} = File.parse(:write, ["--output", "/home/maksim/Desktop/test.csv"])
             teardown()
         end
 

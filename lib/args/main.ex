@@ -11,6 +11,11 @@ defmodule Exp.Args.Main do
     Main Parser, parses top level options and passes left options to more specific parser.
   """
 
+
+
+  # Additionals
+  # status -> current recording status (time-already recording)
+  # clear -> reset recording
   @usage """
     -------------------------------------------------
     /////////////////// EXP-CLI ⌚ ///////////////////
