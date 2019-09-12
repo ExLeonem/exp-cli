@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/ExLeonem/exp.svg?branch=master)](https://travis-ci.com/ExLeonem/exp)
+[![Build Status](https://travis-ci.org/ExLeonem/exp-cli.svg?branch=master)](https://travis-ci.org/ExLeonem/exp-cli)
 [![Coverage Status](https://coveralls.io/repos/github/ExLeonem/exp-cli/badge.svg?branch=master)](https://coveralls.io/github/ExLeonem/exp-cli?branch=master)
 ![](https://img.shields.io/badge/elixir-1.9.1-blue)
 
