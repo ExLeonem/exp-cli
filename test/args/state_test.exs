@@ -40,8 +40,8 @@ defmodule TestExpArgsState do
     end
 
     # Should trigger exp set --help
-    test "test/[]/help" do
-      assert {:help, _} = ArgsState.parse(:set, [])
+    test "test/[]/no-options-set" do
+      assert {:error, _} = ArgsState.parse(:set, [])
       teardown()
     end
 
@@ -63,8 +63,8 @@ defmodule TestExpArgsState do
       assert ArgsState.parse(:get, ["--block-length", "--remind"]) == {:ok, "1:30, nil"}
     end
 
-    test "get/[]/help" do
-      assert {:help, _} = ArgsState.parse(:get, [])
+    test "get/[]/no-options-set" do
+      assert {:error, _} = ArgsState.parse(:get, [])
     end
 
     test "get/[:invalid]/help" do
