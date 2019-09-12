@@ -6,13 +6,7 @@ defmodule TestExpActionFile do
 
     describe "test/exists?" do
 
-        test "valid/dir" do
-
-        end
-
-        test "invalid/dir" do
-            
-        end
+        
 
     end
 

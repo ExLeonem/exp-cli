@@ -9,28 +9,44 @@ defmodule Exp.Args.Display do
     """
 
     @usage_display """
-    
-            
-    """
 
+        --------------------------------------------
+        /////////////////// show /////////////////// 
+        --------------------------------------------
+
+        Description:
+
+            Display the currently stored entries.
+
+        Usage:
+
+            exp show --last
+
+            exp show 
+
+        Options:
+
+            --all, -a           - Show all stored entries
+            --last, -l          - Show the last saved entry
+            --timeframe, -t     - Query entries by timeframe
+
+    """
 
     @options [
         aliases: [
             a: :all,
             l: :last,
-            t: :timeframe
+            t: :timeframe,
+            h: :help
         ],
         strict: [
             all: :boolean,
             last: :boolean,
-            timeframe: :string
+            timeframe: :string,
+            help: :boolean
         ]
     ]
-
-    # @show_strict [
-        
-    # ]
-
+    
     @doc """
 
     """
@@ -46,16 +62,21 @@ defmodule Exp.Args.Display do
 
     # TODO: check wether one ore more parameter set and respond to user
     def get_entries({argv, _, _}) do
-        time_frame = argv[:timeframe]
-        get_all? = argv[:all]
-        last? = argv[:last]
-        
-        result = cond do
-            last? -> _get_entries(:last)
-            !is_nil(time_frame) && time_frame != "" -> _get_entries(:timeframe, time_frame)
-            true -> _get_entries(:all) 
+
+        if argv[:help] do
+            {:help, @usage_display}
+        else
+            time_frame = argv[:timeframe]
+            get_all? = argv[:all]
+            last? = argv[:last]
+            
+            result = cond do
+                last? -> _get_entries(:last)
+                !is_nil(time_frame) && time_frame != "" -> _get_entries(:timeframe, time_frame)
+                true -> _get_entries(:all) 
+            end
+            format_result(result)
         end
-        format_result(result)
     end 
 
     def format_result(result, aggregate \\ "")

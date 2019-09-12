@@ -19,16 +19,15 @@ defmodule TestExpArgsFile do
         end
 
 
-        test "only/-o/valid" do
+        test "only/-o/non-existent-path-component" do
             State.write_entry({"a", "b", "c"})
             State.write_entry({"a", "b", "c"})
             State.write_entry({"k", "t", "b"})
-            assert {:ok, _} = File.parse(:write, ["--output", "/home/maksim/Desktop/test/test.csv"])
+            assert {:error, _} = File.parse(:write, ["--output", "/home/maksim/Desktop/somewhere/test.csv"])
             teardown()
         end
         
         test "only/-o/invalid/no-data" do
-            
             assert {:error, _} = File.parse(:write, ["--output", "/home/maksim/Desktop/test.csv"])
             teardown()
         end

@@ -4,7 +4,6 @@ defmodule TestExpArgsState do
   alias Exp.Args.State, as: ArgsState
   doctest Exp.Args.State
 
-
   setup do
     StateAgent.start_link()
     :ok
@@ -14,7 +13,6 @@ defmodule TestExpArgsState do
     StateAgent.flush(:config_store)
     StateAgent.shutdown()
   end 
-
 
   describe "test/set-parameters" do
 
@@ -39,9 +37,8 @@ defmodule TestExpArgsState do
       teardown()
     end
 
-    # Should trigger exp set --help
-    test "test/[]/help" do
-      assert {:help, _} = ArgsState.parse(:set, [])
+    test "test/[]/no-options-set" do
+      assert {:error, _} = ArgsState.parse(:set, [])
       teardown()
     end
 
@@ -63,8 +60,8 @@ defmodule TestExpArgsState do
       assert ArgsState.parse(:get, ["--block-length", "--remind"]) == {:ok, "1:30, nil"}
     end
 
-    test "get/[]/help" do
-      assert {:help, _} = ArgsState.parse(:get, [])
+    test "get/[]/no-options-set" do
+      assert {:error, _} = ArgsState.parse(:get, [])
     end
 
     test "get/[:invalid]/help" do

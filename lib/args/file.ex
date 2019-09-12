@@ -27,7 +27,7 @@ defmodule Exp.Args.File do
 
     # Add flag: --new --> only write new data till last write
     @parser_config [
-        alias: [
+        aliases: [
             o: :output, # Full path with filename and extension
             f: :flush,
             h: :help

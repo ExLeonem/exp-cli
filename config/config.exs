@@ -48,6 +48,7 @@ config :exp,
         version: [:string, Mix.Project.config[:version], false],
         # supported_types: [:array, [:csv, :json, :xml, :yaml], false],
         # last_write: [:string, nil, false] # Last time data was writen to fs
+        # default_path [:string, cwd(), true] # The default path were to write/read data to/from
     ],
     commands: [
         start: [
