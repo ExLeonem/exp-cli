@@ -83,10 +83,9 @@ Name          | writeable?  |  Description
 ---           | ---         | ---
 is-recording          | false       | Indicates if application currently is recording the time. Switches by calling the [stop](#Commands) command.
 default-block-length  | true        | The block length for the pomodoro timer
-<!-- remind                | true        | Set timout to prompt user current state -->
 output-format         | true        | Default output format to use on `write` command
 last-entry            | false       | DateTime of last entry written to the entry store
-
+<!-- remind                | true        | Set timout to prompt user current state -->
 
 
 ## Commands

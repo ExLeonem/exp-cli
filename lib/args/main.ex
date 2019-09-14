@@ -31,9 +31,10 @@ defmodule Exp.Args.Main do
 
     Commands:
       
-      add     - adding a new entry
       start   - start recording
       stop    - stop recording
+      status  - Shows the current progression.
+      add     - adding a new entry
       set     - cli configuration
       get     - get current cli config information
       show    - query inserted information
@@ -69,6 +70,7 @@ defmodule Exp.Args.Main do
   def dispatch(:stop, argv), do: Record.parse(:stop, argv)
   def dispatch(:set, argv), do: State.parse(:set, argv)
   def dispatch(:get, argv), do: State.parse(:get, argv)
+  def dispatch(:status, argv), do: State.parse(:status, argv)
   def dispatch(:show, argv), do: Display.parse(:show, argv)
   def dispatch(:write, argv), do: File.parse(:write, argv)
   def dispatch(_, _), do: get_help() # defaulting to on :help as well as invalid flags
