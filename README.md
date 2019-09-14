@@ -36,7 +36,7 @@ To use the CLI Erlang/Elixir needs to be installed loally. Other than that
 4. Adding the place where the binary is to the Path
 
 
-**Note:** The directory where the binary is needs to be writeable, because the CLI will be persisting entries into a DETS File.
+**Note:** The directory of the binary needs to be writeable because the CLI will persists entries into dets files.
 
 <!-- If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 by adding `exp` to your list of dependencies in `mix.exs`:
@@ -52,13 +52,7 @@ Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_do
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/exp](https://hexdocs.pm/exp). -->
 
-## Roadmap/Ideas
-
-- [ ] Native Application
-- [ ] Connect to 3rd party applications to collect additional data
-  - [ ] Github Commits (time and message)
-  - [ ] Quire/Google Task etc.
-- [ ] Statistics 
+## Roadmap
 - [x] Configuration
   - [x] Setting Parameters
   - [x] Getting Parameters
@@ -66,57 +60,83 @@ be found at [https://hexdocs.pm/exp](https://hexdocs.pm/exp). -->
   - [x] Complete List
   - [x] Last Entry
   - [ ] By filter
-- [x] Saving entries through CLI
+- [ ] Delete entries
+- [ ] Modify entries
+- [ ] Time tracking
   - [x] start/stop mechanic
   - [x] save instantly complete entry
-- [ ] Reminder/Timer functionality 
-- [ ] DETS Flush
-- [ ] Export DETS Data
+  - [ ] start/stop pomodoro watch
+- [ ] Export Entries
   - [x] CSV
   - [ ] JSON
-  - [ ] XML
-- [ ] Import DETS Data
+  <!-- - [ ] logfmt? -->
+- [ ] Import Entries
+  - [ ] CSV
+  - [ ] JSON
+  <!-- - [ ] logfmt -->
+
 
 
 ## Configuration Parameters
 
 Name          | writeable?  |  Description
 ---           | ---         | ---
-is-recording  | false       | Indicates if application currently is recording the time. Switches by calling the [stop](#Commands) command.
-block-length  | true        | Indicates the length of 
-remind        | true        | Set timout to prompt user current state
-output-format | true        | Default output format to use on `write` command
-last-entry    | false       | DateTime of last entry written to the entry store
+is-recording          | false       | Indicates if application currently is recording the time. Switches by calling the [stop](#Commands) command.
+default-block-length  | true        | The block length for the pomodoro timer
+<!-- remind                | true        | Set timout to prompt user current state -->
+output-format         | true        | Default output format to use on `write` command
+last-entry            | false       | DateTime of last entry written to the entry store
 
 
 
 ## Commands
 
 To start recording a new entry just type:`exp start`.
-To stop the recording call `exp stop`.
+To stop the recording timer call `exp stop` .
 
 ### General Commands
-Name            | Description                                                      | Implemented 
----             | ---                                                              | ---
-start           | Starts recording an entry (Sets time when recording started)     | &#9745;
-stop            | Stops the recording and writes entry to DETS                     | &#9745;
-[add](#Add)     | Writing an an entry directly into DETS                           | &#9745; 
-[show](#Show)   | Prints recorded entries.                                         | &#9745; <!--Checked-->
-[get](#Get)     | Get information on current configuration                         | &#9745;
-[set](#Set)     | Setting configuration attributes                                 | &#9745;
-[write](#Write) | Writes out currently saved entries from DETS into a given format | &#9744;
-[stat](#Stat])  | Show statistics                                                  | &#9744; <!--Unchecked-->
+Name                  | Description                                                      | Implemented 
+---                   | ---                                                              | ---
+start                 | Starts recording the time                                        | &#9745;
+stop                  | Stops the recording and writes an entry                          | &#9745;
+status                | Returns the duration since recording                             | &#9744;
+[add](#Add)           | Writing an entry instantly                                       | &#9745; 
+[show](#Show)         | Prints recorded entries.                                         | &#9745; <!--Checked-->
+[get](#Get)           | Get information on current configuration                         | &#9745;
+[set](#Set)           | Setting configuration attributes                                 | &#9745;
+[export](#export)     | Export of saved entries into another format in csv or json       | &#9744;
+<!-- [import](#import)     | Import a file to the list of current entries                     | &#9744; -->
+[sync](#Sync)         | Upload data to the remote application                            | &#9744;
+<!-- [stat](#Stat])  | Show statistics                                                  | &#9744; Unchecked -->
+<!-- [remote](#Remote) | Adding a remote application                                    | &#9744; -->
+
+
+<!-- ### Start
+
+ Start to record time `exp start`
+ Start a pomodoro timer `exp start -p`
+
+Flag            | Description
+---             | ---
+--pomodoro, -p  | Starts a pomodoro timer -->
 
 
 
 ### Add
+Add a new complete entry at once. Equal to recording with start/stop.
+If no stop flag is given it assumed that you just finished yet.
 
+Examples:
 
-Flag            | Description
----             | ---
--s, --start     | Start of the entry `HH:mm` 
--t, --title     | Title of the entry
--tg, --tag      | Add tags to the entry `exp add - "something" -tg tag1,tag2,tag3`     
+ `exp add -s 15:10 `
+
+ `exp add -s 12:12 -t "something" -tg tag1,tag2,tag3`     
+
+Flag            | Required? | Description
+---             |---        | ---
+-s, --start     | true      | Start of the entry `HH:mm` 
+-t, --title     | false     | Title of the entry
+-tg, --tag      | false     | Add tags to the entry 
 
 
 ### Show
@@ -124,16 +144,19 @@ Passing no flag at all will default to -a, --all
 
 Flag          | Description
 ---           | ---
--l, --last    | Output the last recorded entry.
--a, --all     | Output all entries
--f, --filter  | Filter output with passed query
+-l, --last    | Print the last recorded entry.
+-a, --all     | Prints all entries to the terminal.
+-f, --filter  | Filter all entries by given filter and print them to the terminal.
 
 
 ### Get
 Request the current set values of configuration parameters. All parameters usable as flags are listed in the [configuration parameter list](#Configuration_Parameters) section.
 
-Example: `exp get --block-length`
+Examples: 
+  
+  `exp get --block-length`
 
+  `exp get --block-length --is-recording`
 
 ### Set
 Setting default/configuration parameters.
@@ -144,6 +167,26 @@ Flag              | Type      |   Description
 ---               | ---       | ---
 --block-length    | string    | Default time for block when using CLI as a pomodoro watch in Format `HH:mm`
 --output-format   | string    | Setting the default output format for entry export, supported formats: `csv` and `json`
+
+
+### Export
+Export the recorded data to a specific Format.
+The given path must already be existent. Available output formats are csv and json. 
+
+Example: `exp -x /path/file.csv`
+
+
+<!-- ### Import
+
+Example: `exp -i /path/file.csv` -->
+
+
+### Sync
+Synchronizing data with the remote web application.
+This command will prompt for you'r credentials.
+
+Example: `exp sync`
+
 
 
 ### Contribution

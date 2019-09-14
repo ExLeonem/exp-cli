@@ -26,3 +26,7 @@ pow-*.tar
 /.*
 
 /exp
+
+# Ignore dets-storage files
+/config_store
+/entry_store
