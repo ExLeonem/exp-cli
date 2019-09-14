@@ -105,8 +105,8 @@ status                | Returns the duration since recording                    
 [get](#Get)           | Get information on current configuration                         | &#9745;
 [set](#Set)           | Setting configuration attributes                                 | &#9745;
 [export](#export)     | Export of saved entries into another format in csv or json       | &#9744;
-<!-- [import](#import)     | Import a file to the list of current entries                     | &#9744; -->
 [sync](#Sync)         | Upload data to the remote application                            | &#9744;
+<!-- [import](#import)     | Import a file to the list of current entries                     | &#9744; -->
 <!-- [stat](#Stat])  | Show statistics                                                  | &#9744; Unchecked -->
 <!-- [remote](#Remote) | Adding a remote application                                    | &#9744; -->
 
