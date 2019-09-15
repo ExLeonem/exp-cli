@@ -107,7 +107,7 @@ defmodule Exp.Args.Display do
     def _get_entries(:last, _), do: State.get_last_entry()
     def _get_entries(:all, _), do: State.get_entries()
     def _get_entries(:timeframe, timeframe) do
-        
+        # Filter entries by timeframe filter
     end
     def _get_entries(type, _), do: raise ArgumentError, message: "Unknown filter type: #{type}"
 

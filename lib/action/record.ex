@@ -55,7 +55,7 @@ defmodule Exp.Action.Record do
 
     config = State.get_config(:is_recording)
     if config[:is_recording] do
-      now = Time.utc_now()
+      now = DateTime.utc_now()
       date_time_write = DateTime.utc_now()
       config_time = State.get_config(:time_started)
       
@@ -96,13 +96,22 @@ defmodule Exp.Action.Record do
     seconds = Time.diff(end_time, start_time)
     minutes = div(seconds, 60)
     hours = div(minutes, 60)
+    days = div(hours, 24)
 
-    # Return tuple of calculated time units
-    {hours, rem(minutes, 60), rem(seconds, 60)}
+    if days != 0 do
+      {days, rem(hours, 24), rem(minutes, 60), rem(seconds, 60)}
+    else
+      # Return tuple of calculated time units
+      {hours, rem(minutes, 60), rem(seconds, 60)}
+    end
   end
 
   def format_time({hours, minutes, seconds}) do
     "#{hours}:#{minutes}:#{seconds}"
+  end
+
+  def format_time({days, hours, minutes, seconds}) do
+    "#{days}-days, #{hours}:#{minutes}:#{seconds}"
   end
 
 

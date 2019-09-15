@@ -25,7 +25,7 @@ defmodule Exp.Action.Record.Start do
     def start(_, _) do
         config = State.get_config(:is_recording)
         if !config[:is_recording] do
-            now = Time.utc_now()
+            now = DateTime.utc_now()
             state_updated? = State.put_config(:time_started, now)
             state_updated? = State.put_config(:is_recording, true)
 

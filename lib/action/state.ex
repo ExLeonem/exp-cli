@@ -72,16 +72,13 @@ defmodule Exp.Action.State do
   end
 
   @doc """
-    Returns the last entry of the entry dets store.
-
+    Returns the last entry written to the dets store.
   """
   def get_last_entry() do
-    table = get_table(@entry_table)
-    last_entry = get_config(:last_entry)
-    if !is_nil(last_entry) do
-
-      # REVIEW: Not a solution for big datasets (maybe Streams?)
-      get_entries()
+    # REVIEW: Not a solution for big datasets (maybe Streams?)
+    all_entries = get_entries()
+    if all_entries != [] do
+      all_entries
       |> Enum.reverse
       |> hd
     else
