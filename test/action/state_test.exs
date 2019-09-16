@@ -37,7 +37,7 @@ defmodule TestExpActionState do
   end
 
   test "read-config-from-table/parameterized/valid" do
-    assert State.get_config(:block_length) == [block_length: "1:30"]
+    assert State.get_config(:block_length) == "1:30"
   end
 
   test "read-config-from-table/all/valid" do
@@ -86,12 +86,8 @@ defmodule TestExpActionState do
 
   describe "test/config/read-write" do
 
-    test "read-first/valid" do
-      assert State.get_config(:block_length) == [block_length: "1:30"]
-    end
-
     test "read-last/valid" do
-      assert State.get_config(:output_format) == [output_format: :csv]
+      assert State.get_config(:output_format) == :csv
     end
 
     test "negative/mid/invalid" do
@@ -101,7 +97,7 @@ defmodule TestExpActionState do
     test "update-value/valid" do
       State.init_config() # reset configuration
       State.put_config(:is_recording, true)
-      assert State.get_config(:is_recording) == [is_recording: true]
+      assert State.get_config(:is_recording) == true
       teardown()
     end
 
@@ -110,7 +106,7 @@ defmodule TestExpActionState do
       State.put_config(:is_recording, true)
       State.shutdown()
       State.start_link()
-      assert State.get_config(:is_recording) == [is_recording: true]
+      assert State.get_config(:is_recording) == true
       teardown()
     end
 
@@ -119,7 +115,7 @@ defmodule TestExpActionState do
       now = Time.utc_now()
       State.put_config(:last_entry, now)
       last_entry = State.get_config(:last_entry)
-      assert last_entry[:last_entry] == now
+      assert last_entry == now
       teardown()
     end
 
@@ -127,8 +123,8 @@ defmodule TestExpActionState do
       State.init_config()
       update_keys = [block_length: "2:00", remind: true]
       State.set_config(update_keys)
-      assert State.get_config(:block_length) == [block_length: "2:00"]
-      assert State.get_config(:remind) == [remind: true]
+      assert State.get_config(:block_length) == "2:00"
+      assert State.get_config(:remind) == true
       teardown()
     end
 

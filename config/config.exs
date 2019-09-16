@@ -44,8 +44,9 @@ config :exp,
         remind: [:string, nil, true], # can be set but flag must be passed on start
         time_started: [:string, nil, false],
         output_format: [:string, :csv, true],
-        last_entry: [:string, nil, false],
+        last_entry: [:string, nil, false], # Is this needed at all? --> build complete entry and save here instead of interating over all entries?
         version: [:string, Mix.Project.config[:version], false],
+        default_storage_path: [:string, File.cwd!, false],
         # supported_types: [:array, [:csv, :json, :xml, :yaml], false],
         # last_write: [:string, nil, false] # Last time data was writen to fs
         # default_path [:string, cwd(), true] # The default path were to write/read data to/from

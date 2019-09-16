@@ -22,8 +22,9 @@ defmodule TestExpArgsDisplay do
         State.write_entry({DateTime.utc_now(), "00:00", "nkn"})
         State.write_entry({DateTime.utc_now(), "00:00", "tt"})
         now = DateTime.utc_now()
-        State.write_entry({now, "00:00", "cc"})
-        State.put_config(:last_entry, now)
+        entry = {now, "00:00", "cc"}
+        State.write_entry(entry)
+        State.put_config(:last_entry, entry)
     end
 
 

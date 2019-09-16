@@ -23,9 +23,9 @@ defmodule Exp.Action.Record.Start do
         Depending on passed parameters sets configuration that gets persisted.
     """
     def start(_, _) do
-        config = State.get_config(:is_recording)
-        if !config[:is_recording] do
-            now = Time.utc_now()
+        is_recording? = State.get_config(:is_recording)
+        if !is_recording? do
+            now = DateTime.utc_now()
             state_updated? = State.put_config(:time_started, now)
             state_updated? = State.put_config(:is_recording, true)
 

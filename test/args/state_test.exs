@@ -18,13 +18,13 @@ defmodule TestExpArgsState do
 
     test "set/:block-length" do
       ArgsState.parse(:set, ["--block-length", "20:00"])
-      assert StateAgent.get_config(:block_length) == [block_length: "20:00"]
+      assert StateAgent.get_config(:block_length) == "20:00"
       teardown()
     end
 
     test "set/:remind" do
       ArgsState.parse(:set, ["--remind", "2:00"])
-      assert StateAgent.get_config(:remind) == [remind: "2:00"]
+      assert StateAgent.get_config(:remind) == "2:00"
       teardown()
     end
 
@@ -32,8 +32,8 @@ defmodule TestExpArgsState do
       ArgsState.parse(:set, ["--block-length", "20:20", "--remind", "1:00"])
       block_length = StateAgent.get_config(:block_length)
       remind = StateAgent.get_config(:remind)
-      assert block_length[:block_length] == "20:20" 
-      assert remind[:remind] == "1:00"
+      assert block_length == "20:20" 
+      assert remind == "1:00"
       teardown()
     end
 
