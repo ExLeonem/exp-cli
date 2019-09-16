@@ -100,10 +100,6 @@ defmodule Exp.Format.FileOutput do
         resolve_csv(rest, new_acc)
     end
     def resolve_csv(_, _), do: raise ArgumentError, message: "Error in function &resolve_csv/3. Invalid entry format. Only mulitple entries represented as tuple may be written to a file."
-
-
-    def resolve_xml(data), do: {:error, "Currently under development"}
-    def resolve_yaml(data), do: {:error, "Currently under development"}
     def resolve_json(data), do: {:error, "Currently under development"}
 
 

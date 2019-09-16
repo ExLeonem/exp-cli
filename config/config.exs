@@ -56,6 +56,10 @@ config :exp,
             aliases: [ timer: :t,remind: :r ],
             strict: [ timer: :string, remind: :string]
         ],
+        stop: [
+            aliases: [d: :desc, t: :tag],
+            strict: [desc: :string, tag: :string]
+        ]
     ],
     fields: [
         date: [:string, false, :d],

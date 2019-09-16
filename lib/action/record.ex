@@ -1,13 +1,14 @@
 defmodule Exp.Action.Record do
   alias Exp.Action.State
   alias Exp.Action.Record.Start
+  alias Exp.Format.Config
   require Logger
 
   @moduledoc """
     Records/stops recording of time.
   """
 
-  @start_help """
+  @usage_start """
     How to record and set a timer with the start.
 
     Starting to record as follows ...
@@ -25,7 +26,7 @@ defmodule Exp.Action.Record do
   def start({argv, _, _}) do
     # Print either help or start recording
     if argv[:help] do
-      {:help, @start_help}
+      {:help, @usage_start}
     else
       remind = if argv[:remind], do: parse_remind(argv[:remind]), else: nil
       Start.start(argv[:timer], remind)
@@ -50,20 +51,16 @@ defmodule Exp.Action.Record do
   end
 
 
+  @usage_stop """
+  
+  """
   # Stop recording, shutdown process & write to file if circumstances right
   def stop(io \\ IO) do
 
     is_recording? = State.get_config(:is_recording)
     if is_recording? do
-      now = DateTime.utc_now()
-      date_time_write = DateTime.utc_now()
-      time_started = State.get_config(:time_started)
+      entry = build_entry()
       
-
-      # Check if today already file created & create one if needed
-      title = request_user_argument("Enter a title or description for the entry... \n", &is_binary/1, io)
-      time_flag = calculate_time(time_started, now) |> format_time
-
       # Write to dets tables
       entry = {date_time_write, time_flag, title}
       State.write_entry(entry)
@@ -74,6 +71,19 @@ defmodule Exp.Action.Record do
       {:error, "It seems like you aren't recording anything. Start recording first to stop something."}
     end
   end
+
+  def build_entry() do
+    now = DateTime.utc_now()
+    date_time_write = DateTime.utc_now()
+    time_started = State.get_config(:time_started)
+
+    # Check if today already file created & create one if needed
+    title = request_user_argument("Enter a title or description for the entry... \n", &is_binary/1, io)
+    time_flag = calculate_time(time_started, now) |> format_time
+
+  end
+
+
 
 
   def add({:ok, entry}) do

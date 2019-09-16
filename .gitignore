@@ -30,3 +30,5 @@ pow-*.tar
 # Ignore dets-storage files
 /config_store
 /entry_store
+
+/*.json

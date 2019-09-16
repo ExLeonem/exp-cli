@@ -66,7 +66,10 @@ defmodule Exp.Args.Record do
   @doc """
 
   """
-  def parse(:stop, _), do: Record.stop
+  def parse(:stop, argv) do
+    
+    Record.stop
+  end 
   def parse(_, _), do: {:error, "", []}
 
 end
