@@ -18,18 +18,37 @@ defmodule Exp.Action.State do
   @doc """
     Starts the StateAgent.
   """
-  def start_link() do
+  def start_link() do 
+    try do
+      default_path = @default_config[:default_storage_path]
+      changed_to_dir = File.cd(default_path)
+
+      if changed_to_dir != :ok, do: raise ArgumentError, message: "Failed to switch to #{default_path}"
       {:ok, config_table} = open_table(@config_table)
-      {:ok, entry_table} = open_table(@entry_table)
 
       # Parameterlist either not set or corrupted, reset, TODO: Compare keys, length prone for manipulation
       if length(get_config(:all_keys, config_table)) != length(@default_config) do
         init_config(config_table)
       end
 
+      storage_path = get_config(:default_storage_path, config_table)
+      
+      # switch where to save entries to.
+      changed_to_dir = File.cd(storage_path)
+      if changed_to_dir != :ok, do: raise ArgumentError, message: "Couldn't switch to #{storage_path}. Is the directory existent at all?"
+      {:ok, entry_table} = open_table(@entry_table)
+
       # Agent loads/keeps tables open, writes/reads tables
       Agent.start_link(fn -> {config_table, entry_table} end, name: __MODULE__)
+      :ok
+    rescue
+      e in ArgumentError -> {:error, e[:message]}
+
+    end
   end
+
+
+
 
   def open_table(table_name) do
     :dets.open_file(table_name, [type: :set, access: :read_write])
@@ -76,11 +95,9 @@ defmodule Exp.Action.State do
   """
   def get_last_entry() do
     # REVIEW: Not a solution for big datasets (maybe Streams?)
-    all_entries = get_entries()
-    if all_entries != [] do
-      all_entries
-      |> Enum.reverse
-      |> hd
+    last_entry = get_config(:last_entry)
+    if !is_nil(last_entry) do
+      [last_entry]
     else
       []
     end
@@ -93,7 +110,7 @@ defmodule Exp.Action.State do
     # check if config is in @default config key list then write
     table = get_table(@config_table)
     :dets.insert(table, {key, value})
-  end
+  end 
 
   @doc """
       Gets the current configuration parameter under given key.
@@ -114,14 +131,14 @@ defmodule Exp.Action.State do
     result = get_config(config_key)
     case result do
       {:error, _} -> result
-      [{key, value}] -> get_config(rest, table, [value| aggr])
+      _ -> get_config(rest, table, [result| aggr])
     end
   end
 
   def get_config(key, table, _) when is_atom(key) do
     table = if is_nil(table), do: get_table(@config_table), else: table
     # :dets.match_object(table, {key, :"$2"}) # REVIEW: Which one to choose
-    :dets.lookup(table, key)
+    :dets.lookup(table, key) |> Keyword.get(key)
   end
 
 
@@ -130,12 +147,25 @@ defmodule Exp.Action.State do
     Input has to be a Keyword list of the form: [config_param_key: value]
   """
   def set_config([]), do: :ok
+
+  # Check if valid path
+  def set_config([{:"default_storage_path", value} = result | t]) do
+    if File.exists?(value) && File.dir?(value) do
+      put_config(:"default_storage_path", value)
+      set_config(t)
+    else
+      {:error, "Path is not a valid directory."}
+    end
+  end
+
   def set_config([{key, value} | t]) do
     if key in @config_keys do
       put_config(key, value)
     end
     set_config(t)
   end
+
+
 
   @doc """
     Flush table contents. (Deleting Table contents)

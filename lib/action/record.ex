@@ -53,21 +53,22 @@ defmodule Exp.Action.Record do
   # Stop recording, shutdown process & write to file if circumstances right
   def stop(io \\ IO) do
 
-    config = State.get_config(:is_recording)
-    if config[:is_recording] do
+    is_recording? = State.get_config(:is_recording)
+    if is_recording? do
       now = DateTime.utc_now()
       date_time_write = DateTime.utc_now()
-      config_time = State.get_config(:time_started)
+      time_started = State.get_config(:time_started)
       
 
       # Check if today already file created & create one if needed
       title = request_user_argument("Enter a title or description for the entry... \n", &is_binary/1, io)
-      time_flag = calculate_time(config_time[:time_started], now) |> format_time
+      time_flag = calculate_time(time_started, now) |> format_time
 
       # Write to dets tables
-      State.write_entry({date_time_write, time_flag, title})
-      State.set_config([is_recording: false, last_entry: now])
-      last_entry = State.get_config(:last_entry)
+      entry = {date_time_write, time_flag, title}
+      State.write_entry(entry)
+      State.set_config([is_recording: false, last_entry: entry])
+      # last_entry = State.get_config(:last_entry)
       {:ok, "\nEntry successfully written."}
     else
       {:error, "It seems like you aren't recording anything. Start recording first to stop something."}

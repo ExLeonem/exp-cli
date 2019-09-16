@@ -11,9 +11,13 @@ defmodule Exp.CLI do
     Main entry point for the cli
   """
   def main(args \\ []) do
-    State.start_link()
-    args |> ArgParser.parse
-    State.shutdown()
+    status = State.start_link()
+    case status do
+      :ok ->
+        args |> ArgParser.parse
+        State.shutdown()  
+      {:error, reason} -> IO.puts(reason)
+    end
   end
 
 end
