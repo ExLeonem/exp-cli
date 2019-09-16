@@ -73,6 +73,7 @@ defmodule Exp.Args.Main do
   def dispatch(:status, argv), do: State.parse(:status, argv)
   def dispatch(:show, argv), do: Display.parse(:show, argv)
   def dispatch(:write, argv), do: File.parse(:write, argv)
+  def dispatch(first_key, _) when first_key in [:"--version", :"-v"], do: State.parse(:get, ["--version"])
   def dispatch(_, _), do: get_help() # defaulting to on :help as well as invalid flags
 
   # Iterate parsed parameters

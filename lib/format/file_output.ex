@@ -59,8 +59,6 @@ defmodule Exp.Format.FileOutput do
         case type do
             :csv -> resolve_csv(data)
             :json -> resolve_json(data)
-            :xml -> resolve_xml(data)
-            :yaml -> resolve_yaml(data)
         end
     end
 
@@ -78,12 +76,7 @@ defmodule Exp.Format.FileOutput do
     def resolve_csv([value | rest], acc) when is_tuple(value) or is_list(value) do
         
         # Resolve unecessary nesting
-        new_value = if is_tuple(value) do
-            value    
-        else
-            [ele] = value
-            ele
-        end
+        new_value = if is_tuple(value), do: value, else: value |> hd
 
         resolve_inner = fn 
             value when is_tuple(value) or is_list(value) -> 
@@ -102,8 +95,15 @@ defmodule Exp.Format.FileOutput do
     def resolve_csv(_, _), do: raise ArgumentError, message: "Error in function &resolve_csv/3. Invalid entry format. Only mulitple entries represented as tuple may be written to a file."
 
 
-    def resolve_xml(data), do: {:error, "Currently under development"}
-    def resolve_yaml(data), do: {:error, "Currently under development"}
+    @doc """
+        
+    """
+    # def resolve_json(value, acc \\ "{\"data\":[")
+    # def resolve_json([], acc), do: acc
+    # def resolve_json([value | rest], acc) do
+    #     new_value = if is_tuple(value), do: value, else: value |> hd
+    #     {:error, "Currently under development"}
+    # end
     def resolve_json(data), do: {:error, "Currently under development"}
 
 
