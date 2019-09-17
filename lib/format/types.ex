@@ -253,7 +253,14 @@ defmodule Exp.Format.Types do
             false
         end
     end
-    def valid?(_, :date), do: false
+    def valid?(value, :date) do
+        try do
+            DateTime.truncate(value, :second)
+            true
+        rescue
+            FunctionClauseError -> false
+        end        
+    end
     def valid?(value, :time) when is_binary(value) do
         matches_format = value |> String.match?(~r/[0-9]{1,2}\:[0-9]{1,2}/)
         if matches_format do
@@ -267,7 +274,14 @@ defmodule Exp.Format.Types do
             false
         end
     end
-    def valid?(_, :time), do: false
+    def valid?(value, :time) do
+        try do
+            DateTime.truncate(value, :second)
+            true
+        rescue
+            FunctionClauseError -> false
+        end
+    end
     
     def valid?(_, _), do: raise ArgumentError, message: "Unknown parameter value type: [:string | :boolean | :float | :integer | :date | :time ]"
 
@@ -314,7 +328,13 @@ defmodule Exp.Format.Types do
             MatchError -> {:error, "Failed to parse string into date format."}
         end
     end
-    def string_to_date(_), do: {:error, "Error in function &string_to_date/1. Wrong parameter type passed. Functions expects value of type string."}
+    def string_to_date(value) do
+        try do
+            {:ok, DateTime.truncate(value, :second)}
+        rescue
+            FunctionClauseError -> {:error, "Error in function &string_to_date/1. Wrong parameter type passed. Functions expects value of type string or datetime."} 
+        end
+    end
 
     def date_to_string(date) do
         try do
@@ -350,7 +370,13 @@ defmodule Exp.Format.Types do
             MatchError -> {:error, "Error in function &string_to_time/1. Failed to parse string into time format."}
         end
     end
-    def string_to_time(_), do: {:error, "Error in function &string_to_time/1. Passed parameter is not of type string."}
+    def string_to_time(value) do
+        try do
+            {:ok, DateTime.truncate(value, :second)}            
+        rescue
+            FunctionClauseError -> {:error, "Error in function &string_to_time/1. Passed parameter is not of type string."}
+        end
+    end
 
     @doc """
         Parses given time into a string.

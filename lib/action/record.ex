@@ -102,8 +102,9 @@ defmodule Exp.Action.Record do
 
       case entry do
         {:ok, entry} -> 
-          State.set_config([is_recording: false, last_entry: entry])
-          State.write_entry(entry)
+          processed_entry = entry |> Enum.reverse |> List.to_tuple 
+          State.set_config([is_recording: false, last_entry: processed_entry])
+          State.write_entry(processed_entry)
           {:ok, "\nEntry successfully written."}
         {:error, reason} -> entry
       end
@@ -116,32 +117,10 @@ defmodule Exp.Action.Record do
     end
   end
 
-  @doc """
-    Builds an entry for the stop command to write to the storage.
-  """
-  def build_entry(params) do
-    now = DateTime.utc_now()
-    date_time_write = DateTime.utc_now()
-    time_started = State.get_config(:time_started)
-
-    # get descriptive parameteres
-    title = Keyword.get(params, :title) |> is_required(:title) 
-    tags = Keyword.get(params, :tag) |> Types.tags_from_string
-
-    # calculate-the duration 
-    duration = calculate_time(time_started, now) |> format_time
-
-    {date_time_write, time_started, now, duration, title, tags}
-  end
-
-  def is_required(nil, :title), do: {:error, ""}
-  def is_required(value, :title), do: {:ok, value}
-
-
-
   def add({:ok, entry}) do
 
       entry
+      |> Enum.reverse
       |> List.to_tuple
       |> State.write_entry
 
@@ -213,6 +192,15 @@ defmodule Exp.Action.Record do
     today = Date.utc_today()
     {today, "#{today.year}_#{today.month}_#{today.day}"}
   end
+
+
+  # @doc """
+  #   Sort 
+  # """
+  # def sort_by_fields(key_value_pairs) do
+
+  # end
+
 
   @doc """
     !deprecated
