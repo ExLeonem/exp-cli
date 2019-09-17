@@ -59,8 +59,6 @@ defmodule Exp.Format.FileOutput do
         case type do
             :csv -> resolve_csv(data)
             :json -> resolve_json(data)
-            :xml -> resolve_xml(data)
-            :yaml -> resolve_yaml(data)
         end
     end
 

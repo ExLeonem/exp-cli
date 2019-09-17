@@ -1,5 +1,6 @@
 defmodule Exp.Action.Record do
   alias Exp.Action.State
+  alias Exp.Format.Types
   alias Exp.Action.Record.Start
   alias Exp.Format.Config
   require Logger
@@ -9,15 +10,23 @@ defmodule Exp.Action.Record do
   """
 
   @usage_start """
-    How to record and set a timer with the start.
 
-    Starting to record as follows ...
+    -------------------------------------------
+    /////////////////// start /////////////////
+    -------------------------------------------
 
-      exp start [options]
+    Description:
+
+        Starts a recording/pomodoro timer.
+
+    Usage:
+
+      exp stop --title "Sample tilte" --tags tag1,tag2,tag3
 
     Options:
-      -t, --timer - start a timer with specified, pass time in format hh:mm
-      -r, --remind - reminds user of current progress every hh:mm
+      --timer, -t   - start a timer with specified, pass time in format hh:mm
+      --remind, -r  - reminds user of current progress every hh:mm
+
   """
   
   @doc """
@@ -52,37 +61,81 @@ defmodule Exp.Action.Record do
 
 
   @usage_stop """
-  
+
+    -------------------------------------------
+    /////////////////// stop /////////////////// 
+    -------------------------------------------
+
+    Description:
+
+        Finishes a recording and writes an entry to the store.
+
+    Usage:
+
+      exp stop --title "Sample tilte" --tags tag1,tag2,tag3
+
+    Options:
+      --title, -t   - A description or title of what you did (required!)
+      --tag         - A list of tags you want to add: tag1,tag2,tag3
+
   """
   # Stop recording, shutdown process & write to file if circumstances right
-  def stop(io \\ IO) do
+  def stop({_valid, rest, _invalid}) when rest != [], do: {:error, "You passed some non-existing flags. Check exp stop -h"}
+  def stop({_valid, _rest, invalid}) when invalid != [], do: {:error, "You passed some invalid flags. Check exp stop -h"}
+  def stop({valid_keys, _, _}) do
 
     is_recording? = State.get_config(:is_recording)
     if is_recording? do
-      entry = build_entry()
-      
+
+      # Get time information
+      now = DateTime.utc_now()
+      date_time_write = DateTime.utc_now()
+      time_started = State.get_config(:time_started)
+
+      # Fill time keys and assemble the entry
+      params = valid_keys 
+        |> Keyword.put(:date, date_time_write) 
+        |> Keyword.put(:start, time_started) 
+        |> Keyword.put(:end, now)
+        
+      entry = Types.build_entry({params, [], []})
+
+      case entry do
+        {:ok, entry} -> 
+          State.set_config([is_recording: false, last_entry: entry])
+          State.write_entry(entry)
+          {:ok, "\nEntry successfully written."}
+        {:error, reason} -> entry
+      end
+
       # Write to dets tables
-      entry = {date_time_write, time_flag, title}
-      State.write_entry(entry)
-      State.set_config([is_recording: false, last_entry: entry])
-      # last_entry = State.get_config(:last_entry)
-      {:ok, "\nEntry successfully written."}
+      # State.set_config([is_recording: false, last_entry: entry])
+      # {:ok, "\nEntry successfully written."}
     else
       {:error, "It seems like you aren't recording anything. Start recording first to stop something."}
     end
   end
 
-  def build_entry() do
+  @doc """
+    Builds an entry for the stop command to write to the storage.
+  """
+  def build_entry(params) do
     now = DateTime.utc_now()
     date_time_write = DateTime.utc_now()
     time_started = State.get_config(:time_started)
 
-    # Check if today already file created & create one if needed
-    title = request_user_argument("Enter a title or description for the entry... \n", &is_binary/1, io)
-    time_flag = calculate_time(time_started, now) |> format_time
+    # get descriptive parameteres
+    title = Keyword.get(params, :title) |> is_required(:title) 
+    tags = Keyword.get(params, :tag) |> Types.tags_from_string
 
+    # calculate-the duration 
+    duration = calculate_time(time_started, now) |> format_time
+
+    {date_time_write, time_started, now, duration, title, tags}
   end
 
+  def is_required(nil, :title), do: {:error, ""}
+  def is_required(value, :title), do: {:ok, value}
 
 
 
@@ -95,8 +148,6 @@ defmodule Exp.Action.Record do
       {:ok, "\Entry successfully written"}
   end
   def add(entry), do: entry
-
-
 
 
   # -----------------------------

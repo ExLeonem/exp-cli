@@ -25,14 +25,14 @@ defmodule TestExpActionRecord do
   test "stop/invalid/not-recording" do
     State.start_link()
     State.init_config()
-    assert {:error, _} = Record.stop(FakeIO)
+    assert {:error, _} = Record.stop({[title: "hello world"],[],[]})
     teardown()
   end
 
   test "stop/valid/default" do
     State.start_link()
     Record.start({[],[],[]})
-    assert {:ok, _} = Record.stop(FakeIO)
+    assert {:ok, _} = Record.stop({[title: "hello world"],[],[]})
     teardown()
   end
 

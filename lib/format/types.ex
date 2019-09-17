@@ -365,4 +365,18 @@ defmodule Exp.Format.Types do
     end
 
 
+    @doc """
+        Extracts the individual tag values from a string of tags.
+
+    """
+    def tags_from_string(tags) when is_nil(tags), do: tags
+    def tags_from_string(tags) when is_binary(tags) do
+        result = tags 
+            |> Enum.split(",") 
+            |> Enum.map(&String.trim/1) 
+            |> Enum.filter(fn x -> !(is_nil(x) || x == "") end)
+        {:ok, result}
+    end
+    def tags_from_string(_tags), do: {:error, "The given value for Tags is not a string."}
+
 end
