@@ -29,18 +29,17 @@ defmodule Exp.Args.File do
     @parser_config [
         aliases: [
             o: :output, # Full path with filename and extension
-            f: :flush,
             h: :help
         ],
         strict: [
             output: :string, # 
-            flush: :boolean,
             help: :boolean
         ]
     ]
 
     def parse(:write, argv) do
-        argv
+    
+        ["-o"| argv]
         |> OptionParser.parse(@parser_config)
         |> get_args
         |> help_user?
