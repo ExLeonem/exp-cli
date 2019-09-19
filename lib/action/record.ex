@@ -3,6 +3,7 @@ defmodule Exp.Action.Record do
   alias Exp.Format.Types
   alias Exp.Action.Record.Start
   alias Exp.Format.Config
+  alias Exp.Format.CLI
   require Logger
 
   @moduledoc """
@@ -105,7 +106,7 @@ defmodule Exp.Action.Record do
           processed_entry = entry |> Enum.reverse |> List.to_tuple 
           State.set_config([is_recording: false, last_entry: processed_entry])
           State.write_entry(processed_entry)
-          {:ok, "\nEntry successfully written."}
+          CLI.ok("Entry successfully written.")
         {:error, reason} -> entry
       end
 

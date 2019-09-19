@@ -1,5 +1,7 @@
 defmodule Exp.Action.Record.Start do
     alias Exp.Action.State
+    alias Exp.Format.CLI
+
     require Logger
     
     
@@ -30,12 +32,15 @@ defmodule Exp.Action.Record.Start do
             state_updated? = State.put_config(:is_recording, true)
 
             if state_updated? == :ok do
-                {:ok, "Started recording, waiting for you to stop ..."}               
+                CLI.ok("Started recording, waiting for you to stop ...")
+                # {:ok, }               
             else
-                {:error, "Couldn't update :start_time in config.exs"}
+                CLI.error("Couldn't update :start_time in config.exs")
+                # {:error, }
             end 
         else
-            {:error, "You are currently already recording. Stop you'r recording first."}
+            CLI.warn("You are currently already recording. Stop you'r recording first.")
+            # {:error, "You are currently already recording. Stop you'r recording first."}
         end
     end
 
