@@ -1,4 +1,7 @@
 defmodule Exp.Format.FileOutput do
+    alias Exp.Format.Config
+    alias Exp.Format.Types
+    
     @moduledoc """
         Formatting the export of entry tables to output files.
     """
@@ -34,7 +37,6 @@ defmodule Exp.Format.FileOutput do
         TODO: Merge default config into passed config
     """
     def format(type, data) do
-
         if length(data) != 0 do
             result = type |> resolve(data) 
             {:ok, result}
@@ -76,18 +78,16 @@ defmodule Exp.Format.FileOutput do
     def resolve_csv([value | rest], acc) when is_tuple(value) or is_list(value) do
         
         # Resolve unecessary nesting
-        new_value = if is_tuple(value) do
-            value    
-        else
-            [ele] = value
-            ele
-        end
+        new_value = if is_tuple(value), do: value, else: hd(value)
 
         resolve_inner = fn 
             value when is_tuple(value) or is_list(value) -> 
                 joined_values = value |> to_list |> Enum.join(@opts[:csv][:sep])
                 "\"[#{joined_values}]\""
-            value -> value |> to_string |> encapsulate? end   
+
+            value -> 
+                value |> to_string |> encapsulate? 
+            end   
         
         new_acc = new_value
         |> to_list
@@ -98,7 +98,68 @@ defmodule Exp.Format.FileOutput do
         resolve_csv(rest, new_acc)
     end
     def resolve_csv(_, _), do: raise ArgumentError, message: "Error in function &resolve_csv/3. Invalid entry format. Only mulitple entries represented as tuple may be written to a file."
-    def resolve_json(data), do: {:error, "Currently under development"}
+
+
+    @doc """
+        Resolves a list of entities or a single entity into a json format.
+
+        {
+            data: [
+                entity,
+                entity
+            ]
+        }
+
+        returns a string
+    """
+    def resolve_json(data, acc \\ "{\"data\":[")
+    def resolve_json([], acc), do: acc <> "]}"
+    def resolve_json([value | rest], acc) do
+        keys = Config.extract(:keys, :field) |> Enum.reverse
+        all_keys = [:duration | keys]
+
+        entry = if is_tuple(value), do: value |> to_list, else: hd(value) |> to_list 
+        zipped_values = all_keys |> Enum.zip(entry)
+
+        resolve_inner = fn 
+            {key, value} when is_tuple(value) or is_list(value) ->
+                # nested value
+                IO.puts("resolve nested")
+                joined_values = value |>Enum.map(&enc_value/1) |> Enum.join(",")
+                list_of_values = "[#{joined_values}]"
+                combine_key_value(key, list_of_values)
+
+            {key, value} ->
+                IO.puts("resolve simple")
+                IO.inspect(key)
+                IO.inspect(value)
+                # combine_key_value(key, value)
+                IO.puts("finished")
+            _ -> 
+                IO.puts("something else")    
+            end
+
+        new_acc = zipped_values
+            |> Enum.map(resolve_inner)
+            
+
+        resolve_json(rest, acc <> new_acc)
+    end
+    def resolve_json(_, _), do: raise ArgumentError, message: "Error in function &resolve_json/3. Invalid entry format. Only mulitple entries represented as tuple may be written to a file."
+    
+
+    def flatten_list() do
+        
+    end
+
+    def combine_key_value(key, value) do
+        enc_value(key) <> ":" <> value
+    end
+
+    def enc_value(item, type \\ :string)
+    def enc_value(item, :string), do: "\"" <> item <> "\""
+    def enc_value(item, :object), do: "{" <> item <> "}"
+    
 
 
 

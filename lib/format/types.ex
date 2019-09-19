@@ -216,6 +216,7 @@ defmodule Exp.Format.Types do
                 :integer -> String.to_integer(value)
                 :date -> string_to_date(value)
                 :time -> string_to_time(value)
+                :timestamp -> string_to_timestamp(value)
                 _ -> {:error, "Unknown type \"#{type}\" passed to function &cast/2. Valid values are :boolean, :float, :integer, :date, :time."}
             end
         else
@@ -328,6 +329,7 @@ defmodule Exp.Format.Types do
             MatchError -> {:error, "Failed to parse string into date format."}
         end
     end
+
     def string_to_date(value) do
         try do
             {:ok, DateTime.truncate(value, :second)}
@@ -354,6 +356,9 @@ defmodule Exp.Format.Types do
         try do
             result = time_string |> String.split(":") |> Enum.map(&String.to_integer/1) |> List.to_tuple()
             num_values = tuple_size(result)
+
+            # {zone, result} = System.cmd("date", ["+%Z"])
+            # dt = %DateTime{year: , month: , day: , hour: , minute: , second: , }
 
             case num_values do
                 2 -> 
@@ -389,7 +394,6 @@ defmodule Exp.Format.Types do
             FunctionClauseError -> {:error, "Error in function &time_to_string/1. Passed parameter is expected to be of type ~T."}
         end
     end
-
 
     @doc """
         Extracts the individual tag values from a string of tags.

@@ -34,7 +34,7 @@ defmodule TestExpFormatFileOutput do
         end
 
         test "collection/valid/nested-values" do
-            assert FileOutput.format(:csv, [{1, {2, 3}}]) == {:ok, "1,[2,3]"}
+            assert FileOutput.format(:csv, [{1, {2, 3}}]) == {:ok, "1,\"[2,3]\""}
             teardown()
         end
 
