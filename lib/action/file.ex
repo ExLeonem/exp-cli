@@ -92,7 +92,7 @@ defmodule Exp.Action.File do
     def create({status, _} = result, path) when status in [:error, :help], do: result
     def create({:ok, content}, path) do
 
-        opened? = File.open(path, [:write, :append])
+        opened? = File.open(path, [:write])
 
         case opened? do
             {:ok, pid} -> {:ok ,{pid, content}}

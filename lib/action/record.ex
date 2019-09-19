@@ -77,7 +77,7 @@ defmodule Exp.Action.Record do
 
     Options:
       --title, -t   - A description or title of what you did (required!)
-      --tag         - A list of tags you want to add: tag1,tag2,tag3
+      --tag, -g     - A list of tags you want to add: tag1,tag2,tag3
 
   """
   # Stop recording, shutdown process & write to file if circumstances right

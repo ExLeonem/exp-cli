@@ -86,7 +86,7 @@ defmodule Exp.Format.FileOutput do
         resolve_inner = fn 
             value when is_tuple(value) or is_list(value) -> 
                 joined_values = value |> to_list |> Enum.join(@opts[:csv][:sep])
-                "[#{joined_values}]"
+                "\"[#{joined_values}]\""
             value -> value |> to_string |> encapsulate? end   
         
         new_acc = new_value

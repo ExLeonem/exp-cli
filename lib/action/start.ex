@@ -33,14 +33,11 @@ defmodule Exp.Action.Record.Start do
 
             if state_updated? == :ok do
                 CLI.ok("Started recording, waiting for you to stop ...")
-                # {:ok, }               
             else
                 CLI.error("Couldn't update :start_time in config.exs")
-                # {:error, }
             end 
         else
             CLI.warn("You are currently already recording. Stop you'r recording first.")
-            # {:error, "You are currently already recording. Stop you'r recording first."}
         end
     end
 
