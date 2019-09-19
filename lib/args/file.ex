@@ -26,24 +26,21 @@ defmodule Exp.Args.File do
     """
 
     # Add flag: --new --> only write new data till last write
-    @parser_config [
-        aliases: [
-            o: :output, # Full path with filename and extension
-            h: :help
-        ],
-        strict: [
-            output: :string, # 
-            help: :boolean
-        ]
-    ]
-
+    @help_config [strict: [help: :boolean], aliases: [h: :help]]
+    @parser_config [strict: [output: :string], aliases: [o: :output]]
+    
     def parse(:write, argv) do
     
-        ["-o"| argv]
-        |> OptionParser.parse(@parser_config)
-        |> get_args
-        |> help_user?
-        |> File.write
+        {valid, rest, invalid} =  argv |> OptionParser.parse(@help_config)
+
+        if valid[:help] do
+            {:help, @usage_write}
+        else    
+            ["--output" | rest] 
+                |> OptionParser.parse(@parser_config) 
+                |> get_args
+                |> File.write
+        end
     end
 
 
@@ -73,9 +70,11 @@ defmodule Exp.Args.File do
 
     end
     
-    def get_args({[],[],[]}), do: {:error, "You passed an insufficient amount of parameter to the command. Need help? Just type exp write -h"}
-    def get_args({argv, [], []}), do: {:ok, argv}
-    def get_args({_, _rest, []}), do: {:error, "You passed some unneseccary parameters. Type exp write -h to get information about the usage."}
-    def get_args({_, _, _invalid}), do: {:error, "You used invalid arguments. Type exp write -h to get information about the usage."}
+    def get_args(argv, return_rest \\ false)
+    def get_args({[],[],[]}, _), do: {:error, "You passed an insufficient amount of parameter to the command. Need help? Just type exp write -h"}
+    def get_args({argv, [], []}, _), do: {:ok, argv}
+    def get_args({_, rest, _}, true), do: {:ok, rest}
+    def get_args({_, _rest, []}, _), do: {:error, "You passed some unneseccary parameters. Type exp write -h to get information about the usage."}
+    def get_args({_, _, _invalid}, _), do: {:error, "You used invalid arguments. Type exp write -h to get information about the usage."}
 
 end

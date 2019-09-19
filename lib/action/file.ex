@@ -4,6 +4,7 @@ defmodule Exp.Action.File do
     alias Exp.Format.FileOutput
     alias Exp.Action.State
     alias Exp.Format.Config
+    alias Exp.Format.CLIOutput
 
     @moduledoc """
         Export of saved entries into a specific format.
@@ -118,7 +119,8 @@ defmodule Exp.Action.File do
         File.close(file)
 
         case written? do
-            :ok -> {:ok, "File successfully written."}
+        # {:ok, IO.ANSI.light_green <> " + " <> IO.ANSI.white() <> ""}
+            :ok -> CLIOutput.indicate("+", "File successfully written.")
             :error -> {:error, "Couldn't write the file."}
         end
     end
