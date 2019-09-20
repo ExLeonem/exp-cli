@@ -1,5 +1,6 @@
 defmodule Exp.Action.Record.Start do
     alias Exp.Action.State
+    alias Exp.Format.DateTime, as: ExpDateTime
     alias Exp.Format.CLI
 
     require Logger
@@ -27,7 +28,7 @@ defmodule Exp.Action.Record.Start do
     def start(_, _) do
         is_recording? = State.get_config(:is_recording)
         if !is_recording? do
-            now = DateTime.utc_now()
+            now = ExpDateTime.now()
             state_updated? = State.put_config(:time_started, now)
             state_updated? = State.put_config(:is_recording, true)
 

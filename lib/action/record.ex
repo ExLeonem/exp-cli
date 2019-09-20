@@ -4,6 +4,7 @@ defmodule Exp.Action.Record do
   alias Exp.Action.Record.Start
   alias Exp.Format.Config
   alias Exp.Format.CLI
+  alias Exp.Format.DateTime, as: ExpDateTime
   require Logger
 
   @moduledoc """
@@ -89,13 +90,12 @@ defmodule Exp.Action.Record do
     if is_recording? do
 
       # Get time information
-      now = DateTime.utc_now()
-      date_time_write = DateTime.utc_now()
+      now = ExpDateTime.now()
       time_started = State.get_config(:time_started)
 
       # Fill time keys and assemble the entry
       params = valid_keys 
-        |> Keyword.put(:date, date_time_write) 
+        |> Keyword.put(:date, now) 
         |> Keyword.put(:start, time_started) 
         |> Keyword.put(:end, now)
         

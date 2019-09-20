@@ -32,8 +32,6 @@ use Mix.Config
 # Configuration keys and type
 
 
-
-
 # Params: default application configuration, structure of single parameter [type, default_value, is_modifyable?]
 # Commands: Each represents an top-level option and the flags that may be set for it
 # Fields:  used on saving an entry the inner defnition: [type_of_field, is_required?, alias]. The :none atom specifies a field without alias.

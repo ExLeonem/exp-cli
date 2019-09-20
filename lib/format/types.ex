@@ -394,9 +394,11 @@ defmodule Exp.Format.Types do
         end
     end
 
-    def get_timezone_data() do
+    def get_current_time() do
         
     end
+
+
 
 
     @doc """
