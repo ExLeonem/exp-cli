@@ -216,7 +216,6 @@ defmodule Exp.Format.Types do
                 :integer -> String.to_integer(value)
                 :date -> string_to_date(value)
                 :time -> string_to_time(value)
-                :timestamp -> string_to_timestamp(value)
                 _ -> {:error, "Unknown type \"#{type}\" passed to function &cast/2. Valid values are :boolean, :float, :integer, :date, :time."}
             end
         else
@@ -394,6 +393,11 @@ defmodule Exp.Format.Types do
             FunctionClauseError -> {:error, "Error in function &time_to_string/1. Passed parameter is expected to be of type ~T."}
         end
     end
+
+    def get_timezone_data() do
+        
+    end
+
 
     @doc """
         Extracts the individual tag values from a string of tags.
