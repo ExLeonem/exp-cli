@@ -104,7 +104,7 @@ status                | Returns the duration since recording                    
 [show](#Show)         | Prints recorded entries.                                         | &#9745; <!--Checked-->
 [get](#Get)           | Get information on current configuration                         | &#9745;
 [set](#Set)           | Setting configuration attributes                                 | &#9745;
-[export](#export)     | Export of saved entries into another format in csv or json       | &#9744;
+[-x](#-x)             | Export of saved entries into another format in csv or json       | &#9744;
 [sync](#Sync)         | Upload data to the remote application                            | &#9744;
 <!-- [import](#import)     | Import a file to the list of current entries                     | &#9744; -->
 <!-- [stat](#Stat])  | Show statistics                                                  | &#9744; Unchecked -->
@@ -169,7 +169,7 @@ Flag              | Type      |   Description
 --output-format   | string    | Setting the default output format for entry export, supported formats: `csv` and `json`
 
 
-### Export
+### -x
 Export the recorded data to a specific Format.
 The given path must already be existent. Available output formats are csv and json. 
 

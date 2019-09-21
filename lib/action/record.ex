@@ -1,22 +1,34 @@
 defmodule Exp.Action.Record do
   alias Exp.Action.State
+  alias Exp.Format.Types
   alias Exp.Action.Record.Start
+  alias Exp.Format.Config
+  alias Exp.Format.CLI
+  alias Exp.Format.DateTime, as: ExpDateTime
   require Logger
 
   @moduledoc """
     Records/stops recording of time.
   """
 
-  @start_help """
-    How to record and set a timer with the start.
+  @usage_start """
 
-    Starting to record as follows ...
+    -------------------------------------------
+    /////////////////// start /////////////////
+    -------------------------------------------
 
-      exp start [options]
+    Description:
+
+        Starts a recording/pomodoro timer.
+
+    Usage:
+
+      exp stop --title "Sample tilte" --tags tag1,tag2,tag3
 
     Options:
-      -t, --timer - start a timer with specified, pass time in format hh:mm
-      -r, --remind - reminds user of current progress every hh:mm
+      --timer, -t   - start a timer with specified, pass time in format hh:mm
+      --remind, -r  - reminds user of current progress every hh:mm
+
   """
   
   @doc """
@@ -25,7 +37,7 @@ defmodule Exp.Action.Record do
   def start({argv, _, _}) do
     # Print either help or start recording
     if argv[:help] do
-      {:help, @start_help}
+      {:help, @usage_start}
     else
       remind = if argv[:remind], do: parse_remind(argv[:remind]), else: nil
       Start.start(argv[:timer], remind)
@@ -50,43 +62,74 @@ defmodule Exp.Action.Record do
   end
 
 
+  @usage_stop """
+
+    -------------------------------------------
+    /////////////////// stop /////////////////// 
+    -------------------------------------------
+
+    Description:
+
+        Finishes a recording and writes an entry to the store.
+
+    Usage:
+
+      exp stop --title "Sample tilte" --tags tag1,tag2,tag3
+
+    Options:
+      --title, -t   - A description or title of what you did (required!)
+      --tag, -g     - A list of tags you want to add: tag1,tag2,tag3
+
+  """
   # Stop recording, shutdown process & write to file if circumstances right
-  def stop(io \\ IO) do
+  def stop({_valid, rest, _invalid}) when rest != [], do: {:error, "You passed some non-existing flags. Check exp stop -h"}
+  def stop({_valid, _rest, invalid}) when invalid != [], do: {:error, "You passed some invalid flags. Check exp stop -h"}
+  def stop({valid_keys, _, _}) do
 
     is_recording? = State.get_config(:is_recording)
     if is_recording? do
-      now = DateTime.utc_now()
-      date_time_write = DateTime.utc_now()
-      time_started = State.get_config(:time_started)
-      
 
-      # Check if today already file created & create one if needed
-      title = request_user_argument("Enter a title or description for the entry... \n", &is_binary/1, io)
-      time_flag = calculate_time(time_started, now) |> format_time
+      # Get time information
+      now = ExpDateTime.now()
+      time_started = State.get_config(:time_started)
+
+
+      # Fill time keys and assemble the entry
+      params = valid_keys 
+        |> Keyword.put(:date, now) 
+        |> Keyword.put(:start, time_started) 
+        |> Keyword.put(:end, now)
+        
+      entry = Types.build_entry({params, [], []})
+
+
+      case entry do
+        {:ok, entry} -> 
+          processed_entry = entry |> Enum.reverse |> List.to_tuple 
+          State.set_config([is_recording: false, last_entry: processed_entry])
+          State.write_entry(processed_entry)
+          CLI.ok("Entry successfully written.")
+        {:error, reason} -> entry
+      end
 
       # Write to dets tables
-      entry = {date_time_write, time_flag, title}
-      State.write_entry(entry)
-      State.set_config([is_recording: false, last_entry: entry])
-      # last_entry = State.get_config(:last_entry)
-      {:ok, "\nEntry successfully written."}
+      # State.set_config([is_recording: false, last_entry: entry])
+      # {:ok, "\nEntry successfully written."}
     else
       {:error, "It seems like you aren't recording anything. Start recording first to stop something."}
     end
   end
 
-
   def add({:ok, entry}) do
 
       entry
+      |> Enum.reverse
       |> List.to_tuple
       |> State.write_entry
 
       {:ok, "\Entry successfully written"}
   end
   def add(entry), do: entry
-
-
 
 
   # -----------------------------
@@ -152,6 +195,15 @@ defmodule Exp.Action.Record do
     today = Date.utc_today()
     {today, "#{today.year}_#{today.month}_#{today.day}"}
   end
+
+
+  # @doc """
+  #   Sort 
+  # """
+  # def sort_by_fields(key_value_pairs) do
+
+  # end
+
 
   @doc """
     !deprecated

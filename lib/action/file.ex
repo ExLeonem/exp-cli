@@ -4,6 +4,7 @@ defmodule Exp.Action.File do
     alias Exp.Format.FileOutput
     alias Exp.Action.State
     alias Exp.Format.Config
+    alias Exp.Format.CLI
 
     @moduledoc """
         Export of saved entries into a specific format.
@@ -91,7 +92,7 @@ defmodule Exp.Action.File do
     def create({status, _} = result, path) when status in [:error, :help], do: result
     def create({:ok, content}, path) do
 
-        opened? = File.open(path, [:write, :append])
+        opened? = File.open(path, [:write])
 
         case opened? do
             {:ok, pid} -> {:ok ,{pid, content}}
@@ -118,8 +119,8 @@ defmodule Exp.Action.File do
         File.close(file)
 
         case written? do
-            :ok -> {:ok, "File successfully written."}
-            :error -> {:error, "Couldn't write the file."}
+            :ok -> CLI.ok("File successfully written.")
+            :error -> CLI.error("Couldn't write the file.") 
         end
     end
 

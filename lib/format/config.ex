@@ -17,14 +17,21 @@ defmodule Exp.Format.Config do
 
 
 
-    @doc """
+    @doc """    
         Uses the config.exs to extract specific sections out of it.
         
         ## Parameter
         - action: The type of action to execute, as an atom
-        - config_type: [:params, :command, :fields] 
+        - config_type: [:params, :command, :fields]
         - options: Keywordlist of options, depending on config_type
 
+        ### fields
+        Following values are returned for specific actions.
+
+            - schema: returns a definition that can be used by an OptionParser
+            - required: 
+            - alias: 
+            - keys: returns a list of keys [key1, key2, key3]
 
         Returns the prepared config defintions
     """

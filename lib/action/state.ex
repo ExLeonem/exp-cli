@@ -43,7 +43,6 @@ defmodule Exp.Action.State do
       :ok
     rescue
       e in ArgumentError -> {:error, e[:message]}
-
     end
   end
 

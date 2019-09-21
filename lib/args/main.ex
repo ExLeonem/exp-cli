@@ -21,7 +21,7 @@ defmodule Exp.Args.Main do
     /////////////////// EXP-CLI ⌚ ///////////////////
     -------------------------------------------------
 
-    For information about a specific command use [option] [--help | -h].
+    For information about a specific command use exp [option] [--help | -h].
 
 
     Usage:
@@ -31,15 +31,16 @@ defmodule Exp.Args.Main do
 
     Commands:
       
-      start   - start recording
-      stop    - stop recording
-      status  - Shows the current progression.
-      add     - adding a new entry
-      set     - cli configuration
-      get     - get current cli config information
-      show    - query inserted information
-      write   - write recorded data from dets to a file
-      help    - print usage information
+      start       - start recording
+      stop        - stop recording
+      status      - Shows the current progression.
+      add         - adding a new entry
+      set         - cli configuration
+      get         - get current cli config information
+      show        - query inserted information
+      -x          - Export data to the given path, available formats are csv | json
+      -h, --help  - print usage information
+
     """
 
   def parse(argv) do
@@ -72,15 +73,14 @@ defmodule Exp.Args.Main do
   def dispatch(:get, argv), do: State.parse(:get, argv)
   def dispatch(:status, argv), do: State.parse(:status, argv)
   def dispatch(:show, argv), do: Display.parse(:show, argv)
-  def dispatch(:write, argv), do: File.parse(:write, argv)
-  def dispatch(first_key, _) when first_key in [:"--version", :"-v"], do: State.parse(:get, ["--version"])
-  def dispatch(_, _), do: get_help() # defaulting to on :help as well as invalid flags
+  def dispatch(first_key, argv) when first_key in [:"-x", :"--export"], do: File.parse(:write, argv)
+  def dispatch(first_key, argv) when first_key in [:"-h", :"--help"], do: get_help()
+  def dispatch(_, _), do: {:error, "You passed something I can't process. Check my manual with exp -h"}
 
   # Iterate parsed parameters
   def dispatch([_| t], argv) do
     dispatch(t, argv)
   end
-
 
   # Return help information
   defp get_help(help \\ @usage) do
