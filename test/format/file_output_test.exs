@@ -19,22 +19,22 @@ defmodule TestExpFormatFileOutput do
         end
 
         test "valid/simple" do
-            assert FileOutput.format(:csv, [{1, 2, 3}]) == {:ok, "1,2,3"}
+            assert FileOutput.format(:csv, [{1, 2, 3}]) == {:ok, "date,start,end,title,tag,duration\n1,2,3"}
             teardown()
         end
 
         test "valid/mixed-values" do
-            assert FileOutput.format(:csv, [{1, :hey, 12.2, nil, true}]) == {:ok, "1,hey,12.2,,true"}
+            assert FileOutput.format(:csv, [{1, :hey, 12.2, nil, true}]) == {:ok, "date,start,end,title,tag,duration\n1,hey,12.2,,true"}
             teardown()
         end
 
         test "valid/2-entries" do
-            assert FileOutput.format(:csv, [{1,2,3}, {1,2,3}]) == {:ok, "1,2,3\n1,2,3"}
+            assert FileOutput.format(:csv, [{1,2,3}, {1,2,3}]) == {:ok, "date,start,end,title,tag,duration\n1,2,3\n1,2,3"}
             teardown()
         end
 
         test "collection/valid/nested-values" do
-            assert FileOutput.format(:csv, [{1, {2, 3}}]) == {:ok, "1,\"[2,3]\""}
+            assert FileOutput.format(:csv, [{1, {2, 3}}]) == {:ok, "date,start,end,title,tag,duration\n1,\"[2,3]\""}
             teardown()
         end
 

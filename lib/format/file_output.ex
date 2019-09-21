@@ -13,13 +13,14 @@ defmodule Exp.Format.FileOutput do
         xml: [],
         yaml: []    
     ]
+    @keys Config.extract(:keys, :field)++[:duration]
     
 
-
-    # What todo on nested keys?
-    def header(:csv, keys) when not is_list(keys), do: raise ArgumentError, message: "Error in function &header/2. Expected an array of header keys, got something else."
-    def header(:csv, keys) do
-        keys |> Enum.map(&to_string/1) |> Enum.join(",")    
+    @doc """
+        Generated a header for a specific file format.
+    """
+    def header(:csv) do
+        @keys |> Enum.map(&to_string/1) |> Enum.join(",")   
     end
 
     
@@ -74,7 +75,7 @@ defmodule Exp.Format.FileOutput do
         Returns resolved string ready to be written to a file.
     """
     def resolve_csv(data, acc \\ "")
-    def resolve_csv([], acc), do: acc
+    def resolve_csv([], acc), do: combine(acc, header(:csv))
     def resolve_csv([value | rest], acc) when is_tuple(value) or is_list(value) do
         
         # Resolve unecessary nesting
@@ -148,10 +149,6 @@ defmodule Exp.Format.FileOutput do
     def resolve_json(_, _), do: raise ArgumentError, message: "Error in function &resolve_json/3. Invalid entry format. Only mulitple entries represented as tuple may be written to a file."
     
 
-    def flatten_list() do
-        
-    end
-
     def combine_key_value(key, value) do
         enc_value(key) <> ":" <> value
     end
@@ -193,6 +190,5 @@ defmodule Exp.Format.FileOutput do
             value
         end
     end
-
 
 end

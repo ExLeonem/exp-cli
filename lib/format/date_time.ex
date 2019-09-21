@@ -4,6 +4,7 @@ defmodule Exp.Format.DateTime do
         Based on elixir NaiveDateTime and Erlang :calendar Modules.
     """
 
+
     @doc """
         Returns the current local time. Based on device time.
     """
@@ -16,146 +17,210 @@ defmodule Exp.Format.DateTime do
     @doc """
         Converts the given NaiveDateTime to an iso8601 string.
     """
-    def to_string(date_time) do
-        NaiveDateTime.to_iso8601(date_time)
-    end
+    def to_iso(date_time), do: NaiveDateTime.to_iso8601(date_time)
 
     @doc """
         Reads an iso8601 DateTime string into a NaiveDateTime.
     """
-    def from_string(iso_dt_string) do
-        {:ok, date_time} = NaiveDateTime.from_iso8601(iso_dt_string)
+    def from_iso(iso_dt_string) when not is_binary(iso_dt_string), do: raise ArgumentError, message: "Error in function &from_iso/1. Expected a string as argument, got something else."
+    def from_iso(iso_dt_string) do
+        try do
+            {:ok, date_time} = NaiveDateTime.from_iso8601(iso_dt_string)
+            date_time 
+        rescue
+            MatchError -> raise ArgumentError, message: "Error in function &from_iso/1.Couldn't parse string #{iso_dt_string} to NaiveDateTime."
+        end
     end
 
     @doc """
         Calculates the difference between to NaiveDateTimes in seconds.
     """
     def diff(naiv_start, naiv_end) do
-        NaiveDate.diff(naiv_start, naiv_end)
+        NaiveDateTime.diff(naiv_start, naiv_end)
     end
 
     @doc """
         Formats the given NaiveDateTime to a string representing a date. 
+
+        Parameters:
+            - date_time: either NativeDateTime | iso_8601 string
+
+        return string of form 'year-month-day'
     """
-    def date_string(date_time) do
-        
+    def date_string(date_time) when is_binary(date_time), do: date_time |> from_iso |> date_string
+    def date_string(date_time) when not is_binary(date_time) do
+        year = date_time.year
+        month = date_time.month
+        day = date_time.day
+
+        "#{year}-#{month}-#{day}"
     end
 
     @doc """
         Formats a given NaiveDatetime to a string representing a time.
+
+        Parameters:
+            - date_time: either NativeDateTime | iso_8601 string
     """
+    def time_string(date_time) when is_binary(date_time), do: date_time |> from_iso |> date_string
     def time_string(date_time) do
-        
+        hour = date_time.hour
+        minute = date_time.minute
+        seconds = date_time.second
+
+        "#{hour}:#{minute}:#{seconds}"
     end
-
-    @doc """
-        Formats a given NaiveDateTime to a string representing a duration.
-    """
-    def duration_string(date_time) do
-        
-    end
-
-    
-
 
     @doc """
         Takes the a time difference in seconds and returns a string of form `hh:mm:ss` representing a duration
 
         Parameters:
-        - secs: seconds as integer
+        - seconds: the time difference
+
+        returns a string representing the duration with HH:MM:SS
     """
-    def format_time_diff(secs) do
-        # REVIEW: Better way to encode/decode duration? maybe a sigil?
-        sec = rem(secs, 60)
-        minutes = if secs >= 60, do: div(secs, 60), else: 0
+    def duration(seconds) do
+        sec = rem(seconds, 60)
+        minutes = if seconds >= 60, do: div(seconds, 60), else: 0
         hours = if minutes > 60, do: div(minutes, 60), else: 0
         real_minutes = minutes - (hours*60)
         "#{hours}:#{real_minutes}:#{sec}"
     end
 
-    @doc """
-        Parses a String of form \"dd-MM-YYYY\" into a date
 
-        return {:ok, date} | {:error, msg}
+    @doc """
+        Formats the given string to a NaiveDateTime.
+
+        Parameters:
+            - date_time_string: string representing the current date/time in form dd-MM-YYYY HH:MM:SS (May consist of both parts or only date/time)
+        
+        return NaiveDateTime
     """
-    def string_to_date(date_string) when is_binary(date_string) do
-        try do
-            {day, month, year} = date_string |> String.split("-") |> Enum.map(&String.to_integer/1) |> List.to_tuple
-            Date.new(year, month, day)
+    # def from_string(date_time_string) when not is_binary(date_time_string), do: {:error, "Error in function &ExpDateTime.from_string/1 exptected a string as input."}
+    def from_string(date_time_string) when not is_binary(date_time_string) do
+           try do
+            {:ok, NaiveDateTime.truncate(date_time_string, :second)}
         rescue
-            ArgumentError -> {:error, "Error in function &string_to_date/1. Value #{date_string} is in the wrong format. Function expects value to be in dd-MM-YYYY"}
+            FunctionClauseError -> {:error,  "Error in function &ExpDateTime.from_string/1 exptected a string as input."} 
+        end
+    end
+
+    def from_string(date_time_string) do
+        try do
+            parts = date_time_string |> String.split(" ") 
+
+            case length(parts) do
+                1 ->
+                    # Either date or time was passed, build NaiveDateTime from them
+                    [part] = parts
+                    if valid?(part, :date) do
+                        erl_date = to_erl(part)
+                        NaiveDateTime.from_erl({erl_date, {0,0,0}})
+                    else
+                        erl_time = to_erl(part, :time)
+                        {date, time} = now() |> NaiveDateTime.to_erl
+                        NaiveDateTime.from_erl({date, erl_time})
+                    end
+                2 ->
+                    # probably date and time passed. Decide which is which and parse
+                    [first_part , second_part] = parts
+                    if valid?(first_part) do
+                        date = to_erl(first_part)
+                        time = to_erl(second_part)
+                        NaiveDateTime.from_erl({date, time})
+                    else
+                        date = to_erl(second_part)
+                        time = to_erl(first_part)
+                        NaiveDateTime.from_erl({date, time})
+                    end
+
+                _ -> raise MatchError
+            end
+
+        rescue 
+            ArgumentError -> {:error, "Failed to parse string into date format."}
             MatchError -> {:error, "Failed to parse string into date format."}
         end
     end
 
-    def string_to_date(value) do
-        try do
-            {:ok, DateTime.truncate(value, :second)}
-        rescue
-            FunctionClauseError -> {:error, "Error in function &string_to_date/1. Wrong parameter type passed. Functions expects value of type string or datetime."} 
-        end
+
+    defp to_erl(date_time_string, type \\ :date)
+    defp to_erl(date_string, :date) do
+        date_string |> String.split("-") |> Enum.map(&String.to_integer/1) |> Enum.reverse |> List.to_tuple
     end
 
-    def date_to_string(date) do
-        try do
-            {year, month, day} = Date.to_erl(date)
-            {:ok, "#{day}-#{month}-#{year}"}
-        rescue
-            FunctionClauseError -> {:error, "Error in function &date_to_string/1. Expected parameter of type ~D."}
+    defp to_erl(time_string, :time) do
+        result = time_string |> String.split(":") |> Enum.map(&String.to_integer/1) |> List.to_tuple()
+        num_values = tuple_size(result)
+
+        case num_values do
+            2 -> 
+                {hour, minute} = result
+                {hour, minute, 0}
+            3 -> result
+            _ -> raise ArgumentError
         end
     end
+    
 
     @doc """
-        Parses a string of format \"hh:mm\" into a time.
+        Is the passed value a valid date or time according to the used time and date formats within this code.
 
-        return {:ok, time} | {:error, msg}
+        Accepted formats:
+            - time: hh:mm
+            - date: YYYY-MM-dd
+
+        return boolean
     """
-    def string_to_time(time_string) when is_binary(time_string) do
-        try do
-            result = time_string |> String.split(":") |> Enum.map(&String.to_integer/1) |> List.to_tuple()
-            num_values = tuple_size(result)
+    def valid?(value, part \\ :date_time)
+    def valid?(value, :date_time), do: if valid?(value, :date) && valid?(value, :time), do: true, else: false 
+    def valid?(value, :date) when is_binary(value) do
+        matches_format = value |> String.match?(~r/[0-9]{1,2}\-[0-9]{1,2}\-[0-9]{4}/)
+        if matches_format do
+            # Check if values match
+            {day, month, year} = value |> String.split("-") |> Enum.map(&String.to_integer/1) |> List.to_tuple
 
-            # {zone, result} = System.cmd("date", ["+%Z"])
-            # dt = %DateTime{year: , month: , day: , hour: , minute: , second: , }
-
-            case num_values do
-                2 -> 
-                    {hour, minute} = result
-                    Time.new(hour, minute, 0) 
-                3 ->
-                    # Logger.debug(time_string)
-                    {hour, minute, sec} = result
-                    Time.new(hour, minute, sec)
-                _ -> raise ArgumentError
+            cond do
+                day == 0 || month == 0 || year == 0 -> false
+                month == 2 && ((rem(year, 100) == 0 && rem(year, 400) != 0 && day <= 29) || day <= 28)  -> true
+                month <= 7 && ((rem(month, 2) == 0 && day <= 30) ||  (rem(month, 2) != 0 && day <= 31)) -> true 
+                month > 7 && ((rem(month, 2) == 0 && day <= 31) || (rem(month, 2) != 0 && day <= 30)) -> true
+                true -> false # Alle above checks passed but nothing matched
             end
-        rescue  
-            ArgumentError -> {:error, "Error in function &string_to_time/1. Passes parameter has the wrong format. String in format hh:mm:ss or hh:mm expected."}
-            MatchError -> {:error, "Error in function &string_to_time/1. Failed to parse string into time format."}
+        else
+            false
         end
     end
-    def string_to_time(value) do
+    def valid?(value, :date) do
         try do
-            {:ok, DateTime.truncate(value, :second)}            
+            NaiveDateTime.truncate(value, :second)
+            true
         rescue
-            FunctionClauseError -> {:error, "Error in function &string_to_time/1. Passed parameter is not of type string."}
+            FunctionClauseError -> false
+        end        
+    end
+    def valid?(value, :time) when is_binary(value) do
+        matches_format = value |> String.match?(~r/[0-9]{1,2}\:[0-9]{1,2}/)
+        if matches_format do
+            {hours, minutes} = value |> String.split(":") |> Enum.map(&String.to_integer/1) |> List.to_tuple
+
+            cond do
+                hours > 24 || minutes > 59 -> false 
+                true -> true
+            end
+        else
+            false
         end
     end
-
-    @doc """
-        Parses given time into a string.
-    """
-    def time_to_string(time) do
+    def valid?(value, :time) do
         try do
-            {hour, minute, sec} = Time.to_erl(time)
-            {:ok, "#{hour}:#{minute}:#{sec}"}
+            NaiveDateTime.truncate(value, :second)
+            true
         rescue
-            FunctionClauseError -> {:error, "Error in function &time_to_string/1. Passed parameter is expected to be of type ~T."}
+            FunctionClauseError -> false
         end
     end
-
-    def get_current_time() do
-        
-    end
+    def valid?(_, _), do: false
 
 
 end

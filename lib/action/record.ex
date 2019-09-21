@@ -93,6 +93,7 @@ defmodule Exp.Action.Record do
       now = ExpDateTime.now()
       time_started = State.get_config(:time_started)
 
+
       # Fill time keys and assemble the entry
       params = valid_keys 
         |> Keyword.put(:date, now) 
@@ -100,6 +101,7 @@ defmodule Exp.Action.Record do
         |> Keyword.put(:end, now)
         
       entry = Types.build_entry({params, [], []})
+
 
       case entry do
         {:ok, entry} -> 
