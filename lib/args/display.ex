@@ -90,7 +90,7 @@ defmodule Exp.Args.Display do
     def _format_result([], aggregate), do: {:ok, aggregate}
     def _format_result([h| t], aggregate) do
         # Needs to be dynamically generated
-        {date_time, duration, title} = if is_tuple(h) do
+        {date_time, start_t, end_t, title, tags, duration} = if is_tuple(h) do
             h 
         else
             [ele] = h

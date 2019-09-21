@@ -2,57 +2,90 @@ defmodule TestExpArgsFile do
     use ExUnit.Case
     alias Exp.Action.State
     alias Exp.Args.File
+    alias Exp.Args.Record
     doctest File
 
+    def mock_data() do
+        Record.parse(:add, ["--start", "12:12", "--end", "22:22", "--title", "Hello world"])
+        Record.parse(:add, ["--date", "22-10-2019","--start", "12:12", "--end", "10:32", "--title", "Whatever", "--tag", "one,two,three"])
+        Record.parse(:add, ["--start", "12:12", "--end", "18:25", "--title", "Whatever", "--tag", "one,two,three"])
+        Record.parse(:add, ["--start", "12:12", "--end", "18:25", "--title", "Whatever", "--tag", "git,programming,pomodoro"])
+    end
 
-    describe "test/parse" do
+    def teardown() do
+        State.flush(:config_store)
+        State.flush(:entry_store)
+        State.shutdown()
+    end
+
+    describe "test/parse/csv" do
+
+        setup do
+            State.start_link()
+            :ok
+        end
+        
+        test "valid" do
+            mock_data()
+            assert {:ok, _} = File.parse(:write, ["/home/maksim/Desktop/test.csv"])
+            teardown()
+        end
+        
+        test "invalid/no-data" do
+            assert {:error, _} = File.parse(:write, ["/home/maksim/Desktop/test.csv"])
+            teardown()
+        end
+
+    end
+
+    describe "test/parse/json" do
+
+        # setup do
+        #     State.start_link()
+        # end
+
+        # test "valid" do
+        #     mock_data()
+        #     assert File.parse(:write, ["/home/maksim/Desktop/test.json"]) == false
+        #     teardown()
+        # end
+
+        # test "invalid/no-data" do
+        #     assert {:error, _} = File.parse(:write, ["/home/maksim/Desktop/test.json"])
+        #     teardown()
+        # end
+
+
+    end
+
+
+    describe "test/parse/default" do
 
         setup do
             State.start_link()
             :ok
         end
 
-        def teardown() do
-            State.flush(:config_store)
-            State.flush(:entry_store)
-            State.shutdown()
-        end
-
-
-        test "only/-o/non-existent-path-component" do
-            State.write_entry({"a", "b", "c"})
-            State.write_entry({"a", "b", "c"})
-            State.write_entry({"k", "t", "b"})
-            assert {:error, _} = File.parse(:write, ["--output", "/home/maksim/Desktop/somewhere/test.csv"])
-            teardown()
-        end
-        
-        test "only/-o/invalid/no-data" do
-            assert {:error, _} = File.parse(:write, ["--output", "/home/maksim/Desktop/test.csv"])
+        test "invalid/no-extension" do
+            assert {:error, _} = File.parse(:write, ["/home/maksim/Desktop/test"])
             teardown()
         end
 
-        test "only/-o/invalid/no-extension" do
-            assert {:error, _} = File.parse(:write, ["--output", "/home/maksim/Desktop/test"])
+        test "invalid/non-existent-path-component" do
+            mock_data()
+            assert {:error, _} = File.parse(:write, ["/home/maksim/Desktop/somewhere/test.csv"])
             teardown()
         end
 
-        test "only/-h/valid" do
-            assert {:help, _} = File.parse(:write, ["--help"])
+        test "valid/help" do
+            assert {:help, _} = File.parse(:write, ["-h"])
             teardown()
         end
 
-        test "no-params" do
+        test "invalid/no-params" do
             assert {:error, _} = File.parse(:write, [])
             teardown()
         end
-
-        test "invalid-params/" do
-            assert {:error, _reason} = File.parse(:write, ["--output", "/home/maksim/Desktop/test.csv", "--dir", "/home/maksim/Desktop", "-n", "hello", "-f", ":csv"])
-            teardown()
-        end
-
-
 
     end
 

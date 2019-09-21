@@ -1,6 +1,8 @@
 defmodule Exp.Format.Types do
     require Logger
-    alias Exp.Format.Config    
+    alias Exp.Format.Config
+    alias Exp.Format.DateTime, as: ExpDateTime
+
     @moduledoc """
         Utilities to format and generate types
     """
@@ -94,7 +96,7 @@ defmodule Exp.Format.Types do
             {:ok, value} when has_end? -> 
                 # End time already set, calculate the time
                 {end_time, prev_rest} = Keyword.pop(prev, :end)
-                duration = Time.diff(end_time, value) |> format_time_diff
+                duration = Time.diff(end_time, value) |> ExpDateTime.duration
                 new_prev = prev_rest |> Keyword.put(:duration, duration) |> Keyword.put(:start, value)
                 {:ok, new_prev}
             {:ok, value} ->
@@ -144,7 +146,7 @@ defmodule Exp.Format.Types do
         case t_result do
             {:ok, value} when has_start? ->
                 {start_time, prev_rest} = Keyword.pop(prev, :start)
-                duration = Time.diff(value, start_time) |> format_time_diff
+                duration = Time.diff(value, start_time) |> ExpDateTime.duration
                 new_prev = prev_rest |> Keyword.put(:duration, duration) |> Keyword.put(:end, value)
                 {:ok, new_prev}
             {:ok, value} ->
@@ -214,8 +216,8 @@ defmodule Exp.Format.Types do
                 :boolean -> String.to_atom(value)
                 :float -> String.to_float(value)
                 :integer -> String.to_integer(value)
-                :date -> string_to_date(value)
-                :time -> string_to_time(value)
+                :date -> ExpDateTime.from_string(value)
+                :time -> ExpDateTime.from_string(value)
                 _ -> {:error, "Unknown type \"#{type}\" passed to function &cast/2. Valid values are :boolean, :float, :integer, :date, :time."}
             end
         else
@@ -236,39 +238,8 @@ defmodule Exp.Format.Types do
     def valid?(value, :float), do: is_float(value)
     def valid?(value, :integer) when is_binary(value), do: try_cast(fn -> value |> String.to_integer |> is_integer end)
     def valid?(value, :integer), do: is_integer(value)
-    def valid?(value, :date) when is_binary(value) do
-        matches_format = value |> String.match?(~r/[0-9]{1,2}\-[0-9]{1,2}\-[0-9]{4}/)
-        if matches_format do
-            # Check if values match
-            {day, month, year} = value |> String.split("-") |> Enum.map(&String.to_integer/1) |> List.to_tuple
-
-            cond do
-                day == 0 || month == 0 || year == 0 -> false
-                month == 2 && ((rem(year, 100) == 0 && rem(year, 400) != 0 && day <= 29) || day <= 28)  -> true
-                month <= 7 && ((rem(month, 2) == 0 && day <= 30) ||  (rem(month, 2) != 0 && day <= 31)) -> true 
-                month > 7 && ((rem(month, 2) == 0 && day <= 31) || (rem(month, 2) != 0 && day <= 30)) -> true
-                true -> false # Alle above checks passed but nothing matched
-            end
-        else
-            false
-        end
-    end
-    def valid?(_, :date), do: false
-    def valid?(value, :time) when is_binary(value) do
-        matches_format = value |> String.match?(~r/[0-9]{1,2}\:[0-9]{1,2}/)
-        if matches_format do
-            {hours, minutes} = value |> String.split(":") |> Enum.map(&String.to_integer/1) |> List.to_tuple
-
-            cond do
-                hours > 24 || minutes > 59 -> false 
-                true -> true
-            end
-        else
-            false
-        end
-    end
-    def valid?(_, :time), do: false
-    
+    def valid?(value, :date), do: ExpDateTime.valid?(value, :date)
+    def valid?(value, :time), do: ExpDateTime.valid?(value, :time)
     def valid?(_, _), do: raise ArgumentError, message: "Unknown parameter value type: [:string | :boolean | :float | :integer | :date | :time ]"
 
     # Tries to executed the parsed pipe (which represents a cast from string to a specific type. See in &valid?/2)
@@ -280,89 +251,25 @@ defmodule Exp.Format.Types do
         end
     end
 
-    # ################################
-    #       FORMAT Functions
-    # ################################
-
+    
+    @info """
+        ------------------------------------------
+        Format functions
+        ------------------------------------------
+    """
 
     @doc """
-        Takes the a time difference in seconds and returns a string of form `hh:mm:ss` representing a duration
+        Extracts the individual tag values from a string of tags.
 
-        Parameters:
-        - secs: seconds as integer
     """
-    def format_time_diff(secs) do
-        # REVIEW: Better way to encode/decode duration? maybe a sigil?
-        sec = rem(secs, 60)
-        minutes = if secs >= 60, do: div(secs, 60), else: 0
-        hours = if minutes > 60, do: div(minutes, 60), else: 0
-        real_minutes = minutes - (hours*60)
-        "#{hours}:#{real_minutes}:#{sec}"
+    def tags_from_string(tags) when is_nil(tags), do: tags
+    def tags_from_string(tags) when is_binary(tags) do
+        result = tags 
+            |> Enum.split(",") 
+            |> Enum.map(&String.trim/1) 
+            |> Enum.filter(fn x -> !(is_nil(x) || x == "") end)
+        {:ok, result}
     end
-
-    @doc """
-        Parses a String of form \"dd-MM-YYYY\" into a date
-
-        return {:ok, date} | {:error, msg}
-    """
-    def string_to_date(date_string) when is_binary(date_string) do
-        try do
-            {day, month, year} = date_string |> String.split("-") |> Enum.map(&String.to_integer/1) |> List.to_tuple
-            Date.new(year, month, day)
-        rescue
-            ArgumentError -> {:error, "Error in function &string_to_date/1. Value #{date_string} is in the wrong format. Function expects value to be in dd-MM-YYYY"}
-            MatchError -> {:error, "Failed to parse string into date format."}
-        end
-    end
-    def string_to_date(_), do: {:error, "Error in function &string_to_date/1. Wrong parameter type passed. Functions expects value of type string."}
-
-    def date_to_string(date) do
-        try do
-            {year, month, day} = Date.to_erl(date)
-            {:ok, "#{day}-#{month}-#{year}"}
-        rescue
-            FunctionClauseError -> {:error, "Error in function &date_to_string/1. Expected parameter of type ~D."}
-        end
-    end
-
-    @doc """
-        Parses a string of format \"hh:mm\" into a time.
-
-        return {:ok, time} | {:error, msg}
-    """
-    def string_to_time(time_string) when is_binary(time_string) do
-        try do
-            result = time_string |> String.split(":") |> Enum.map(&String.to_integer/1) |> List.to_tuple()
-            num_values = tuple_size(result)
-
-            case num_values do
-                2 -> 
-                    {hour, minute} = result
-                    Time.new(hour, minute, 0) 
-                3 ->
-                    # Logger.debug(time_string)
-                    {hour, minute, sec} = result
-                    Time.new(hour, minute, sec)
-                _ -> raise ArgumentError
-            end
-        rescue  
-            ArgumentError -> {:error, "Error in function &string_to_time/1. Passes parameter has the wrong format. String in format hh:mm:ss or hh:mm expected."}
-            MatchError -> {:error, "Error in function &string_to_time/1. Failed to parse string into time format."}
-        end
-    end
-    def string_to_time(_), do: {:error, "Error in function &string_to_time/1. Passed parameter is not of type string."}
-
-    @doc """
-        Parses given time into a string.
-    """
-    def time_to_string(time) do
-        try do
-            {hour, minute, sec} = Time.to_erl(time)
-            {:ok, "#{hour}:#{minute}:#{sec}"}
-        rescue
-            FunctionClauseError -> {:error, "Error in function &time_to_string/1. Passed parameter is expected to be of type ~T."}
-        end
-    end
-
+    def tags_from_string(_tags), do: {:error, "The given value for Tags is not a string."}
 
 end

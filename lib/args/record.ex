@@ -63,10 +63,14 @@ defmodule Exp.Args.Record do
     |> Record.start
   end
 
+  @stop_types Config.extract(:stop, :command)
   @doc """
 
   """
-  def parse(:stop, _), do: Record.stop
-  def parse(_, _), do: {:error, "", []}
+  def parse(:stop, argv) do
+    argv
+    |> OptionParser.parse(@stop_types)
+    |> Record.stop
+  end 
 
 end

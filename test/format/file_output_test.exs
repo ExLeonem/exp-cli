@@ -19,22 +19,22 @@ defmodule TestExpFormatFileOutput do
         end
 
         test "valid/simple" do
-            assert FileOutput.format(:csv, [{1, 2, 3}]) == {:ok, "1,2,3"}
+            assert FileOutput.format(:csv, [{1, 2, 3}]) == {:ok, "date,start,end,title,tag,duration\n1,2,3"}
             teardown()
         end
 
         test "valid/mixed-values" do
-            assert FileOutput.format(:csv, [{1, :hey, 12.2, nil, true}]) == {:ok, "1,hey,12.2,,true"}
+            assert FileOutput.format(:csv, [{1, :hey, 12.2, nil, true}]) == {:ok, "date,start,end,title,tag,duration\n1,hey,12.2,,true"}
             teardown()
         end
 
         test "valid/2-entries" do
-            assert FileOutput.format(:csv, [{1,2,3}, {1,2,3}]) == {:ok, "1,2,3\n1,2,3"}
+            assert FileOutput.format(:csv, [{1,2,3}, {1,2,3}]) == {:ok, "date,start,end,title,tag,duration\n1,2,3\n1,2,3"}
             teardown()
         end
 
         test "collection/valid/nested-values" do
-            assert FileOutput.format(:csv, [{1, {2, 3}}]) == {:ok, "1,[2,3]"}
+            assert FileOutput.format(:csv, [{1, {2, 3}}]) == {:ok, "date,start,end,title,tag,duration\n1,\"[2,3]\""}
             teardown()
         end
 
@@ -77,10 +77,16 @@ defmodule TestExpFormatFileOutput do
 
     describe "test/json-output" do
         
-    end
+        test "valid" do
+            dt = NaiveDateTime.utc_now()
+            assert FileOutput.resolve_json([{dt,dt,dt,"4","5","10:10:10"}, {dt,dt,dt,"4","5","10:10"}]) == false
+        end
 
-    describe "yaml" do
-        
+        # test "valid/nested-tags" do
+        #     dt = NaiveDateTime.utc_now()
+        #     assert FileOutput.resolve_json([{dt,dt,dt,"4",["tag1", "tag2"],"10:10:10"}, {dt,dt,dt,"4","5","10:10"}]) == false
+        # end
+
     end
 
     describe "test/utilities" do

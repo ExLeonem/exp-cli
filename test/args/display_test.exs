@@ -16,15 +16,19 @@ defmodule TestExpArgsDisplay do
     end
 
     def load_mock_data() do
-        State.write_entry({DateTime.utc_now(), "00:00", "Hello World"})
-        State.write_entry({DateTime.utc_now(), "00:00", "What in the world"})
-        State.write_entry({DateTime.utc_now(), "00:00", "k"})
-        State.write_entry({DateTime.utc_now(), "00:00", "nkn"})
-        State.write_entry({DateTime.utc_now(), "00:00", "tt"})
-        now = DateTime.utc_now()
-        entry = {now, "00:00", "cc"}
+        c_mock_entry("Hello world")
+        c_mock_entry("whatever")
+        c_mock_entry("nkn")
+        c_mock_entry("tt")
+        last_entry = c_mock_entry("cc")
+        State.put_config(:last_entry, last_entry)
+    end
+
+    def c_mock_entry(title, tags \\ "") do
+        dt = DateTime.utc_now()
+        entry = {dt, dt, dt, title, tags, "10:10"}
         State.write_entry(entry)
-        State.put_config(:last_entry, entry)
+        entry
     end
 
 
