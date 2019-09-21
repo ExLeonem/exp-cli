@@ -108,19 +108,7 @@ defmodule Exp.Format.FileOutput do
 
 
     @doc """
-<<<<<<< HEAD
-        
-    """
-    # def resolve_json(value, acc \\ "{\"data\":[")
-    # def resolve_json([], acc), do: acc
-    # def resolve_json([value | rest], acc) do
-    #     new_value = if is_tuple(value), do: value, else: value |> hd
-    #     {:error, "Currently under development"}
-    # end
-    def resolve_json(data), do: {:error, "Currently under development"}
-=======
         Resolves a list of entities or a single entity into a json format.
->>>>>>> 157b5d94184555119725e44b58fa9210ddceeac2
 
         {
             keys: [],
