@@ -1,6 +1,7 @@
 defmodule Exp.Format.FileOutput do
     alias Exp.Format.Config
     alias Exp.Format.Types
+    alias Exp.Format.DateTime, as: ExpDateTime
     
     @moduledoc """
         Formatting the export of entry tables to output files.
@@ -21,6 +22,11 @@ defmodule Exp.Format.FileOutput do
     """
     def header(:csv) do
         @keys |> Enum.map(&to_string/1) |> Enum.join(",")   
+    end
+
+    def header(:json) do
+        parsed_keys = @keys |> Enum.map(&to_string/1) |> Enum.map(&enc_value/1)
+        object_attribute(:keys, parsed_keys)
     end
 
     
@@ -105,6 +111,7 @@ defmodule Exp.Format.FileOutput do
         Resolves a list of entities or a single entity into a json format.
 
         {
+            keys: [],
             data: [
                 entity,
                 entity
@@ -113,56 +120,60 @@ defmodule Exp.Format.FileOutput do
 
         returns a string
     """
-    def resolve_json(data, acc \\ "{\"data\":[")
-    def resolve_json([], acc), do: acc <> "]}"
+    def resolve_json(data, acc \\ "")
+    def resolve_json([], acc), do: "{#{header(:json)},\"data\":[" <> acc <> "]}"
     def resolve_json([value | rest], acc) do
-        keys = Config.extract(:keys, :field) |> Enum.reverse
-        all_keys = [:duration | keys]
-
         entry = if is_tuple(value), do: value |> to_list, else: hd(value) |> to_list 
-        zipped_values = all_keys |> Enum.zip(entry)
+        zipped_values = @keys |> Enum.zip(entry)
 
-        resolve_inner = fn 
-            {key, value} when is_tuple(value) or is_list(value) ->
-                # nested value
-                IO.puts("resolve nested")
-                joined_values = value |>Enum.map(&enc_value/1) |> Enum.join(",")
-                list_of_values = "[#{joined_values}]"
-                combine_key_value(key, list_of_values)
+        new_acc = zipped_values 
+            |> Enum.map(&resolve_inner_json/1) 
+            |> Enum.join(",")
+            |> enc_value(:object)
+            |> combine(acc, :json)
 
-            {key, value} ->
-                IO.puts("resolve simple")
-                IO.inspect(key)
-                IO.inspect(value)
-                # combine_key_value(key, value)
-                IO.puts("finished")
-            _ -> 
-                IO.puts("something else")    
-            end
-
-        new_acc = zipped_values
-            |> Enum.map(resolve_inner)
-            
-
-        resolve_json(rest, acc <> new_acc)
+        resolve_json(rest, new_acc)
     end
     def resolve_json(_, _), do: raise ArgumentError, message: "Error in function &resolve_json/3. Invalid entry format. Only mulitple entries represented as tuple may be written to a file."
     
+    defp resolve_inner_json({key, value}) when is_tuple(value), do: resolve_inner_json({key, Tuple.to_list(value)})
+    defp resolve_inner_json({key, value}) when is_list(value) do
+        values = value |> Enum.map(&enc_value/1)
+        object_attribute(key, values)
+    end
+    defp resolve_inner_json({key, value}), do: object_attribute(key, value)
 
-    def combine_key_value(key, value) do
-        enc_value(key) <> ":" <> value
+
+    # ------------------------------------------
+    #             Utility Functions
+    # ------------------------------------------
+
+    # creates 
+    def object_attribute(key, value) do
+        parsed_key = key |> to_string |> enc_value
+        parsed_value = value |> object_value(key) |> enc_value
+
+        parsed_key <> " : " <> parsed_value
     end
 
+    # Cast special values into a specific format
+    def object_value(value, key) when key in [:date, :start, :end], do: ExpDateTime.to_iso(value)
+    def object_value(nil, _), do: "" 
+    def object_value(value, _), do: value
+
+
     def enc_value(item, type \\ :string)
+    def enc_value([first| tail] = item, _), do: "[#{Enum.join(item, ",")}]"
     def enc_value(item, :string), do: "\"" <> item <> "\""
     def enc_value(item, :object), do: "{" <> item <> "}"
-    
-
-
 
     # Combines left and right string parts, takes only strings
-    def combine(right, ""), do: right
-    def combine(right, left), do: left <> "\n" <> right
+    def combine(right, left, type \\ :csv)
+    def combine(right, "", :csv), do: right
+    def combine(right, left, :csv), do: left <> "\n" <> right
+
+    def combine(right, "", :json), do: right
+    def combine(right, left, :json), do: left <> "," <> right
 
     # Check if passed data is collection
     def is_collection?(data) when is_list(data) or is_map(data) or is_tuple(data), do: true

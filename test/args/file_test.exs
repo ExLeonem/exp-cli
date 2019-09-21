@@ -40,20 +40,20 @@ defmodule TestExpArgsFile do
 
     describe "test/parse/json" do
 
-        setup do
-            State.start_link()
-        end
+        # setup do
+        #     State.start_link()
+        # end
 
-        test "valid" do
-            mock_data()
-            assert File.parse(:write, ["/home/maksim/Desktop/test.json"]) == false
-            teardown()
-        end
+        # test "valid" do
+        #     mock_data()
+        #     assert File.parse(:write, ["/home/maksim/Desktop/test.json"]) == false
+        #     teardown()
+        # end
 
-        test "invalid/no-data" do
-            assert {:error, _} = File.parse(:write, ["/home/maksim/Desktop/test.json"])
-            teardown()
-        end
+        # test "invalid/no-data" do
+        #     assert {:error, _} = File.parse(:write, ["/home/maksim/Desktop/test.json"])
+        #     teardown()
+        # end
 
 
     end

@@ -77,10 +77,16 @@ defmodule TestExpFormatFileOutput do
 
     describe "test/json-output" do
         
-    end
+        test "valid" do
+            dt = NaiveDateTime.utc_now()
+            assert FileOutput.resolve_json([{dt,dt,dt,"4","5","10:10:10"}, {dt,dt,dt,"4","5","10:10"}]) == false
+        end
 
-    describe "yaml" do
-        
+        # test "valid/nested-tags" do
+        #     dt = NaiveDateTime.utc_now()
+        #     assert FileOutput.resolve_json([{dt,dt,dt,"4",["tag1", "tag2"],"10:10:10"}, {dt,dt,dt,"4","5","10:10"}]) == false
+        # end
+
     end
 
     describe "test/utilities" do
