@@ -32,3 +32,4 @@ pow-*.tar
 /entry_store
 
 /*.json
+/*.csv

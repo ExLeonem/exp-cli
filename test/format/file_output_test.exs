@@ -79,7 +79,8 @@ defmodule TestExpFormatFileOutput do
         
         test "valid" do
             dt = NaiveDateTime.utc_now()
-            assert FileOutput.resolve_json([{dt,dt,dt,"4","5","10:10:10"}, {dt,dt,dt,"4","5","10:10"}]) == false
+            string_result = FileOutput.resolve_json([{dt,dt,dt,"4","5","10:10:10"}, {dt,dt,dt,"4","5","10:10"}]) 
+            assert !is_nil(string_result)
         end
 
         # test "valid/nested-tags" do
