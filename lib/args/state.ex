@@ -2,8 +2,9 @@ defmodule Exp.Args.State do
   require Logger
   alias Exp.Action.State
   alias Exp.Format.Config
+  alias Exp.Format.DateTime, as: ExpDateTime
   alias Exp.Format.Types
-  alias Exp.Format.Msgs
+  alias Exp.Format.CLI
 
   @moduledoc """
 
@@ -11,13 +12,13 @@ defmodule Exp.Args.State do
 
 
   def parse(:status, _) do
-    is_recording = State.get_config(:is_recording)
+    is_recording? = State.get_config(:is_recording)
     
-    if is_recording[:is_recording] do
+    if is_recording? do
       started_at = State.get_config(:time_started)
       current_duration = Time.utc_now()
-      |> Time.diff(started_at[:time_started])
-      |> Types.format_time_diff
+      |> ExpDateTime.diff(started_at)
+      |> ExpDateTime.duration
 
       {:ok, "Current duration: #{current_duration}"}
     else
@@ -115,7 +116,7 @@ defmodule Exp.Args.State do
       |> get_config
 
       case result do
-        {:ok, _} -> {:ok, (elem(result,1) |> Enum.map(&Msgs.to_string/1) |> Enum.join(", "))}
+        {:ok, _} -> {:ok, (elem(result,1) |> Enum.map(&Types.to_string/1) |> Enum.join(", "))}
         {:error, _} -> result
         :help -> {:help, @usage_get} 
       end

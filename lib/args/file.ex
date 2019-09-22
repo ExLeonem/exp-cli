@@ -42,33 +42,7 @@ defmodule Exp.Args.File do
                 |> File.write
         end
     end
-
-
-    def help_user?({:error, _reason} = result), do: result 
-    def help_user?({:ok, args}) do
-        if Keyword.has_key?(args, :help) && args[:help] do
-            {:help, @usage_write} 
-        else
-            {:ok, args}
-        end
-    end
-
     
-    @doc """
-        Checks the value passed with the -o option.
-
-        Returns tuple in form {:ok, {path, format}} | {:error, reason}
-    """
-    def extract_path_information(path) do
-        extension = Path.extname(path)
-        dir_path = Path.dirname(path)
-
-        cond do
-            extension != "" && File.dir?(dir_path) -> {:ok, {path, extension}}
-            extension == "" -> {:error, "You'r file needs an extension when you use the --output flag, like /Desktop/test.csv"}
-        end
-
-    end
     
     def get_args(argv, return_rest \\ false)
     def get_args({[],[],[]}, _), do: {:error, "You passed an insufficient amount of parameter to the command. Need help? Just type exp write -h"}

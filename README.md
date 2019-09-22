@@ -68,12 +68,8 @@ be found at [https://hexdocs.pm/exp](https://hexdocs.pm/exp). -->
   - [ ] start/stop pomodoro watch
 - [ ] Export Entries
   - [x] CSV
-  - [ ] JSON
+  - [x] JSON
   <!-- - [ ] logfmt? -->
-- [ ] Import Entries
-  - [ ] CSV
-  - [ ] JSON
-  <!-- - [ ] logfmt -->
 
 
 
@@ -83,6 +79,7 @@ Name          | writeable?  |  Description
 ---           | ---         | ---
 is-recording          | false       | Indicates if application currently is recording the time. Switches by calling the [stop](#Commands) command.
 default-block-length  | true        | The block length for the pomodoro timer
+default-storage-path  | true        | The directory where the entries are written to
 output-format         | true        | Default output format to use on `write` command
 last-entry            | false       | DateTime of last entry written to the entry store
 <!-- remind                | true        | Set timout to prompt user current state -->
@@ -91,7 +88,7 @@ last-entry            | false       | DateTime of last entry written to the entr
 ## Commands
 
 To start recording a new entry just type:`exp start`.
-To stop the recording timer call `exp stop` .
+To stop the recording timer call `exp stop -t "Give your record a title"` .
 
 ### General Commands
 Name                  | Description                                                      | Implemented 
