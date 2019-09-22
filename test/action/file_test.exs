@@ -36,11 +36,55 @@ defmodule TestExpActionFile do
 
         test "valid/csv", config do
             file_path = [config[:default_path], "test.csv"] |> Path.join
-            IO.puts(file_path)
-            assert ExpFile.write({:ok, [output: file_path]}) == false
+            assert {:ok, _} = ExpFile.write({:ok, [output: file_path]})
+            clean(file_path)
             teardown()
         end
 
+        test "valid/json", config do
+            file_path = [config[:default_path], "test.json"] |> Path.join
+            assert {:ok, _} = ExpFile.write({:ok, [output: file_path]})
+            clean(file_path)
+            teardown()
+        end
+        
+        test "invalid-file-extension", config do
+            file_path = [config[:default_path], "test.xml"] |> Path.join
+            assert {:error, _} = ExpFile.write({:ok, [output: file_path]})
+            teardown()
+        end
+        
+        test "invalid-path" do
+            path = "/somewhere/no_one_knows/test.json"
+            assert {:error, _} = ExpFile.write({:ok, [output: path]})
+            teardown
+        end
+
     end
+
+    test "test &create/2" do
+        {:ok, path} = File.cwd()
+        assert {:error, _} = ExpFile.create({:error, "msg"}, path)
+    end
+
+
+    describe "test &fill/1" do
+        
+        test "{:error, _} " do
+            assert ExpFile.fill({:error, "hey"}) == {:error, "hey"}
+        end
+
+        # test "{:ok, _} already closed file" do
+        #     {:ok, path} = File.cwd()
+        #     file_path = [path, "test.json"] |> Path.join
+        #     IO.inspect(file_path)
+        #     {:ok, pid} = File.open(file_path, [:write])
+        #     File.rm(file_path)
+        #     assert {:k, _} = ExpFile.fill({:ok, {pid, "hey"}})
+        # end
+
+    end
+
+    
 
 end
