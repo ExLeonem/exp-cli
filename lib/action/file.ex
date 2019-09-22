@@ -12,7 +12,7 @@ defmodule Exp.Action.File do
     """
 
     @field_names Config.extract(:keys, :field)
-    @valid_extensions [:csv, :json, :yaml, :xml]
+    @valid_extensions [:csv, :json]
 
 
     @doc """
@@ -100,7 +100,7 @@ defmodule Exp.Action.File do
         end
 
     end
-    def create(not_successfull_format, _path), do: not_successfull_format
+    def create(error_in_format, _path), do: error_in_format
 
 
     @doc """

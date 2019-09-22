@@ -68,12 +68,8 @@ be found at [https://hexdocs.pm/exp](https://hexdocs.pm/exp). -->
   - [ ] start/stop pomodoro watch
 - [ ] Export Entries
   - [x] CSV
-  - [ ] JSON
+  - [x] JSON
   <!-- - [ ] logfmt? -->
-- [ ] Import Entries
-  - [ ] CSV
-  - [ ] JSON
-  <!-- - [ ] logfmt -->
 
 
 
@@ -92,7 +88,7 @@ last-entry            | false       | DateTime of last entry written to the entr
 ## Commands
 
 To start recording a new entry just type:`exp start`.
-To stop the recording timer call `exp stop` .
+To stop the recording timer call `exp stop -t "Give your record a title"` .
 
 ### General Commands
 Name                  | Description                                                      | Implemented 
