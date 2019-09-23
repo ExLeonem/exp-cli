@@ -189,27 +189,27 @@ defmodule Exp.Action.State do
   # Additional Functions
   # -----------------------------
 
-  @doc """
-    Creates the directory where data is stored.
+  # @doc """
+  #   Creates the directory where data is stored.
 
-    @param path: directory where to store data
-  """
-  def create_dir() do
-    path = Application.get_env(:exp, :env_path)
+  #   @param path: directory where to store data
+  # """
+  # def create_dir() do
+  #   path = Application.get_env(:exp, :env_path)
 
-    # Create Directory write Config else try writing only config
-    if(!File.exists?(path)) do
-      File.mkdir(path)
-    else 
+  #   # Create Directory write Config else try writing only config
+  #   if(!File.exists?(path)) do
+  #     File.mkdir(path)
+  #   else 
 
-      # Only write config if directory already exists
-      if(!File.dir?(path)) do
-        {:error, "Theres already a directory named ExpTime in #{path}. Try using the --create option"}
-      else 
-        :ok
-      end
-    end
-  end
+  #     # Only write config if directory already exists
+  #     if(!File.dir?(path)) do
+  #       {:error, "Theres already a directory named ExpTime in #{path}. Try using the --create option"}
+  #     else 
+  #       :ok
+  #     end
+  #   end
+  # end
 
 
   @doc """

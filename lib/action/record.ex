@@ -56,7 +56,7 @@ defmodule Exp.Action.Record do
 
       [hours: hours, minutes: minutes]
     rescue
-        ArgumentError -> {:error, "Only values of Form hh:mm are applyable to parameter remind."}
+        ArgumentError -> CLI.error("Only values of Form hh:mm are applyable to parameter remind.")
     end
 
   end
@@ -109,14 +109,14 @@ defmodule Exp.Action.Record do
           State.set_config([is_recording: false, last_entry: processed_entry])
           State.write_entry(processed_entry)
           CLI.ok("Entry successfully written.")
-        {:error, reason} -> entry
+        {:error, reason} -> CLI.error(reason)
       end
 
       # Write to dets tables
       # State.set_config([is_recording: false, last_entry: entry])
       # {:ok, "\nEntry successfully written."}
     else
-      {:error, "It seems like you aren't recording anything. Start recording first to stop something."}
+      CLI.error("It seems like you aren't recording anything. Start recording first to stop something.")
     end
   end
 
@@ -127,7 +127,8 @@ defmodule Exp.Action.Record do
       |> List.to_tuple
       |> State.write_entry
 
-      {:ok, "\Entry successfully written"}
+      # {:ok, "\Entry successfully written"}
+      CLI.ok("Entry successfully written")
   end
   def add(entry), do: entry
 
@@ -195,30 +196,6 @@ defmodule Exp.Action.Record do
     today = Date.utc_today()
     {today, "#{today.year}_#{today.month}_#{today.day}"}
   end
-
-
-  # @doc """
-  #   Sort 
-  # """
-  # def sort_by_fields(key_value_pairs) do
-
-  # end
-
-
-  @doc """
-    !deprecated
-    Not in use here
-
-    Returns boolean. File exists do true else false
-  """
-  def file_exists?(file_name) do
-    env_path = State.get_config(:env_path)
-    if File.exists?(env_path) && File.dir?(env_path) do
-      true
-    else
-      false
-    end
-  end
-
+  
 end
 

@@ -2,14 +2,13 @@ defmodule Exp.Action.Record.Start do
     alias Exp.Action.State
     alias Exp.Format.DateTime, as: ExpDateTime
     alias Exp.Format.CLI
-
     require Logger
     
     
     # {:ok, remind_time} = Time.new(remind["hours"], remind["minutes"], 0)  
     
     # Something was wrong with the reminder, return the error message
-    def start(_, {:error, msg} = remind), do: remind
+    def start(_, {:error, msg} = remind), do: CLI.error(msg)
 
     # Timer and reminder
     def start(true, {:ok, remind}) do
