@@ -65,7 +65,6 @@ defmodule Exp.Args.Main do
   @doc """
     Process the parsed parameters first match triggers specialized processing
   """
-  def dispatch([], _), do: get_help() # either no parameters passed or any valid found
   def dispatch(:add, argv), do: Record.parse(:add, argv)
   def dispatch(:start, argv), do: Record.parse(:start, argv)
   def dispatch(:stop, argv), do: Record.parse(:stop, argv)
@@ -74,20 +73,11 @@ defmodule Exp.Args.Main do
   def dispatch(:status, argv), do: State.parse(:status, argv)
   def dispatch(:show, argv), do: Display.parse(:show, argv)
   def dispatch(first_key, argv) when first_key in [:"-x", :"--export"], do: File.parse(:write, argv)
-  def dispatch(first_key, argv) when first_key in [:"-h", :"--help"], do: get_help()
+  def dispatch(_, []), do: {:help, @usage} # either no parameters passed or any valid found
+  def dispatch(first_key, argv) when first_key in [:"-h", :"--help"], do: {:help, @usage}
   def dispatch(_, _), do: {:error, "You passed something I can't process. Check my manual with exp -h"}
 
-  # Iterate parsed parameters
-  def dispatch([_| t], argv) do
-    dispatch(t, argv)
-  end
-
-  # Return help information
-  defp get_help(help \\ @usage) do
-    {:help, help}
-  end
-
-  defp process_result(result = {_, msg}) do
+  def process_result(result = {_, msg}) do
     IO.puts(msg) # Don't remove this !!!!
     result
   end

@@ -63,6 +63,7 @@ defmodule TestExpActionState do
     end
 
     test "write-new-entry/entry-table/invalid" do
+      # Erorred one time
       State.write_entry({"hey", "some"})
       assert State.write_entry({"hey", "some"}) == false 
       teardown()

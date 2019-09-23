@@ -1,6 +1,7 @@
 defmodule TestExpFormatCLI do
     use ExUnit.Case, async: true
     alias Exp.Format.CLI
+    @doctest CLI
 
     describe "status-output" do
         

@@ -18,48 +18,7 @@ defmodule TestExpArgsFile do
         State.shutdown()
     end
 
-    describe "test/parse/csv" do
-
-        setup do
-            State.start_link()
-            :ok
-        end
-        
-        test "valid" do
-            mock_data()
-            assert {:ok, _} = File.parse(:write, ["/home/maksim/Desktop/test.csv"])
-            teardown()
-        end
-        
-        test "invalid/no-data" do
-            assert {:error, _} = File.parse(:write, ["/home/maksim/Desktop/test.csv"])
-            teardown()
-        end
-
-    end
-
-    describe "test/parse/json" do
-
-        # setup do
-        #     State.start_link()
-        # end
-
-        # test "valid" do
-        #     mock_data()
-        #     assert File.parse(:write, ["/home/maksim/Desktop/test.json"]) == false
-        #     teardown()
-        # end
-
-        # test "invalid/no-data" do
-        #     assert {:error, _} = File.parse(:write, ["/home/maksim/Desktop/test.json"])
-        #     teardown()
-        # end
-
-
-    end
-
-
-    describe "test/parse/default" do
+    describe "test &parse/2" do
 
         setup do
             State.start_link()
