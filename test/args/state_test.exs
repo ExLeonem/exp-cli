@@ -3,6 +3,7 @@ defmodule TestExpArgsState do
   alias Exp.Action.State, as: StateAgent
   alias Exp.Args.State, as: ArgsState
   alias Exp.Format.DateTime, as: ExpDateTime
+  alias Exp.Action.Record
   doctest Exp.Args.State
 
   setup do
@@ -72,39 +73,45 @@ defmodule TestExpArgsState do
 
   end
 
-  describe "test/delete-entries" do
+  describe "test/status" do
 
-    setup do
-      StateAgent.start_link()
-      :ok
-    end
-    
-    test "delete all" do
-      mock_data()
-      assert {:ok, _} = StateAgent.delete_entry({:all, ""})
-      teardown()
+    test "valid" do
+      Record.start({[],[],[]})
+      assert {:ok, _} = ArgsState.parse(:status, [])
+      teardown()      
     end
 
-    test "delete all/ no data" do
+    test "invalid" do
+      assert {:error, _} = ArgsState.parse(:status, [])
       teardown()
-      StateAgent.start_link()
-      assert {:error, _} = StateAgent.delete_entry({:all, ""})
-      teardown()
-    end
-
-    test "delete last" do
-      mock_data()
-      last_entry = StateAgent.get_last_entry()
-      assert {:ok, _} = StateAgent.delete_entry({:last, ""})
-      teardown()
-    end
-
-    test "delete last/ no data" do
-      assert {:error, _} = StateAgent.delete_entry({:last, ""})
-      teardown()        
     end
 
   end
 
+  describe "test/delete" do
+    
+    test "last" do
+      mock_data()
+      assert {:ok, _} = ArgsState.parse(:delete, ["--last"])
+      teardown()
+    end
+
+    test "all" do
+      mock_data()
+      assert {:ok, _} = ArgsState.parse(:delete, ["--all"])
+      teardown()
+    end
+
+    test "empty" do
+      mock_data()
+      assert {:error, _} = ArgsState.parse(:delete, [])
+      teardown()
+    end
+
+  end
+
+  test "test/version" do
+    assert {:ok, _} = ArgsState.version()
+  end
 
 end

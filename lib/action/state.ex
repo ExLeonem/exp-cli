@@ -141,7 +141,8 @@ defmodule Exp.Action.State do
 
         return {:ok, msg} | {:error, msg}      
   """
-  def delete_entry({:last, _}) do
+  def delete_entry(type, filter \\ nil)
+  def delete_entry(:last, _) do
 
     if !empty?(@entry_table) do
       [entry] = get_last_entry()
@@ -157,7 +158,7 @@ defmodule Exp.Action.State do
 
   end
 
-  def delete_entry({:all, _}) do
+  def delete_entry(:all, _) do
   
     if !empty?(@entry_table) do
       result = :dets.delete_all_objects(@entry_table)
@@ -171,7 +172,7 @@ defmodule Exp.Action.State do
     
   end
 
-  def delete_entry({:filter, _}) do
+  def delete_entry(:filter, _filter) do
     {:error, "cooming soon"}
   end
 

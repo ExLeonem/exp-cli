@@ -169,11 +169,6 @@ defmodule Exp.Args.State do
     |> OptionParser.parse(@delete_types)
     |> extract_valid
     |> delete_entries
-
-    case result do
-      {:ok, _} -> 
-    end
-
   end
 
   @doc """
@@ -181,12 +176,21 @@ defmodule Exp.Args.State do
 
     returns {:ok, msg} | {:error, msg}
   """
-  def delete_entries({status, _} = result) when status in [:error, :help], do: result
-  def delete_entries({:ok, args}) do
-    if length(args) > 1 do
-          args
+  def delete_entries({:error, _} = result), do: result
+  def delete_entries(args) do
+
+    num_entries = length(args)
+
+    if num_entries == 1 do
+      cond do
+        args[:help] -> {:help, @usage_delete}
+        args[:last] -> State.delete_entry(:last)
+        args[:all] -> State.delete_entry(:all)
+        true -> State.delete_entry(:filter, args[:filter])
+      end
     else
-      {:error, "You passed to many arguments. Check exp delete -h for more information."}
+      msg = if num_entries > 1, do: "You passed to many arguments. Check exp delete -h for more information.", else: "What do you want me to delete? I need some more arguments. Check exp delete -h"
+      {:error, msg}
     end
   end
 
