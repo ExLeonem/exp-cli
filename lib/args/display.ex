@@ -2,7 +2,7 @@ defmodule Exp.Args.Display do
     require Logger
     alias Exp.Action.Display
     alias Exp.Action.State
-    alias Exp.Action.Formatter
+    alias Exp.Format.CLI
 
     @moduledoc """
         Module handles CLI calls to query/display data from entry store.
@@ -61,7 +61,7 @@ defmodule Exp.Args.Display do
 
 
     # TODO: check wether one ore more parameter set and respond to user
-    def get_entries({argv, _, _}) do
+    def get_entries({argv, [], []}) do
 
         if argv[:help] do
             {:help, @usage_display}
@@ -77,15 +77,14 @@ defmodule Exp.Args.Display do
             end
             format_result(result)
         end
-    end 
+    end
+    def get_entries({[], _rest, []}), do: CLI.error("You passed some unnecessary parameter. Check exp show -h ...")
+    def get_entries({_, _, _invalid}), do: CLI.error("You passed some invalid arguments. Check exp show -h for more information.")
 
     def format_result(result, aggregate \\ "")
     def format_result([], ""), do: {:ok , "There's no recorded data yet."}
     def format_result([], aggregate), do: {:ok, aggregate}
-    def format_result(result, aggregate) do
-        aggregate <> "++++ Result ++++"
-        _format_result(result, aggregate)
-    end
+    def format_result(result, aggregate), do: _format_result(result, aggregate)
 
     def _format_result([], aggregate), do: {:ok, aggregate}
     def _format_result([h| t], aggregate) do

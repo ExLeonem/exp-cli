@@ -31,15 +31,16 @@ defmodule Exp.Args.Main do
 
     Commands:
       
-      start       - start recording
-      stop        - stop recording
-      status      - Shows the current progression.
-      add         - adding a new entry
-      set         - cli configuration
-      get         - get current cli config information
-      show        - query inserted information
-      -x          - Export data to the given path, available formats are csv | json
-      -h, --help  - print usage information
+      start         - start recording
+      stop          - stop recording
+      status        - Show the timer progression
+      add           - Add a new entry at once
+      set           - Configurations of CLI parameters
+      get           - Get current CLI configuration parameter
+      show          - Query inserted information
+      -x            - Export data to the given path, available formats are csv | json
+      -h, --help    - Print usage information
+      -v, --version - Prints the current 
 
     """
 
@@ -73,6 +74,7 @@ defmodule Exp.Args.Main do
   def dispatch(:status, argv), do: State.parse(:status, argv)
   def dispatch(:show, argv), do: Display.parse(:show, argv)
   def dispatch(first_key, argv) when first_key in [:"-x", :"--export"], do: File.parse(:write, argv)
+  def dispatch(first_key, []) when first_key in [:"-v", :"--version"], do: State.version()
   def dispatch(_, []), do: {:help, @usage} # either no parameters passed or any valid found
   def dispatch(first_key, argv) when first_key in [:"-h", :"--help"], do: {:help, @usage}
   def dispatch(_, _), do: {:error, "You passed something I can't process. Check my manual with exp -h"}

@@ -10,7 +10,7 @@ defmodule Exp.Args.Record do
 
   """
 
-  @add_types [strict: Config.extract(:schema, :field), aliases: Config.extract(:alias, :field)]
+  @add_types [strict: Config.extract(:schema, :field, [exclude: [:date]]), aliases: Config.extract(:alias, :field)]
   @add_help_switch [strict: [help: :boolean], aliases: [h: :help]]
   @add_help """
 

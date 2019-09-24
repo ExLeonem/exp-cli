@@ -49,6 +49,7 @@ defmodule Exp.Format.CLI do
     def get_icon(:check), do: Symbol.check
     def get_icon(:add), do: "+"
     def get_icon(:cross), do: Symbol.cross
+    def get_icon(:none), do: ""
     
 
     defmodule Symbol do

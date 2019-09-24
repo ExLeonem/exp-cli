@@ -60,7 +60,7 @@ config :exp,
         ]
     ],
     fields: [
-        date: [:string, false, :d],
+        date: [:string, false, :none],
         start: [:string, true, :s], # ATTENTION: Start field must be followed by end field. 
         end: [:string, false, :e], 
         title: [:string, true, :t],

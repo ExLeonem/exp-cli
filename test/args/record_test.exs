@@ -16,17 +16,21 @@ defmodule TestExpArgsRecord do
   end
 
   setup do
-    [valid: ["--title", "Hello World or nah", "--start", "10:10"]]
+    [valid: ["--title", "Hello World or nah", "--start", "10:10", "--end", "12:12"]]
   end
 
-  describe "test/add" do
+  describe "test &add/*" do
+
+    test "valid/date-time" do
+      assert {:ok, _} = Record.parse(:add, ["--start", "10-10-2019 10:10", "--end", "11-10-2019 10:10", "--title", "whatever"])
+    end
 
     test "valid", context do
       assert {:ok, _} = Record.parse(:add, context[:valid])
       teardown()
     end
 
-    test "invalid/format-error", context do
+    test "invalid/date-parameter excluded", context do
       valid = context[:valid]
       params = ["--date", "22.10.2019" | valid]
       assert {:error, _} = Record.parse(:add, params)

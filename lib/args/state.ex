@@ -16,7 +16,7 @@ defmodule Exp.Args.State do
     
     if is_recording? do
       started_at = State.get_config(:time_started)
-      current_duration = Time.utc_now()
+      current_duration = ExpDateTime.now()
       |> ExpDateTime.diff(started_at)
       |> ExpDateTime.duration
 
@@ -99,8 +99,7 @@ defmodule Exp.Args.State do
       --block-length    - set the default length of a learning unit.
       --is-recording    - is CLI currently recording?
       --remind          - Current time of set timer
-      -- version        - Get the current cli version
-      
+
     """
 
 
@@ -150,4 +149,10 @@ defmodule Exp.Args.State do
     end
 
   end
+
+  def version() do
+    version = State.get_config(:version)
+    CLI.ok("EXP-CLI version: #{version}", :none)
+  end
+
 end

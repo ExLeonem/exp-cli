@@ -42,7 +42,7 @@ defmodule Exp.Action.State do
       Agent.start_link(fn -> {config_table, entry_table} end, name: __MODULE__)
       :ok
     rescue
-      e in ArgumentError -> {:error, e[:message]}
+      e in ArgumentError -> {:error, e.message}
     end
   end
 
