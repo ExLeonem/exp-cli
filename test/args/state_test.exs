@@ -22,21 +22,6 @@ defmodule TestExpArgsState do
       teardown()
     end
 
-    test "set/:remind" do
-      ArgsState.parse(:set, ["--remind", "2:00"])
-      assert StateAgent.get_config(:remind) == "2:00"
-      teardown()
-    end
-
-    test "set/[:remind, :block-length]" do
-      ArgsState.parse(:set, ["--block-length", "20:20", "--remind", "1:00"])
-      block_length = StateAgent.get_config(:block_length)
-      remind = StateAgent.get_config(:remind)
-      assert block_length == "20:20" 
-      assert remind == "1:00"
-      teardown()
-    end
-
     test "test/[]/no-options-set" do
       assert {:error, _} = ArgsState.parse(:set, [])
       teardown()
@@ -57,7 +42,7 @@ defmodule TestExpArgsState do
     end
 
     test "get/[:block-length, :remind]" do
-      assert ArgsState.parse(:get, ["--block-length", "--remind"]) == {:ok, "1:30, nil"}
+      assert ArgsState.parse(:get, ["--block-length", "--output-format"]) == {:ok, "1:30, csv"}
     end
 
     test "get/[]/no-options-set" do

@@ -91,10 +91,6 @@ defmodule TestExpActionState do
       assert State.get_config(:output_format) == :csv
     end
 
-    test "negative/mid/invalid" do
-      assert State.get_config(:remind) != true
-    end
-
     test "update-value/valid" do
       State.init_config() # reset configuration
       State.put_config(:is_recording, true)
@@ -122,10 +118,9 @@ defmodule TestExpActionState do
 
     test "set-config/persist" do
       State.init_config()
-      update_keys = [block_length: "2:00", remind: true]
+      update_keys = [block_length: "2:00"]
       State.set_config(update_keys)
       assert State.get_config(:block_length) == "2:00"
-      assert State.get_config(:remind) == true
       teardown()
     end
 
