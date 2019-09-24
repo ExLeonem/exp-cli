@@ -48,8 +48,10 @@ If you want to use this project as a base for something or just further develop 
   - [x] Complete List
   - [x] Last Entry
   - [ ] By filter
-- [ ] Delete entries
-- [ ] Modify entries
+- [ ] Delete
+  - [ ] last entry
+  - [ ] all entries
+  - [ ] filter term
 - [ ] Time tracking
   - [x] start/stop mechanic
   - [x] save instantly complete entry
@@ -173,7 +175,7 @@ Flag              | Type      |   Description
 
 ### Export
 Export the recorded data to a specific Format.
-The given path must already be existent. Suported output formats are currently csv and json. 
+The given path must already be existent. Suported output formats are currently **csv** and **json**. 
 
 Example: `exp -x /path/file.csv`
 

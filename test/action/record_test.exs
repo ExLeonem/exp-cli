@@ -36,18 +36,6 @@ defmodule TestExpActionRecord do
     teardown()
   end
 
-  @tag timeout: 200
-  test "user_request_param" do
-    checker = fn value -> is_binary(value) end
-    assert Record.request_user_argument("2", checker, FakeIO) == "2"
-  end
-
-  test "request_user_argument/invalid" do
-    assert_raise ArgumentError, fn ->
-      Record.request_user_argument("Hey", 2)
-    end
-  end
-
   test "parse_remind/valid/22:22" do
     assert  Record.parse_remind("22:22") == [hours: 22, minutes: 22]
   end

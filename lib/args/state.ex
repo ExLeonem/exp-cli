@@ -10,7 +10,13 @@ defmodule Exp.Args.State do
 
   """
 
+  @doc """
+    Depending on the passed directive, executing different routines.
+    Either request the passed time since record starting, get/set configuration parameters or delete entries.
 
+
+    returns {:ok, msg} | {:error, msg}
+  """
   def parse(:status, _) do
     is_recording? = State.get_config(:is_recording)
     
@@ -49,9 +55,6 @@ defmodule Exp.Args.State do
       --output_format   - the format to write out entries.
     """
 
-  @doc """
-    Setting configuration parameters through the cli.
-  """
   def parse(:set, argv) do
     strict = Config.extract(:schema) |> Keyword.put_new(:help, :boolean)
 
@@ -103,9 +106,6 @@ defmodule Exp.Args.State do
     """
 
 
-  @doc """
-    Getting configuration parameters through the cli.
-  """
   def parse(:get, argv) do
      strict = Config.extract(:schema) |> Config.set_type(:boolean) |> Keyword.put_new(:help, :boolean)
 
@@ -121,8 +121,11 @@ defmodule Exp.Args.State do
       end
   end
 
-  def parse(_, argv), do: {:error, "invalid directive", []}
+  @doc """
+    Get the requested configuration parameter values.
 
+    return {:ok, [values]} | {:error, msg}
+  """
   def get_config({status, _} = result) when status in [:help, :error], do: result  
   def get_config([]), do: {:error, "You passed no options at all. Type exp get -h for usage information"}
   def get_config(argv) do
@@ -133,6 +136,61 @@ defmodule Exp.Args.State do
       |> Keyword.keys
       |> Enum.reverse
       |> State.get_config
+    end
+  end
+
+  @usage_delete """
+  
+    --------------------------------------------
+    /////////////////// delete////////////////// 
+    --------------------------------------------
+
+    Description:
+
+        Deletes saved entries.
+
+    Usage:
+
+        exp delete -l
+
+        exp delete -all
+
+    Options:
+
+        --all, -a           - Delete all stored entries
+        --last, -l          - Delete the last entry saved
+        --filter, -f        - Delete entries by a filter term (cooming soon)
+
+  """
+
+  @delete_types [strict: [last: :boolean, all: :boolean, filter: :string, help: :boolean], aliases: [l: :last, a: :all, f: :filter, h: :help]]
+  def parse(:delete, argv) do
+    result = argv
+    |> OptionParser.parse(@delete_types)
+    |> extract_valid
+    |> delete_entries
+  end
+
+  @doc """
+    Delete entries persisted in the dets files.
+
+    returns {:ok, msg} | {:error, msg}
+  """
+  def delete_entries({:error, _} = result), do: result
+  def delete_entries(args) do
+
+    num_entries = length(args)
+
+    if num_entries == 1 do
+      cond do
+        args[:help] -> {:help, @usage_delete}
+        args[:last] -> State.delete_entry(:last)
+        args[:all] -> State.delete_entry(:all)
+        true -> State.delete_entry(:filter, args[:filter])
+      end
+    else
+      msg = if num_entries > 1, do: "You passed to many arguments. Check exp delete -h for more information.", else: "What do you want me to delete? I need some more arguments. Check exp delete -h"
+      {:error, msg}
     end
   end
 
@@ -150,6 +208,9 @@ defmodule Exp.Args.State do
 
   end
 
+  @doc """
+    Returns the current CLI version with {:ok, msg}
+  """
   def version() do
     version = State.get_config(:version)
     CLI.ok("EXP-CLI version: #{version}", :none)

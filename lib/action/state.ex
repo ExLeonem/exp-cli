@@ -46,17 +46,33 @@ defmodule Exp.Action.State do
     end
   end
 
-
-
-
+  @doc """
+    Opens a dets table.
+    
+    returns
+  """
   def open_table(table_name) do
     :dets.open_file(table_name, [type: :set, access: :read_write])
   end
 
+  @doc """
+    Closes an dets table.
+
+    returns
+  """
   def close_table(table_name) do
     :dets.close(table_name)
   end
 
+
+  @doc """
+    Get a dets table currently persisted in the state by its name.
+
+    Parameters:
+    - table_name: an atom representing the table name
+
+    return table
+  """
   def get_table(table_name) do
     {config, entries} = Agent.get(__MODULE__, & &1)
     case table_name do
@@ -66,6 +82,11 @@ defmodule Exp.Action.State do
     end
   end
 
+  @doc """
+    Writes an entry to the entry_store dets file.
+
+    return 
+  """
   def write_entry(entry, type \\ :new) do
     table = get_table(@entry_table)
     case type do
@@ -75,6 +96,11 @@ defmodule Exp.Action.State do
     end
   end
   
+  @doc """
+    Get the entries saved to the entry store.
+
+    return [entry, entry, entry, ...] where each entry is an tuple
+  """
   def get_entries(filter \\ [])
   def get_entries([]) do
     table = get_table(@entry_table)
@@ -103,6 +129,54 @@ defmodule Exp.Action.State do
   end
 
   @doc """
+    Delete entries from the entry storage file.
+
+    Parameters:
+      - {type, value}: Delete entries from the store depending on the type.
+
+      Type:
+        - last: Delete the last entry
+        - all: Delete all entries
+        - filter: Delete entries by given fitler
+
+        return {:ok, msg} | {:error, msg}      
+  """
+  def delete_entry(type, filter \\ nil)
+  def delete_entry(:last, _) do
+
+    if !empty?(@entry_table) do
+      [entry] = get_last_entry()
+      result = :dets.delete_object(@entry_table, entry)
+
+      case result do
+        :ok -> {:ok, "Successfully deleted the last entry."}
+        {:error, _reason} -> {:error, "Oops... I couldn't delete the entries inside the table."}
+      end
+    else
+      {:error, "Can't delete nothing from the table. There are no entries present."}
+    end
+
+  end
+
+  def delete_entry(:all, _) do
+  
+    if !empty?(@entry_table) do
+      result = :dets.delete_all_objects(@entry_table)
+      case result do
+        :ok -> {:ok, "Successfully deleted all entries"}
+        {:error, reason} -> {:error, "Oops... I couldn't delete the entries inside the table."}
+      end
+    else
+      {:error, "Can't delete nothing from the table. There are no entries present."}
+    end
+    
+  end
+
+  def delete_entry(:filter, _filter) do
+    {:error, "cooming soon"}
+  end
+
+  @doc """
     Updated the configuration parameter on key with given value.
   """
   def put_config(key, value) do
@@ -112,9 +186,16 @@ defmodule Exp.Action.State do
   end 
 
   @doc """
-      Gets the current configuration parameter under given key.
+      Gets the current configuration parameter under given key | keys.
       
-      Returns [key: value]
+      Parameters:
+      - key: :all_keys | list | single value
+
+      Depending on which parameter passed returns either
+      - KeywordList of all configuration parameteres (:all_keys)
+      - List of configuration parameter values (list of config parameter names passed)
+      - Parameter value (single value passed as key)
+
   """
   def get_config(key \\ :all_keys, table \\ nil, aggr \\ [])
   def get_config(:all_keys, table, aggr) do
@@ -140,7 +221,6 @@ defmodule Exp.Action.State do
     :dets.lookup(table, key) |> Keyword.get(key)
   end
 
-
   @doc """
     Update multiple configuration parameters.
     Input has to be a Keyword list of the form: [config_param_key: value]
@@ -164,6 +244,20 @@ defmodule Exp.Action.State do
     set_config(t)
   end
 
+  @doc """
+    Checks wether the table is empty or not.
+
+    returns boolean
+  """
+  def empty?(table_name \\ @entry_table)
+  def empty?(:entry_store) do
+    first = :dets.first(@entry_table)
+    if !is_nil(first) && first != :"$end_of_table" do
+      false
+    else
+      true
+    end
+  end
 
 
   @doc """
@@ -182,35 +276,6 @@ defmodule Exp.Action.State do
     close_table(@entry_table)
     Agent.stop(__MODULE__)
   end
-
-
-
-  # -----------------------------
-  # Additional Functions
-  # -----------------------------
-
-  # @doc """
-  #   Creates the directory where data is stored.
-
-  #   @param path: directory where to store data
-  # """
-  # def create_dir() do
-  #   path = Application.get_env(:exp, :env_path)
-
-  #   # Create Directory write Config else try writing only config
-  #   if(!File.exists?(path)) do
-  #     File.mkdir(path)
-  #   else 
-
-  #     # Only write config if directory already exists
-  #     if(!File.dir?(path)) do
-  #       {:error, "Theres already a directory named ExpTime in #{path}. Try using the --create option"}
-  #     else 
-  #       :ok
-  #     end
-  #   end
-  # end
-
 
   @doc """
     Initialize default arguments if not existent in dets table

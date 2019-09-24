@@ -3,6 +3,7 @@ defmodule TestExpActionState do
   require Logger
   alias Exp.Action.State
   alias Exp.Format.Config
+  alias Exp.Format.DateTime, as: ExpDateTime
   doctest Exp.Action.State
 
   # test "create default directory/valid" do
@@ -26,6 +27,22 @@ defmodule TestExpActionState do
     State.flush(@config_table)
     State.flush(@entry_table)
     State.shutdown()
+  end
+
+  def mock_data() do
+      c_mock_entry("Hello world")
+      c_mock_entry("whatever")
+      c_mock_entry("nkn")
+      c_mock_entry("tt")
+      last_entry = c_mock_entry("cc")
+      State.put_config(:last_entry, last_entry)
+  end
+
+  def c_mock_entry(title, tags \\ "") do
+    dt = ExpDateTime.now()
+    entry = {dt, dt, dt, title, tags, "10:10"}
+    State.write_entry(entry)
+    entry
   end
 
   test "init_configuration/valid" do
@@ -122,6 +139,38 @@ defmodule TestExpActionState do
       State.set_config(update_keys)
       assert State.get_config(:block_length) == "2:00"
       teardown()
+    end
+
+  end
+
+   describe "test/delete-entries" do
+
+    setup do
+      State.start_link()
+      :ok
+    end
+    
+    test "delete all" do
+      mock_data()
+      assert {:ok, _} = State.delete_entry(:all)
+      teardown()
+    end
+
+    test "delete all/ no data" do
+      assert {:error, _} = State.delete_entry(:all)
+      teardown()
+    end
+
+    test "delete last" do
+      mock_data()
+      last_entry = State.get_last_entry()
+      assert {:ok, _} = State.delete_entry(:last)
+      teardown()
+    end
+
+    test "delete last/ no data" do
+      assert {:error, _} = State.delete_entry(:last)
+      teardown()        
     end
 
   end
