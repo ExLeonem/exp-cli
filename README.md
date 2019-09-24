@@ -99,9 +99,10 @@ stop                  | Stops the recording and writes an entry                 
 status                | Returns the duration since recording                             | &#9745;
 [add](#Add)           | Writing an entry instantly                                       | &#9745; 
 [show](#Show)         | Prints recorded entries.                                         | &#9745; <!--Checked-->
+[delete](#Delete)     | Deletion of entries                                              | &#9744;
 [get](#Get)           | Get information on current configuration                         | &#9745;
 [set](#Set)           | Setting configuration attributes                                 | &#9745;
-[-x](#Export)             | Export of saved entries into another format in csv or json       | &#9745;
+[-x](#Export)             | Export of saved entries into another format in csv or json   | &#9745;
 -v, --version         | Prints the current CLI version                                   | &#9745;
 
 
@@ -146,6 +147,23 @@ Flag          | Description
 -l, --last    | Print the last recorded entry.
 -a, --all     | Prints all entries to the terminal.
 -f, --filter  | Filter all entries by given filter and print them to the terminal.
+
+
+## Delete
+You can use followin command to the delete an persistet entry.
+
+Examples:
+
+  `exp delete -l `
+
+  `exp delete --all`
+
+Flag          | Description
+---           | ---
+-l, --last    | Delete the last entry
+-a, --all     | Delete all entries
+-f, --filter  | Delete entries by filter term
+
 
 
 ### Get
