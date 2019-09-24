@@ -72,6 +72,7 @@ defmodule Exp.Args.Main do
   def dispatch(:set, argv), do: State.parse(:set, argv)
   def dispatch(:get, argv), do: State.parse(:get, argv)
   def dispatch(:status, argv), do: State.parse(:status, argv)
+  def dispatch(:delete, argv), do: State.parse(:delete, argv)
   def dispatch(:show, argv), do: Display.parse(:show, argv)
   def dispatch(first_key, argv) when first_key in [:"-x", :"--export"], do: File.parse(:write, argv)
   def dispatch(first_key, []) when first_key in [:"-v", :"--version"], do: State.version()

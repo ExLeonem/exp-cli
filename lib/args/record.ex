@@ -36,7 +36,14 @@ defmodule Exp.Args.Record do
   """
   
   @doc """
+    Depending on the parameters passed, executes different routines.
+    Either Adds a complete entry, starts or stops a recording.
 
+    Parameter:
+    - directive
+    - argv 
+
+    returns tuple {:ok, msg} | {:error, msg}
   """
   def parse(:add, argv) do
     {captured, rest, _errors} = argv |> OptionParser.parse(@add_help_switch)
@@ -52,11 +59,7 @@ defmodule Exp.Args.Record do
 
   end
 
-
   @start_types Config.extract(:start, :command)
-  @doc """
-
-  """
   def parse(:start, argv) do
     argv
     |> OptionParser.parse(@start_types)
@@ -64,9 +67,6 @@ defmodule Exp.Args.Record do
   end
 
   @stop_types Config.extract(:stop, :command)
-  @doc """
-
-  """
   def parse(:stop, argv) do
     argv
     |> OptionParser.parse(@stop_types)

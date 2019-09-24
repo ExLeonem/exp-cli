@@ -28,7 +28,7 @@ defmodule Exp.Args.Display do
 
             --all, -a           - Show all stored entries
             --last, -l          - Show the last saved entry
-            --timeframe, -t     - Query entries by timeframe
+            --filter, -f        - Query entries by special term (cooming soon)
 
     """
 
@@ -36,13 +36,13 @@ defmodule Exp.Args.Display do
         aliases: [
             a: :all,
             l: :last,
-            t: :timeframe,
+            f: :filter,
             h: :help
         ],
         strict: [
             all: :boolean,
             last: :boolean,
-            timeframe: :string,
+            filter: :string,
             help: :boolean
         ]
     ]
