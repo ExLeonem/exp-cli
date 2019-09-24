@@ -48,9 +48,9 @@ If you want to use this project as a base for something or just further develop 
   - [x] Complete List
   - [x] Last Entry
   - [ ] By filter
-- [ ] Delete
-  - [ ] last entry
-  - [ ] all entries
+- [x] Delete
+  - [x] last entry
+  - [x] all entries
   - [ ] filter term
 - [ ] Time tracking
   - [x] start/stop mechanic
