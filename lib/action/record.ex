@@ -56,7 +56,7 @@ defmodule Exp.Action.Record do
 
       [hours: hours, minutes: minutes]
     rescue
-        ArgumentError -> {:error, "Only values of Form hh:mm are applyable to parameter remind."}
+        ArgumentError -> CLI.error("Only values of Form hh:mm are applyable to parameter remind.")
     end
 
   end
@@ -109,14 +109,14 @@ defmodule Exp.Action.Record do
           State.set_config([is_recording: false, last_entry: processed_entry])
           State.write_entry(processed_entry)
           CLI.ok("Entry successfully written.")
-        {:error, reason} -> entry
+        {:error, reason} -> CLI.error(reason)
       end
 
       # Write to dets tables
       # State.set_config([is_recording: false, last_entry: entry])
       # {:ok, "\nEntry successfully written."}
     else
-      {:error, "It seems like you aren't recording anything. Start recording first to stop something."}
+      CLI.error("It seems like you aren't recording anything. Start recording first to stop something.")
     end
   end
 
@@ -127,98 +127,10 @@ defmodule Exp.Action.Record do
       |> List.to_tuple
       |> State.write_entry
 
-      {:ok, "\Entry successfully written"}
+      # {:ok, "\Entry successfully written"}
+      CLI.ok("Entry successfully written")
   end
   def add(entry), do: entry
-
-
-  # -----------------------------
-  # Utility functions
-  # -----------------------------
-  
-  def calculate_time(start_time, end_time) do
-    seconds = Time.diff(end_time, start_time)
-    minutes = div(seconds, 60)
-    hours = div(minutes, 60)
-    days = div(hours, 24)
-
-    if days != 0 do
-      {days, rem(hours, 24), rem(minutes, 60), rem(seconds, 60)}
-    else
-      # Return tuple of calculated time units
-      {hours, rem(minutes, 60), rem(seconds, 60)}
-    end
-  end
-
-  def format_time({hours, minutes, seconds}) do
-    "#{hours}:#{minutes}:#{seconds}"
-  end
-
-  def format_time({days, hours, minutes, seconds}) do
-    "#{days}-days, #{hours}:#{minutes}:#{seconds}"
-  end
-
-
-
-  @doc """
-    Prompts the user for an argument using the passed checker function
-  """
-  def request_user_argument(prompt, checker \\ nil, io \\ IO) when is_function(checker) or nil do
-    if checker != nil do
-      value = io.gets(prompt)
-
-      # Loop till user input is truthy
-      if !apply(checker, [value]) do
-        request_user_argument(prompt, checker, io)
-      else
-        value
-      end
-    else
-      io.gets(prompt)
-    end
-  end
-  def request_user_argument(_, _, _), do: raise ArgumentError, message: "Invalid argument checker for function request_user_argument."
-
-
-  @doc """
-    Returns tuple of Form {Time.utc_now(), "hh_mm_ss"}
-  """
-  def get_entry_name() do
-    now = Time.utc_now()
-    {now, "#{now.hour}_#{now.minute}_#{now.second}"}
-  end 
-
-  @doc """
-    Returns tupel of Form {Date.utc_now(), "yy_mm_dd"}
-  """
-  def get_file_name() do
-    today = Date.utc_today()
-    {today, "#{today.year}_#{today.month}_#{today.day}"}
-  end
-
-
-  # @doc """
-  #   Sort 
-  # """
-  # def sort_by_fields(key_value_pairs) do
-
-  # end
-
-
-  @doc """
-    !deprecated
-    Not in use here
-
-    Returns boolean. File exists do true else false
-  """
-  def file_exists?(file_name) do
-    env_path = State.get_config(:env_path)
-    if File.exists?(env_path) && File.dir?(env_path) do
-      true
-    else
-      false
-    end
-  end
 
 end
 

@@ -88,6 +88,10 @@ defmodule TestExpFormatDateTime do
 
     describe "test &from_string/1" do
 
+        test "full" do
+            assert {:ok, _} = ExpDateTime.from_string("22-10-2016 10:10")
+        end
+
         test "to_date/valid" do
             assert {:ok, _} = ExpDateTime.from_string("22-10-2019")
         end

@@ -11,7 +11,7 @@ defmodule TestExpFormatTypes do
     describe "test/build-entries" do
 
         setup do
-            [ valid: [title: "Value", start: "12:12"] ]
+            [ valid: [title: "Value", start: "12:12", end: "14:14"] ]
         end
 
 
@@ -28,11 +28,6 @@ defmodule TestExpFormatTypes do
         test "valid/set-date", context do
             params = context[:valid] |> Keyword.put(:date, "22-10-2019") |> parser_mock
             assert {:ok, _} = Types.build_entry(params)
-        end
-
-        test "invalid/set-date", context do
-            params = context[:valid] |> Keyword.put(:date, "22.10.2019") |> parser_mock
-            assert {:error, _} = Types.build_entry(params)
         end
 
         test "invalid/unknown-parameters", context do

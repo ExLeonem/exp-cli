@@ -26,7 +26,8 @@ defmodule Exp.Action.File do
 
         returns {:error, reason} | {:help, message} | {:ok, message}
     """
-    def write({status, _} = result) when status == :error or status == :help, do: result # return {:error, _} | {:help, @usage} 
+    def write({status, _} = result) when status == :help, do: result
+    def write({status, msg}) when status == :error, do: CLI.error(msg)
     def write({:ok, argv}) do
         
         # TODO: Check if there is content at all to write.
@@ -126,10 +127,10 @@ defmodule Exp.Action.File do
 
 
     # Custom error messages
-    def process_fs_error(:eacces), do: {:error, "Missing search or write permission."}
-    def process_fs_error(:eexist), do: {:error, "There's already a file named this way."}
-    def process_fs_error(:enoent), do: {:error, "A component of the path is missing."}
-    def process_fs_error(:enospc), do: {:error, "There's no space left on the device."}
-    def process_fs_error(:enotdir), do: {:error, "A component of the path is not a directory."}
+    def process_fs_error(:eacces), do: CLI.error("Missing search or write permission.")
+    def process_fs_error(:eexist), do: CLI.error("There's already a file named this way.")
+    def process_fs_error(:enoent), do: CLI.error("A component of the path is missing.")
+    def process_fs_error(:enospc), do: CLI.error("There's no space left on the device.")
+    def process_fs_error(:enotdir), do: CLI.error("A component of the path is not a directory.")
 
 end

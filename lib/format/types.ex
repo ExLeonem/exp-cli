@@ -45,17 +45,21 @@ defmodule Exp.Format.Types do
     end
     def iterate_fields([key| rest], values, acc, prev) do
 
-        t_result = process_field(key, values[key], prev)
+        try do
+            t_result = process_field(key, values[key], prev)
 
-        case t_result do
-            {:ok, result} when is_list(result) -> 
-                # t_result returned multiple values (Keyword list)
-                {value, new_prev} = Keyword.pop_first(result, key)
-                iterate_fields(rest, values, [value| acc], new_prev)
-            {:ok, value} -> 
-                iterate_fields(rest, values, [value | acc], prev)
-            {:error, _} -> 
-                t_result
+            case t_result do
+                {:ok, result} when is_list(result) -> 
+                    # t_result returned multiple values (Keyword list)
+                    {value, new_prev} = Keyword.pop_first(result, key)
+                    iterate_fields(rest, values, [value| acc], new_prev)
+                {:ok, value} -> 
+                    iterate_fields(rest, values, [value | acc], prev)
+                {:error, _} -> 
+                    t_result
+            end 
+        rescue
+            e in ArgumentError -> {:error, e.message}
         end
 
     end
@@ -76,19 +80,11 @@ defmodule Exp.Format.Types do
 
         May return multiple values, which get append to prev and filled in at the end if not used.
     """
-    def process_field(:date = key, value, _) do
-        {year, month, day} = Date.utc_today |> Date.to_erl
-        
-        value
-        |> filled?(key, default: "#{day}-#{month}-#{year}")
-        |> cast(key)
-    end
-
+    def process_field(:date = key, value, _), do: {:ok, ExpDateTime.now()} # When was entry written?
     def process_field(:start = key, value, prev) do
-
         t_result = value
         |> filled?(key)
-        |> cast(:time)
+        |> ExpDateTime.from_string
 
         # Calculate duration if end-time given, else append to prev
         has_end? = not is_nil(prev[:end])
@@ -96,7 +92,7 @@ defmodule Exp.Format.Types do
             {:ok, value} when has_end? -> 
                 # End time already set, calculate the time
                 {end_time, prev_rest} = Keyword.pop(prev, :end)
-                duration = Time.diff(end_time, value) |> ExpDateTime.duration
+                duration = ExpDateTime.diff(end_time, value) |> ExpDateTime.duration
                 new_prev = prev_rest |> Keyword.put(:duration, duration) |> Keyword.put(:start, value)
                 {:ok, new_prev}
             {:ok, value} ->
@@ -117,7 +113,7 @@ defmodule Exp.Format.Types do
         case t_result do
             {:ok, tags_string} ->
 
-                # Try to split array
+                # Split tag array 
                 if is_binary(tags_string) do
                     splitted_values =  tags_string |> String.split(",") |> Enum.map(&String.trim/1) |> List.to_tuple
                     {:ok, splitted_values}
@@ -134,22 +130,23 @@ defmodule Exp.Format.Types do
     end
 
     def process_field(:end = key, value, prev) do
-        # TODO: duration calculation needs to be fixed. Duration over a day will result in error if end_time < start_time !!
-        {hour, minute, _sec} = Time.utc_now |> Time.to_erl 
+        now = ExpDateTime.now() 
         
         t_result = value
-        |> filled?(key, default: "#{hour}:#{minute}")
-        |> cast(:time)
+        |> filled?(key, default: ExpDateTime.date_time_string(now))
+        |> ExpDateTime.from_string
 
-        # Calculate duration if start-time given, else append end-time to prev
+        # Check value of previously set fields
         has_start? = not is_nil(prev[:start])
         case t_result do
             {:ok, value} when has_start? ->
+                # Calculate duration
                 {start_time, prev_rest} = Keyword.pop(prev, :start)
-                duration = Time.diff(value, start_time) |> ExpDateTime.duration
+                duration = ExpDateTime.diff(value, start_time) |> ExpDateTime.duration
                 new_prev = prev_rest |> Keyword.put(:duration, duration) |> Keyword.put(:end, value)
                 {:ok, new_prev}
             {:ok, value} ->
+                # Append start to check later on and compare
                 template = {:end, value}
                 new_prev = [template, template | prev]
                 {:ok, new_prev}
@@ -157,13 +154,9 @@ defmodule Exp.Format.Types do
         end
     end
 
-    # def process_field(:tag, value, _) do
-        
-    # end
-
     def process_field(key, value, _) do
-        value
-        |> filled?(key)
+        # Default just check wether required field was filled
+        value |> filled?(key)
     end
 
     @doc """
@@ -210,7 +203,6 @@ defmodule Exp.Format.Types do
     """
     def cast({:error, msg} = result, _), do: result
     def cast({:ok, value}, type) do
-
         if valid?(value, type) do
             case type do
                 :boolean -> String.to_atom(value)
@@ -238,6 +230,7 @@ defmodule Exp.Format.Types do
     def valid?(value, :float), do: is_float(value)
     def valid?(value, :integer) when is_binary(value), do: try_cast(fn -> value |> String.to_integer |> is_integer end)
     def valid?(value, :integer), do: is_integer(value)
+    def valid?(value, :date_time), do: ExpDateTime.valid?(value, :date_time)
     def valid?(value, :date), do: ExpDateTime.valid?(value, :date)
     def valid?(value, :time), do: ExpDateTime.valid?(value, :time)
     def valid?(_, _), do: raise ArgumentError, message: "Unknown parameter value type: [:string | :boolean | :float | :integer | :date | :time ]"

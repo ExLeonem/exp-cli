@@ -3,13 +3,11 @@
 ![](https://img.shields.io/badge/elixir-1.9.1-blue)
 
 
-<div style="text-align:center">
-  <img src="./.favicon.png">
-</div>
+![banner](.banner.png)
 
 
 #  EXP CLI -Track you'r time
-A tool to track the time you spend working on a project or anything else.
+A tool to track the time you spend working on a project.
 
 
 ## Table of Contents
@@ -21,36 +19,26 @@ A tool to track the time you spend working on a project or anything else.
   - [Show](#Show)
   - [Get](#Get)
   - [Set](#Set)
+  - [Export](#Export)
 - [Contribution](#Contribution)
 
 
 ## Installation
 There are no existing dependencies to other libraries.
-To use the CLI Erlang/Elixir needs to be installed loally. Other than that
+However a prequisite for the use is Elixir in version >= 1.8.
+To Use the CLI you can download the binary or build it locally and afterwards add it to you'r path.
 
-1. Clone the Repo
-`git clone https://github.com/ExLeonem/exp.git`
+## How to build locally?
+If you want to use this project as a base for something or just further develop it.
 
+1. Clone the Repo with`git clone https://github.com/ExLeonem/exp.git`
 2. CD into the Repo
-3. Execute `mix escript.build` (Building the binary)
+3. Execute `mix deps.get && mix escript.build`alternativly you can configure the dev dependencies
 4. Adding the place where the binary is to the Path
+5. And you are ready to go
 
+**Note:** The directory of the binary needs to be writeable because the CLI will persists the entries into files.
 
-**Note:** The directory of the binary needs to be writeable because the CLI will persists entries into dets files.
-
-<!-- If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `exp` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:exp, "~> 0.1.0"}
-  ]
-end
-```
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/exp](https://hexdocs.pm/exp). -->
 
 ## Roadmap
 - [x] Configuration
@@ -60,13 +48,15 @@ be found at [https://hexdocs.pm/exp](https://hexdocs.pm/exp). -->
   - [x] Complete List
   - [x] Last Entry
   - [ ] By filter
-- [ ] Delete entries
-- [ ] Modify entries
+- [ ] Delete
+  - [ ] last entry
+  - [ ] all entries
+  - [ ] filter term
 - [ ] Time tracking
   - [x] start/stop mechanic
   - [x] save instantly complete entry
   - [ ] start/stop pomodoro watch
-- [ ] Export Entries
+- [x] Export Entries
   - [x] CSV
   - [x] JSON
   <!-- - [ ] logfmt? -->
@@ -82,7 +72,6 @@ default-block-length  | true        | The block length for the pomodoro timer
 default-storage-path  | true        | The directory where the entries are written to
 output-format         | true        | Default output format to use on `write` command
 last-entry            | false       | DateTime of last entry written to the entry store
-<!-- remind                | true        | Set timout to prompt user current state -->
 
 
 ## Commands
@@ -95,16 +84,14 @@ Name                  | Description                                             
 ---                   | ---                                                              | ---
 start                 | Starts recording the time                                        | &#9745;
 stop                  | Stops the recording and writes an entry                          | &#9745;
-status                | Returns the duration since recording                             | &#9744;
+status                | Returns the duration since recording                             | &#9745;
 [add](#Add)           | Writing an entry instantly                                       | &#9745; 
 [show](#Show)         | Prints recorded entries.                                         | &#9745; <!--Checked-->
+[delete](#Delete)     | Deletion of entries                                              | &#9744;
 [get](#Get)           | Get information on current configuration                         | &#9745;
 [set](#Set)           | Setting configuration attributes                                 | &#9745;
-[-x](#-x)             | Export of saved entries into another format in csv or json       | &#9744;
-[sync](#Sync)         | Upload data to the remote application                            | &#9744;
-<!-- [import](#import)     | Import a file to the list of current entries                     | &#9744; -->
-<!-- [stat](#Stat])  | Show statistics                                                  | &#9744; Unchecked -->
-<!-- [remote](#Remote) | Adding a remote application                                    | &#9744; -->
+[-x](#Export)             | Export of saved entries into another format in csv or json   | &#9745;
+-v, --version         | Prints the current CLI version                                   | &#9745;
 
 
 <!-- ### Start
@@ -119,20 +106,25 @@ Flag            | Description
 
 
 ### Add
-Add a new complete entry at once. Equal to recording with start/stop.
-If no stop flag is given it assumed that you just finished yet.
+Add a complete entry. In essence is equal to recording with start/stop.
+
+If no stop flag is given the end is assumed to be the moment you add the entry. You can use a date on the start and end tags as well
+to calculate the time usage over multiple days.
 
 Examples:
 
  `exp add -s 15:10 `
 
- `exp add -s 12:12 -t "something" -tg tag1,tag2,tag3`     
+ `exp add -s 12:12 -t "I worked on my project" -g tag1,tag2,tag3`
+
+  `exp add -s "10-10-2019 10:10" -e "11-10-2019 15:00" --title "hello world"`   
 
 Flag            | Required? | Description
 ---             |---        | ---
--s, --start     | true      | Start of the entry `HH:mm` 
--t, --title     | false     | Title of the entry
--tg, --tag      | false     | Add tags to the entry 
+-s, --start     | true      | Start of the entry formatted as`HH:MM`, `DD-MM-YYYY HH:MM` or `DD-MM-YYYY`. The missing parts will be filled with the current DateTime
+-e, --end       | false     | End of the recording. Allowed formats are the same as in `--start`
+-t, --title     | true      | Title of the entry
+-g, --tag       | false     | Add tags to the entry 
 
 
 ### Show
@@ -143,6 +135,23 @@ Flag          | Description
 -l, --last    | Print the last recorded entry.
 -a, --all     | Prints all entries to the terminal.
 -f, --filter  | Filter all entries by given filter and print them to the terminal.
+
+
+## Delete
+You can use followin command to the delete an persistet entry.
+
+Examples:
+
+  `exp delete -l `
+
+  `exp delete --all`
+
+Flag          | Description
+---           | ---
+-l, --last    | Delete the last entry
+-a, --all     | Delete all entries
+-f, --filter  | Delete entries by filter term
+
 
 
 ### Get
@@ -162,27 +171,13 @@ Example: `exp set --block-length 1:30 --output-format csv`
 Flag              | Type      |   Description
 ---               | ---       | ---
 --block-length    | string    | Default time for block when using CLI as a pomodoro watch in Format `HH:mm`
---output-format   | string    | Setting the default output format for entry export, supported formats: `csv` and `json`
 
 
-### -x
+### Export
 Export the recorded data to a specific Format.
-The given path must already be existent. Available output formats are csv and json. 
+The given path must already be existent. Suported output formats are currently **csv** and **json**. 
 
 Example: `exp -x /path/file.csv`
-
-
-<!-- ### Import
-
-Example: `exp -i /path/file.csv` -->
-
-
-### Sync
-Synchronizing data with the remote web application.
-This command will prompt for you'r credentials.
-
-Example: `exp sync`
-
 
 
 ### Contribution

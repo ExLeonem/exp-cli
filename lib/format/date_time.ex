@@ -1,4 +1,5 @@
 defmodule Exp.Format.DateTime do
+    require Logger
     @moduledoc """
         Definition of functions to be used on time operations.
         Based on elixir NaiveDateTime and Erlang :calendar Modules.
@@ -16,11 +17,15 @@ defmodule Exp.Format.DateTime do
 
     @doc """
         Converts the given NaiveDateTime to an iso8601 string.
+
+        returns string in iso8601
     """
     def to_iso(date_time), do: NaiveDateTime.to_iso8601(date_time)
 
     @doc """
         Reads an iso8601 DateTime string into a NaiveDateTime.
+
+        returns NaiveDateTime
     """
     def from_iso(iso_dt_string) when not is_binary(iso_dt_string), do: raise ArgumentError, message: "Error in function &from_iso/1. Expected a string as argument, got something else."
     def from_iso(iso_dt_string) do
@@ -34,9 +39,16 @@ defmodule Exp.Format.DateTime do
 
     @doc """
         Calculates the difference between to NaiveDateTimes in seconds.
+
+        returns the difference in seconds
     """
     def diff(naiv_start, naiv_end) do
-        NaiveDateTime.diff(naiv_start, naiv_end)
+        difference = NaiveDateTime.diff(naiv_start, naiv_end)
+        if difference < 0 do
+            raise ArgumentError, message: "You'r start time happend later than the end time."
+        else 
+            difference
+        end
     end
 
     @doc """
@@ -71,6 +83,15 @@ defmodule Exp.Format.DateTime do
         "#{hour}:#{minute}:#{seconds}"
     end
 
+
+    def date_time_string(date_time) when is_binary(date_time), do: date_time |> from_iso |> date_time_string
+    def date_time_string(date_time) do
+        time = time_string(date_time)
+        date = date_string(date_time)
+
+        "#{date} #{time}"
+    end
+
     @doc """
         Takes the a time difference in seconds and returns a string of form `hh:mm:ss` representing a duration
 
@@ -96,9 +117,11 @@ defmodule Exp.Format.DateTime do
         
         return NaiveDateTime
     """
-    # def from_string(date_time_string) when not is_binary(date_time_string), do: {:error, "Error in function &ExpDateTime.from_string/1 exptected a string as input."}
+    def from_string({:error, _} = result), do: result
+    def from_string({:ok, value}), do: from_string(value)
     def from_string(date_time_string) when not is_binary(date_time_string) do
-           try do
+        # NaiveDateTime passed?
+        try do
             {:ok, NaiveDateTime.truncate(date_time_string, :second)}
         rescue
             FunctionClauseError -> {:error,  "Error in function &ExpDateTime.from_string/1 exptected a string as input."} 
@@ -108,7 +131,7 @@ defmodule Exp.Format.DateTime do
     def from_string(date_time_string) do
         try do
             parts = date_time_string |> String.split(" ") 
-
+            
             case length(parts) do
                 1 ->
                     # Either date or time was passed, build NaiveDateTime from them
@@ -123,14 +146,14 @@ defmodule Exp.Format.DateTime do
                     end
                 2 ->
                     # probably date and time passed. Decide which is which and parse
-                    [first_part , second_part] = parts
-                    if valid?(first_part) do
+                    [first_part , second_part] = parts 
+                    if valid?(first_part, :date) do
                         date = to_erl(first_part)
-                        time = to_erl(second_part)
+                        time = to_erl(second_part, :time)
                         NaiveDateTime.from_erl({date, time})
                     else
                         date = to_erl(second_part)
-                        time = to_erl(first_part)
+                        time = to_erl(first_part, :time)
                         NaiveDateTime.from_erl({date, time})
                     end
 
@@ -173,28 +196,21 @@ defmodule Exp.Format.DateTime do
         return boolean
     """
     def valid?(value, part \\ :date_time)
-    def valid?(value, :date_time), do: if valid?(value, :date) && valid?(value, :time), do: true, else: false 
+    def valid?(value, :date_time), do: if valid?(value, :date) && valid?(value, :time), do: true, else: false
     def valid?(value, :date) when is_binary(value) do
         matches_format = value |> String.match?(~r/[0-9]{1,2}\-[0-9]{1,2}\-[0-9]{4}/)
         if matches_format do
             # Check if values match
-            {day, month, year} = value |> String.split("-") |> Enum.map(&String.to_integer/1) |> List.to_tuple
-
-            cond do
-                day == 0 || month == 0 || year == 0 -> false
-                month == 2 && ((rem(year, 100) == 0 && rem(year, 400) != 0 && day <= 29) || day <= 28)  -> true
-                month <= 7 && ((rem(month, 2) == 0 && day <= 30) ||  (rem(month, 2) != 0 && day <= 31)) -> true 
-                month > 7 && ((rem(month, 2) == 0 && day <= 31) || (rem(month, 2) != 0 && day <= 30)) -> true
-                true -> false # Alle above checks passed but nothing matched
-            end
+            erl_date = to_erl(value)
+            valid_date?(erl_date)            
         else
             false
         end
     end
     def valid?(value, :date) do
         try do
-            NaiveDateTime.truncate(value, :second)
-            true
+            {date, _} = NaiveDateTime.to_erl(value)
+            valid_date?(date)
         rescue
             FunctionClauseError -> false
         end        
@@ -202,25 +218,43 @@ defmodule Exp.Format.DateTime do
     def valid?(value, :time) when is_binary(value) do
         matches_format = value |> String.match?(~r/[0-9]{1,2}\:[0-9]{1,2}/)
         if matches_format do
-            {hours, minutes} = value |> String.split(":") |> Enum.map(&String.to_integer/1) |> List.to_tuple
-
-            cond do
-                hours > 24 || minutes > 59 -> false 
-                true -> true
-            end
+            erl_time = to_erl(value, :time)
+            valid_time?(erl_time)
         else
             false
         end
     end
     def valid?(value, :time) do
         try do
-            NaiveDateTime.truncate(value, :second)
-            true
+            {_, time} = NaiveDateTime.to_erl(value)
+            valid_time?(time)
         rescue
             FunctionClauseError -> false
         end
     end
     def valid?(_, _), do: false
 
+
+    defp valid_date?({year, month, day}) do
+
+        month_even? = rem(month, 2) == 0
+        leap_year? = rem(year, 100) == 0 && rem(year, 400) != 0
+
+        cond do
+            day == 0 || month == 0 || year == 0 -> false
+            month == 2 && ((leap_year? && day <= 29) || day <= 28)  -> true
+            month <= 7 && ((month_even? && day <= 30) ||  (!month_even? && day <= 31)) -> true 
+            month > 7 && ((month_even? && day <= 31) || (!month_even? && day <= 30)) -> true
+            true -> false # Alle above checks passed but nothing matched
+        end
+    end
+
+    defp valid_time?({hour, minute, second}) do
+        hours? = (hour <= 24 && hour >= 0)
+        minutes? = (minute <= 60 && minute >= 0)
+        seconds? = (second <= 60 && second >= 0)
+        
+        hours? && minutes? && seconds?
+    end
 
 end

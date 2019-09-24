@@ -38,10 +38,9 @@ use Mix.Config
 config :exp,
     params: [
         block_length: [:string, "1:30", true],
-        is_recording: [:boolean, false, false],
-        remind: [:string, nil, true], # can be set but flag must be passed on start
-        time_started: [:string, nil, false],
         output_format: [:string, :csv, true],
+        is_recording: [:boolean, false, false],
+        time_started: [:string, nil, false],
         last_entry: [:string, nil, false], # Is this needed at all? --> build complete entry and save here instead of interating over all entries?
         version: [:string, Mix.Project.config[:version], false],
         default_storage_path: [:string, File.cwd!, false],
@@ -60,11 +59,11 @@ config :exp,
         ]
     ],
     fields: [
-        date: [:string, false, :d],
+        date: [:string, false, :none],
         start: [:string, true, :s], # ATTENTION: Start field must be followed by end field. 
         end: [:string, false, :e], 
         title: [:string, true, :t],
-        tag: [:string, false, :none]
+        tag: [:string, false, :g]
     ]
 
     
