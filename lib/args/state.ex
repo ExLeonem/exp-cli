@@ -17,7 +17,7 @@ defmodule Exp.Args.State do
 
     returns {:ok, msg} | {:error, msg}
   """
-  def parse(:status, _) do
+  def parse(:status, []) do
     is_recording? = State.get_config(:is_recording)
     
     if is_recording? do
@@ -26,11 +26,12 @@ defmodule Exp.Args.State do
       |> ExpDateTime.diff(started_at)
       |> ExpDateTime.duration
 
-      {:ok, "Current duration: #{current_duration}"}
+      CLI.regular("Current duration: #{current_duration}", :ok, :clock)
     else
-      {:error, "You are currently not recording. Start a recording first."}
+      CLI.warn("You are currently not recording. Start to record first...")
     end
   end
+  def parse(:status, _), do: CLI.error("You passed some invalid arguments. Simply call `exp status` while you already recording.")
 
 
   @usage_set """
@@ -64,8 +65,8 @@ defmodule Exp.Args.State do
     |> set_config
 
     case result do
-      :ok -> {:ok, "Configuration successfully updated."}
-      {:error, _} -> result
+      :ok -> CLI.ok("Configuration successfully updated.")
+      {:error, msg} -> CLI.error(msg)
       :help -> {:help, @usage_set}
     end
   end
@@ -116,7 +117,7 @@ defmodule Exp.Args.State do
 
       case result do
         {:ok, _} -> {:ok, (elem(result,1) |> Enum.map(&Types.to_string/1) |> Enum.join(", "))}
-        {:error, _} -> result
+        {:error, msg} -> CLI.error(msg)
         :help -> {:help, @usage_get} 
       end
   end
@@ -169,6 +170,12 @@ defmodule Exp.Args.State do
     |> OptionParser.parse(@delete_types)
     |> extract_valid
     |> delete_entries
+
+    case result do
+      {:error, msg} -> CLI.error(msg)
+      {:ok, msg} -> CLI.ok(msg)
+      _ -> result
+    end
   end
 
   @doc """

@@ -8,6 +8,18 @@ defmodule Exp.Format.CLI do
 
     # TODO: use the IO.ANSI module to format the output
 
+    def regular(message, status, icon) do
+        config = [
+            type: status,
+            default_icon: "",
+            icon_color: "",
+            msg_color: ""
+        ]
+
+        create_message(message, icon, config)
+    end
+
+
     def ok(message, icon \\ "") do
         config = [
             type: :ok, 
@@ -50,6 +62,7 @@ defmodule Exp.Format.CLI do
     def get_icon(:add), do: "+"
     def get_icon(:cross), do: Symbol.cross
     def get_icon(:none), do: ""
+    def get_icon(:clock), do: Symbol.clock
     
 
     defmodule Symbol do
@@ -65,6 +78,10 @@ defmodule Exp.Format.CLI do
         def cross(font \\ :light)
         def cross(:light), do: "྾"
         def cross(:bold), do: "🞬"
+
+        def clock(font \\ :light)
+        def clock(:light), do: "🕑"
+        def clock(:bold), do: "🕑"
 
     end
 
