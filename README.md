@@ -82,16 +82,16 @@ To stop the recording timer call `exp stop -t "Give your record a title"` .
 ### General Commands
 Name                  | Description                                                      | Implemented 
 ---                   | ---                                                              | ---
-start                 | Starts recording the time                                        | &#9744;
-stop                  | Stops the recording and writes an entry                          | &#9744;
-status                | Returns the duration since recording                             | &#9744;
-[add](#Add)           | Writing an entry instantly                                       | &#9744; 
-[show](#Show)         | Prints recorded entries.                                         | &#9744; <!--Checked-->
-[delete](#Delete)     | Deletion of entries                                              | &#9744;
-[get](#Get)           | Get information on current configuration                         | &#9744;
-[set](#Set)           | Setting configuration attributes                                 | &#9744;
-[-x](#Export)             | Export of saved entries into another format in csv or json   | &#9744;
--v, --version         | Prints the current CLI version                                   | &#9744;
+start                 | Starts recording the time                                        | &#9745;
+stop                  | Stops the recording and writes an entry                          | &#9745;
+status                | Returns the duration since recording                             | &#9745;
+[add](#Add)           | Writing an entry instantly                                       | &#9745; 
+[show](#Show)         | Prints recorded entries.                                         | &#9745; <!--Checked-->
+[delete](#Delete)     | Deletion of entries                                              | &#9745;
+[get](#Get)           | Get information on current configuration                         | &#9745;
+[set](#Set)           | Setting configuration attributes                                 | &#9745;
+[-x](#Export)             | Export of saved entries into another format in csv or json   | &#9745;
+-v, --version         | Prints the current CLI version                                   | &#9745;
 
 <!-- &#9745; <!-- unchecked > -->
 
