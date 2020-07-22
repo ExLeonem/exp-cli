@@ -6,6 +6,10 @@ defmodule Exp.CLI do
   """
 
 
+  def hello_world() do
+    
+  end
+
 
    @doc """
     Main entry point for the cli

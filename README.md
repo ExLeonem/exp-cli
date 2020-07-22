@@ -12,7 +12,7 @@ A tool to track the time you spend working on a project.
 
 ## Table of Contents
 - [Installation](#Installation)
-- [Roadmap](#Roadmap)
+<!-- - [Roadmap](#Roadmap) -->
 - [Configuration Parameters](#Configuration_Parameters)
 - [Commands](#Commands)
   - [Add](#Add)
@@ -40,7 +40,7 @@ If you want to use this project as a base for something or just further develop 
 **Note:** The directory of the binary needs to be writeable because the CLI will persists the entries into files.
 
 
-## Roadmap
+<!-- ## Roadmap
 - [x] Configuration
   - [x] Setting Parameters
   - [x] Getting Parameters
@@ -58,7 +58,7 @@ If you want to use this project as a base for something or just further develop 
   - [ ] start/stop pomodoro watch
 - [x] Export Entries
   - [x] CSV
-  - [x] JSON
+  - [x] JSON -->
   <!-- - [ ] logfmt? -->
 
 
@@ -86,13 +86,14 @@ start                 | Starts recording the time                               
 stop                  | Stops the recording and writes an entry                          | &#9745;
 status                | Returns the duration since recording                             | &#9745;
 [add](#Add)           | Writing an entry instantly                                       | &#9745; 
-[show](#Show)         | Prints recorded entries.                                         | &#9745; <!--Checked-->
+[show](#Show)         | Prints recorded entries.                                         | &#9744; <!--Checked-->
 [delete](#Delete)     | Deletion of entries                                              | &#9744;
 [get](#Get)           | Get information on current configuration                         | &#9745;
 [set](#Set)           | Setting configuration attributes                                 | &#9745;
 [-x](#Export)             | Export of saved entries into another format in csv or json   | &#9745;
 -v, --version         | Prints the current CLI version                                   | &#9745;
 
+<!-- &#9745; <!-- unchecked > -->
 
 <!-- ### Start
 
